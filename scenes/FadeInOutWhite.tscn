@@ -1,0 +1,77 @@
+[gd_scene load_steps=6 format=3 uid="uid://bptvppydbpwfi"]
+
+[ext_resource type="Script" path="res://addons/godotegp-framework-csharp/classes/ScreenTransition/FadeInOutWhite.cs" id="1_2mu8i"]
+
+[sub_resource type="Animation" id="Animation_vmni2"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CanvasLayer/ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_kg40y"]
+resource_name = "hide"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CanvasLayer/ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_12mly"]
+resource_name = "show"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("CanvasLayer/ColorRect:color")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_1tb5c"]
+_data = {
+"RESET": SubResource("Animation_vmni2"),
+"hide": SubResource("Animation_kg40y"),
+"show": SubResource("Animation_12mly")
+}
+
+[node name="ScreenTransition" type="Node2D"]
+script = ExtResource("1_2mu8i")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 128
+visible = false
+metadata/id = "ScreenTransition.FadeInOutWhite.Canvas"
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_1tb5c")
+}
+metadata/id = "ScreenTransition.FadeInOutWhite.Anim"
