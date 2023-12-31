@@ -51,8 +51,12 @@ public partial class LoggerManager : Service
 			{
 				_loggerDestinationCollectionDefault = new DestinationCollection();
 
+#if GODOT
 				// Add Godot console as default destination
 				_loggerDestinationCollectionDefault.AddDestination(new GodotConsole());
+#else
+				_loggerDestinationCollectionDefault.AddDestination(new DefaultConsole());
+#endif
 			}
 
 			return _loggerDestinationCollectionDefault;
