@@ -701,7 +701,7 @@ public partial class ScriptInterpretter : Node
 			// arguments as string
 			else if (varName == "*")
 			{
-				varValue = _scriptParams.Join(" ");
+				varValue = string.Join(" ", _scriptParams);
 			}
 			// arguments count
 			else if (varName == "#")
@@ -887,7 +887,7 @@ public partial class ScriptInterpretter : Node
 			if (parsedBlockLines.Count > 0)
 			{
 				string tempFuncName = $"{_scriptLineCounter}_{GetHashCode()}";
-				RegisterFunctionFromContent(tempFuncName, parsedBlockLines.ToArray().Join("\n"));
+				RegisterFunctionFromContent(tempFuncName, string.Join("\n", parsedBlockLines.ToArray()));
 				
 				// set line content to the temp function
 				lineResult.Stdout = tempFuncName;

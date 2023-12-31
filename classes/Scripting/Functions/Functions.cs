@@ -22,7 +22,7 @@ public partial class Echo : ScriptFunction
 	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
 	{
 
-		return new ScriptProcessResult(0, (p as string[]).Join(" ").Trim());
+		return new ScriptProcessResult(0, string.Join(" ", (p as string[])).Trim());
 	}
 }
 
