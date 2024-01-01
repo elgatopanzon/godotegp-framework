@@ -34,14 +34,15 @@ public partial class ServiceRegistry : Node
 	public ServiceRegistry() 
 	{
 		Instance = this;
-
-		// Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, __On_EventServiceReady, true));
-		this.Subscribe<ServiceReady>(__On_EventServiceReady, true);
 	}
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		LoggerManager.LogDebug("Subscribing to ServiceReady events");
+
+		// Get<EventManager>().Subscribe(new EventSubscription<EventServiceReady>(this, __On_EventServiceReady, true));
+		this.Subscribe<ServiceReady>(__On_EventServiceReady, isHighPriority:false); // switch to low priority to allow startup code to execute
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
