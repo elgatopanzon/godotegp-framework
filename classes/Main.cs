@@ -26,7 +26,7 @@ public partial class Main : Node
 		AddChild(new ServiceRegistry());
 
 		// register LoggerManager singleton as service to trigger ready state
-		ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
+		// ServiceRegistry.Instance.RegisterService(LoggerManager.Instance);
 
 		// create instance of ConfigHandler to handle setting configs
 		AddChild(new ConfigHandler());
