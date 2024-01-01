@@ -65,14 +65,15 @@ public partial class ThreadedResourceLoader : BackgroundJob
 				// TODO: make this work better
 				if (item.ResourceDefinition.ClassType.Equals(typeof(GameScript)))
 				{
-					var file = FileAccess.Open(ProjectSettings.GlobalizePath(item.ResourceDefinition.Path), FileAccess.ModeFlags.Read);
+    				using (StreamReader reader = new StreamReader(ProjectSettings.GlobalizePath(item.ResourceDefinition.Path)))
+    				{
+    					var res = reader.ReadToEnd();
 
-
-					if (r is GameScript gs)
-					{
-						gs.ScriptContent = file.GetAsText(true);
-					}
-					
+						if (r is GameScript gs)
+						{
+							gs.ScriptContent = res;
+						}
+    				}
 				}
 
 			}
