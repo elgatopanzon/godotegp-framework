@@ -104,6 +104,10 @@ public partial class ThreadedResourceLoader : BackgroundJob
 			);
 		}
 
+		resourceObject.Id = item.Id;
+		resourceObject.Category = item.Category;
+		resourceObject.Definition = item.ResourceDefinition;
+
 		item.ResourceObject = resourceObject;
 		_resourceObjects.Add(item);
 

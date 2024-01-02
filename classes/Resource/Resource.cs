@@ -14,6 +14,7 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
+using GodotEGP.Resource;
 
 using GodotEGP.Data.Endpoint;
 
@@ -25,6 +26,10 @@ public abstract partial class ResourceBase
         Type genericType = typeof(Resource<>).MakeGenericType(parameterType);
         return Activator.CreateInstance(genericType);
     }
+
+    public abstract string Category {get; set;}
+    public abstract string Id {get; set;}
+    public abstract Definition Definition {get; set;}
 }
 
 public partial class Resource<T> : ResourceBase, IResource<T> where T : Resource
@@ -36,6 +41,10 @@ public partial class Resource<T> : ResourceBase, IResource<T> where T : Resource
 			return Value;
 		}
 	}
+
+	public override string Category { get; set; }
+	public override string Id { get; set; }
+	public override Definition Definition { get; set; }
 
 	public Resource()
 	{
