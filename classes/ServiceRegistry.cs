@@ -8,6 +8,7 @@ using System.Linq;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Event.Events;
 using GodotEGP.Logging;
+using GodotEGP.Service;
 
 public partial class ServiceRegistry : Node
 {
@@ -106,5 +107,52 @@ public partial class ServiceRegistry : Node
 		}
 
 		return (T) obj;
+	}
+
+	/// <summary>
+	/// Get a service's ready state
+	/// </summary>
+	public static bool IsServiceReady<T>() where T : Service.Service, new()
+	{
+		return Get<T>().GetReady();
+	}
+
+	public static bool WaitForServices(params Type[] p)
+	{
+		bool servicesReady = false;
+
+		while (true)
+		{
+			int serviceReadyCount = 0;
+
+			foreach (Type serviceType in p)
+			{
+				foreach (var serviceObj in Instance._serviceObjs)
+				{
+					if (serviceObj.Key == serviceType && serviceObj.Value.GetReady())
+					{
+						serviceReadyCount++;
+					}
+				}
+			}
+
+			LoggerManager.LogDebug($"Waiting for services... {serviceReadyCount}/{p.Count()}", "", "services", p.Select(e => e.Name));
+
+			if (serviceReadyCount == p.Count())
+			{
+				servicesReady = true;
+				break;
+			}
+			else
+			{
+				// wait 100ms before checking again
+				System.Threading.Thread.Sleep(100);
+
+				// process low-priority event queue
+				ServiceRegistry.Get<EventManager>()._Process(0);
+			}
+		}
+
+		return servicesReady;
 	}
 }
