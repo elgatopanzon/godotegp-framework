@@ -143,6 +143,11 @@ public partial class LoggerManager : Service
 		Config = config;
 	}
 
+	public static void SetLogLevel(Message.LogLevel logLevel)
+	{
+		Instance.Config.LogLevel = logLevel;
+	}
+
 	// update config object in various moving parts
 	public void OnConfigObjectUpdated()
 	{
