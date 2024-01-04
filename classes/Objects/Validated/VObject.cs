@@ -86,7 +86,7 @@ public partial class VObject
 				}
 				else
 				{
-					if (!sourceProperty.IsDefault())
+					if (!sourceProperty.IsDefault() || sourceProperty.HasBeenSet)
 					{
 						// LoggerManager.LogDebug("Merging!", "", "sourceProp", sourceProperty);
 						if (sourceProperty.MergeCollections)

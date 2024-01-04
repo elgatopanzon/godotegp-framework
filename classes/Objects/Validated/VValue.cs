@@ -21,6 +21,8 @@ public abstract partial class VValue : Validated.IVValue
 	internal abstract object RawValue {set; get;}
 	internal abstract object Parent {set; get;}
 	internal abstract bool MergeCollections {get; set;}
+
+	internal abstract bool HasBeenSet {get; set;}
 }
 
 public partial class VValue<T> : VValue
@@ -28,6 +30,7 @@ public partial class VValue<T> : VValue
 	protected T _value;
 	protected T _default;
 	protected bool NullAllowed = true;
+	internal override bool HasBeenSet {get; set;}
 	protected bool ChangeEventsState = false;
 
 	private object _parent;
@@ -72,6 +75,8 @@ public partial class VValue<T> : VValue
 
 	private void _SetValue(T newValue)
 	{
+		HasBeenSet = true;
+
 		LoggerManager.LogDebug($"Setting value {this.GetType().Name}<{this.GetType().GetTypeInfo().GenericTypeArguments[0]}>", "", "value", newValue);
 
 		newValue = ValidateValue(newValue);
