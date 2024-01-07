@@ -27,9 +27,17 @@ public partial class ConfigManager : Service
 
 	private Dictionary<Type, Config.Object> _configObjects = new Dictionary<Type, Config.Object>();
 
+	private Dictionary<string, FileSystemWatcher> _filesystemWatchers { get; set; }
+	private bool _configReload { get; set; }
+
+	private bool _serviceReadyInitial { get; set; }
+
 	public ConfigManager() : base()
 	{
 		_configDataDirs = new List<string>();
+		_filesystemWatchers = new();
+		_configReload = false;
+
 		AddConfigDataDir(ProjectSettings.GlobalizePath("res://"));
 		AddConfigDataDir(OS.GetUserDataDir());
 	}
@@ -48,6 +56,13 @@ public partial class ConfigManager : Service
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		if (_configReload)
+		{
+			_configReload = false;
+			LoggerManager.LogDebug("Reloading config files");
+
+			DiscoveryConfigFiles();
+		}
 	}
 
 	// Called when service is registered in manager
@@ -220,19 +235,70 @@ public partial class ConfigManager : Service
 	public override void _OnServiceReady()
 	{
 		// create instance of GlobalConfig if config doesn't exist already
-		if (!_configObjects.TryGetValue(typeof(GlobalConfig), out var obj))
+		if (!_serviceReadyInitial)
 		{
-			LoggerManager.LogDebug("Creating default config instance", "", "type", typeof(GlobalConfig).Name);
+			if (!_configObjects.TryGetValue(typeof(GlobalConfig), out var obj))
+			{
+				LoggerManager.LogDebug("Creating default config instance", "", "type", typeof(GlobalConfig).Name);
 
-			var globalConfig = GetConfigObjectInstance(typeof(GlobalConfig));
-			globalConfig.DataEndpoint = GetDefaultSaveEndpoint(globalConfig.GetType());
+				var globalConfig = GetConfigObjectInstance(typeof(GlobalConfig));
+				globalConfig.DataEndpoint = GetDefaultSaveEndpoint(globalConfig.GetType());
 
-			Save<GlobalConfig>();
+				Save<GlobalConfig>();
+			}
+			else
+			{
+				// save it so we include any new values
+				Save<GlobalConfig>();
+			}
 		}
-		else
+
+		// setup filesystem watchers
+		foreach (var dataDir in _configDataDirs)
 		{
-			// save it so we include any new values
-			Save<GlobalConfig>();
+			if (!_filesystemWatchers.ContainsKey(dataDir))
+			{
+				var watcher = new FileSystemWatcher(dataDir);
+
+				watcher.NotifyFilter = NotifyFilters.Attributes
+                                 		| NotifyFilters.CreationTime
+                                 		| NotifyFilters.DirectoryName
+                                 		| NotifyFilters.FileName
+                                 		| NotifyFilters.LastWrite
+                                 		| NotifyFilters.Size;
+
+				watcher.Changed += _On_ConfigDirChanged;
+				watcher.Created += _On_ConfigDirChanged;
+				watcher.Deleted += _On_ConfigDirChanged;
+				watcher.Renamed += _On_ConfigDirChanged;
+				watcher.Error += _On_ConfigDirError;
+				watcher.Filter = "*.json";
+
+				watcher.IncludeSubdirectories = true;
+        		watcher.EnableRaisingEvents = true;
+
+				_filesystemWatchers.Add(dataDir, watcher);
+			}
 		}
+	
+		_serviceReadyInitial = true;
 	}
+
+	private void _On_ConfigDirChanged(object sender, FileSystemEventArgs e)
+    {
+    	QueueConfigReload();
+
+        LoggerManager.LogDebug($"Config dir changed: {e.FullPath}");
+    }
+
+    private void QueueConfigReload()
+    {
+    	_configReload = true;
+    }
+
+    private void _On_ConfigDirError(object sender, ErrorEventArgs e)
+    {
+        LoggerManager.LogError("Config dir watcher error", "", "error", e.GetException());
+    }
+
 }
