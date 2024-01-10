@@ -20,6 +20,8 @@ using GodotEGP.Config;
 using GodotEGP.Threading;
 using GodotEGP.Data.Endpoint;
 
+using System.Security.Cryptography;
+
 public partial class ThreadedResourceLoader : BackgroundJob
 {
 	private Queue<LoaderQueueItem> _loadQueue = new Queue<LoaderQueueItem>();
@@ -107,6 +109,20 @@ public partial class ThreadedResourceLoader : BackgroundJob
 		resourceObject.Id = item.Id;
 		resourceObject.Category = item.Category;
 		resourceObject.Definition = item.ResourceDefinition;
+
+		string fileHash = "";
+		using (var md5 = MD5.Create())
+		{
+    		if (File.Exists(item.ResourceDefinition.Path))
+    		{
+    			using (var stream = File.OpenRead(item.ResourceDefinition.Path))
+    			{
+        			fileHash = String.Join("", md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(item.ResourceDefinition.Path)));
+    			}
+    		}
+		}
+
+		item.ResourceDefinition.FileHash = fileHash;
 
 		item.ResourceObject = resourceObject;
 		_resourceObjects.Add(item);

@@ -46,6 +46,14 @@ public partial class Definition : VObject
 		set { _resourceType = value; }
 	}
 
+	internal readonly VValue<string> _fileHash;
+
+	public string FileHash
+	{
+		get { return _fileHash.Value; }
+		set { _fileHash.Value = value; }
+	}
+
 	// store config options to be applied to the loaded resources
 	private readonly VValue<Dictionary<string, string>> _configDictionary;
 
@@ -62,6 +70,9 @@ public partial class Definition : VObject
 
 		_resourceClass = AddValidatedValue<string>(this)
 			.NotNull();
+
+		_fileHash = AddValidatedValue<string>(this)
+		    .Default("");
 
         _configDictionary = AddValidatedValue<Dictionary<string, string>>(this)
             .Default(new Dictionary<string, string>() {
