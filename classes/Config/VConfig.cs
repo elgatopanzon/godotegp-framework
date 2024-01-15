@@ -16,15 +16,8 @@ using GodotEGP.Config;
 
 public partial class VConfig : VObject
 {
-	public virtual partial void InitConfigParams();
-
 	public VConfig()
 	{
-		InitConfigParams();
-	}
-
-	public virtual partial void InitConfigParams() {
-
 	}
 }
 

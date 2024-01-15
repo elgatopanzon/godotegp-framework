@@ -16,7 +16,7 @@ using GodotEGP.Config;
 
 public partial class GlobalConfig : VConfig
 {
-	public override partial void InitConfigParams();
+	partial void InitConfigParams();
 
 	// used for migrations
 	internal VValue<int> _configVersion;
@@ -37,10 +37,6 @@ public partial class GlobalConfig : VConfig
 
 	public GlobalConfig()
 	{
-	}
-
-	public override partial void InitConfigParams()
-	{
 		_configVersion = AddValidatedValue<int>(this)
 		    .Default(1)
 		    .ChangeEventsEnabled();
@@ -48,6 +44,7 @@ public partial class GlobalConfig : VConfig
 		_mappingConfig = AddValidatedNative<InputMappingConfig>(this)
 		    .Default(new InputMappingConfig())
 		    .ChangeEventsEnabled();
+
+		InitConfigParams();
 	}
 }
-
