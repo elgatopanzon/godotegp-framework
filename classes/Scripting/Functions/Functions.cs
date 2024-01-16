@@ -207,3 +207,33 @@ public partial class CallbackAsFunction : ScriptFunction
 		}
 	}
 }
+
+public partial class DictVal : ScriptFunction
+{
+	public override ScriptProcessResult Call(ScriptInterpretter i, params object[] p)
+	{
+		string result = "";
+
+		if (p.Length >= 2)
+		{
+			string dictVar = (string) p[0];
+			string dictIndex = (string) p[1];
+			string dictIndexKey = "";
+			if (p.Length >= 3)
+			{
+				dictIndexKey = (string) p[2];
+			}
+
+			if (i.ScriptVars[dictVar] is Dictionary<string, object> d)
+			{
+				if (d[dictIndex] is Dictionary<string, object> dd && dictIndexKey.Length > 0)
+				{
+					LoggerManager.LogDebug("DictVal", "", dictIndex, dd);
+					result = $"{dd[dictIndexKey]}";
+				}
+			}
+		}
+
+		return new ScriptProcessResult(0, result);
+	}
+}

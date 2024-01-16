@@ -640,6 +640,19 @@ public partial class ScriptInterpretter : Node
 		return new ScriptProcessResult(0, res.Result.Replace("${"+varName+"}", varValue).Replace("$"+varName, varValue));
 	}
 
+	public string PrintVarValue(object var, string varName, int idx = 0)
+	{
+		// if the var itself is a dict, then print using `dictval` function
+		if (var is Dictionary<string, object> dict)
+		{
+			return $"dictval {varName} {idx}";
+		}
+		else
+		{
+			return (string) var;
+		}
+	}
+
 	public string GetVariableValue(string varName)
 	{
 		string varValue = "";
@@ -672,14 +685,14 @@ public partial class ScriptInterpretter : Node
 
 				if (dict.ContainsKey(dictKey))
 				{
-					varValue = (string) dict[dictKey];
+					varValue = PrintVarValue(dict[dictKey], varName);
 				}
 				else if (dictKey == "@")
 				{
 					if (varName.StartsWith("!"))
-						varValue = (string) string.Join("\n", dict.Select(x => "\""+x.Key+"\"").ToArray());
+						varValue = (string) string.Join(" ", dict.Select(x => "\""+x.Key+"\"").ToArray());
 					else
-						varValue = (string) string.Join(" ", dict.Select(x => "\""+x.Value+"\"").ToArray());
+						varValue = (string) string.Join(" ", dict.Select((x, idx) => "\""+PrintVarValue(x.Value, varName, idx)+"\"").ToArray());
 				}
 			}
 			else
