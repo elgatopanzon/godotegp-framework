@@ -176,7 +176,7 @@ public partial class ScriptInterpretter : Node
 	*  Script running methods  *
 	****************************/
 	
-	public void RunScript(string scriptName)
+	public void RunScript(string scriptName, Dictionary<string, object> scriptVars = null)
 	{
 		if (_gameScripts.TryGetValue(scriptName, out Resource<GameScript> gs))
 		{
@@ -184,6 +184,11 @@ public partial class ScriptInterpretter : Node
 
 			_gameScript = gs.Value;
 			_gameScriptName = scriptName;
+
+			if (scriptVars != null)
+			{
+				_scriptVars = scriptVars;
+			}
 
 			LoggerManager.LogDebug($"[{_gameScriptName}] running");
 

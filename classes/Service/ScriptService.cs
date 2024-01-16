@@ -102,28 +102,34 @@ public partial class ScriptService : Service
 	********************************************/
 	
 	// run a script in a managed instance, destroyed once finished
-	public void RunScript(string scriptName)
+	public void RunScript(string scriptName, Dictionary<string, object> scriptVars = null)
 	{
 		if (IsValidScriptName(scriptName))
 		{
 			LoggerManager.LogDebug("Running script", "", "name", scriptName);
+			LoggerManager.LogDebug("Passing script vars", "", "vars", scriptVars);
 
 			// create interpretter instance
 			var si = CreateInterpretterInstance();
-			
+
 			AddChild(si);
 
-	 		si.RunScript(scriptName);
+	 		si.RunScript(scriptName, scriptVars);
 		}
 		else {
 			throw new InvalidScriptNameException($"Invalid script name: {scriptName}");
 		}
 	}
 
-	public void RunScriptContent(string scriptContent)
+	public void RunScriptContent(string scriptContent, Dictionary<string, object> scriptVars = null)
 	{
 		LoggerManager.LogDebug("Running script content as script");
 
+		RunScript(AddScriptContent(scriptContent), scriptVars);
+	}
+
+	public string AddScriptContent(string scriptContent)
+	{
 		var scriptResource = new Resource<GameScript>();
 		scriptResource.Value = new GameScript();
 		scriptResource.Value.ScriptContent = scriptContent;
@@ -132,7 +138,7 @@ public partial class ScriptService : Service
 
 		_gameScripts[tempScriptName] = scriptResource;
 
-		RunScript(tempScriptName);
+		return tempScriptName;
 	}
 	
 	public ScriptInterpretter CreateInterpretterInstance()
