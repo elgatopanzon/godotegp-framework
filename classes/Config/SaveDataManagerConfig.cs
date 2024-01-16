@@ -45,6 +45,13 @@ public partial class SaveDataManagerConfig : VObject
 		set { _autosaveTimeDefaultSec.Value = value; }
 	}
 
+	internal readonly VValue<bool> _autocreateSystemData;
+
+	public bool AutocreateSystemData
+	{
+		get { return _autocreateSystemData.Value; }
+		set { _autocreateSystemData.Value = value; }
+	}
 
 	public SaveDataManagerConfig(VObject parent = null) : base(parent)
 	{
@@ -57,6 +64,10 @@ public partial class SaveDataManagerConfig : VObject
 		_autosaveTimeDefaultSec = AddValidatedValue<int>(this)
 	    	.Default(15 * 86400)
 	    	.ChangeEventsEnabled();
+
+		_autocreateSystemData = AddValidatedValue<bool>(this)
+		    .Default(true)
+		    .ChangeEventsEnabled();
 
 	    InitConfigParams();
 	}

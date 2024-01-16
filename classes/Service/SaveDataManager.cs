@@ -74,7 +74,7 @@ public partial class SaveDataManager : Service
 	public override void _OnServiceReady()
 	{
 		// create base System data
-		if (!Exists("System"))
+		if (!Exists("System") && _config.AutocreateSystemData)
 		{
 			Create<SystemData>("System");
 		}
