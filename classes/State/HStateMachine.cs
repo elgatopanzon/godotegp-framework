@@ -24,6 +24,8 @@ public partial class HStateMachine
 	private HStateMachine DefaultSubState;
 	public HStateMachine CurrentSubState;
 
+	private Object _stateLock = new();
+
 	public HStateMachine(object owner = null)
 	{
 		SubStates = new Dictionary<Type, HStateMachine>();
@@ -69,27 +71,33 @@ public partial class HStateMachine
 
 	public void Enter()
 	{
-		OnEnter();
+		lock (_stateLock) {
+			OnEnter();
 
-		// assign currentSubState to default if current isn't set
-		if (CurrentSubState == null && DefaultSubState != null)
-		{
-			CurrentSubState = DefaultSubState;
+			// assign currentSubState to default if current isn't set
+			if (CurrentSubState == null && DefaultSubState != null)
+			{
+				CurrentSubState = DefaultSubState;
+			}
+
+			CurrentSubState?.Enter();
 		}
-
-		CurrentSubState?.Enter();
 	}
 
 	public void Update()
 	{
-		OnUpdate();
-		CurrentSubState?.Update();
+		lock (_stateLock) {
+			OnUpdate();
+			CurrentSubState?.Update();
+		}
 	}
 
 	public void Exit()
 	{
-		CurrentSubState?.Exit();
-		OnExit();
+		lock (_stateLock) {
+			CurrentSubState?.Exit();
+			OnExit();
+		}
 	}
 
 	public virtual void CallbackOnEnter() { }
