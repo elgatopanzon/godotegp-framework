@@ -28,6 +28,8 @@ public enum SaveDataType
 
 public partial class Data : VObject
 {
+	partial void InitSaveParams();
+
 	// keep track of the save structure and use it for future migrations
 	internal readonly VValue<int> _saveVersion;
 
@@ -151,6 +153,7 @@ public partial class Data : VObject
 	    	.Default(false)
 	    	.ChangeEventsEnabled();
 
+		InitSaveParams();
 	}
 
 	public void UpdateDateSaved()
