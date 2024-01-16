@@ -21,6 +21,7 @@ using GodotEGP.Threading;
 using GodotEGP.Data.Endpoint;
 
 using System.Security.Cryptography;
+using System.IO;
 
 public partial class ThreadedResourceLoader : BackgroundJob
 {
