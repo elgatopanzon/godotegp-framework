@@ -7,6 +7,8 @@ using GodotEGP.Objects.Validated;
 
 public partial class LoggerConfig : VObject
 {
+	partial void InitConfigParams();
+
 	private readonly VValue<Logging.Message.LogLevel> _logLevel;
 
 	public Logging.Message.LogLevel LogLevel
@@ -43,6 +45,8 @@ public partial class LoggerConfig : VObject
             	})
         	.ChangeEventsEnabled()
             ;
+
+        InitConfigParams();
 	}
 
 	public Logging.Message.LogLevel GetMatchingLogLevelOverride(string match)

@@ -4,20 +4,22 @@ using GodotEGP.Objects.Validated;
 
 public partial class EngineConfig : VConfig
 {
-	private readonly VNative<LoggerConfig> _loggerManagerConfig;
+	partial void InitConfigParams();
+
+	private readonly VNative<LoggerConfig> _loggerManager;
 
 	public LoggerConfig LoggerManager
 	{
-		get { return _loggerManagerConfig.Value; }
-		set { _loggerManagerConfig.Value = value; }
+		get { return _loggerManager.Value; }
+		set { _loggerManager.Value = value; }
 	}
 
-	internal readonly VNative<SaveDataManagerConfig> _saveDataManagerConfig;
+	internal readonly VNative<SaveDataManagerConfig> _saveDataManager;
 
 	public SaveDataManagerConfig SaveDataManager
 	{
-		get { return _saveDataManagerConfig.Value; }
-		set { _saveDataManagerConfig.Value = value; }
+		get { return _saveDataManager.Value; }
+		set { _saveDataManager.Value = value; }
 	}
 
 	internal readonly VNative<SceneTransitionManagerConfig> _sceneTransitionManager;
@@ -38,11 +40,11 @@ public partial class EngineConfig : VConfig
 
 	public EngineConfig()
 	{
-        _loggerManagerConfig = AddValidatedNative<LoggerConfig>(this)
+        _loggerManager = AddValidatedNative<LoggerConfig>(this)
         	.Default(new LoggerConfig(this))
         	.ChangeEventsEnabled();
 
-		_saveDataManagerConfig = AddValidatedNative<SaveDataManagerConfig>(this)
+		_saveDataManager = AddValidatedNative<SaveDataManagerConfig>(this)
 		    .Default(new SaveDataManagerConfig())
 		    .ChangeEventsEnabled();
 
@@ -53,5 +55,7 @@ public partial class EngineConfig : VConfig
 		_inputManager = AddValidatedNative<InputManagerConfig>(this)
 		    .Default(new InputManagerConfig())
 		    .ChangeEventsEnabled();
+
+		InitConfigParams();
 	}
 }

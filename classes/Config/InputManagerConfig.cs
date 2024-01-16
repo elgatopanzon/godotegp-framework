@@ -19,6 +19,8 @@ using GodotEGP.Config;
 
 public partial class InputManagerConfig : VConfig
 {
+	partial void InitConfigParams();
+
 	private VValue<Dictionary<string, InputActionConfig>> _inputActions;
 	public Dictionary<string, InputActionConfig> Actions
 	{
@@ -32,7 +34,9 @@ public partial class InputManagerConfig : VConfig
             .Default(new() {
             	})
             ;
-            _inputActions.MergeCollections = true;
+        _inputActions.MergeCollections = true;
+
+		InitConfigParams();
 	}
 }
 

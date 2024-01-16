@@ -19,6 +19,8 @@ using GodotEGP.Resource;
 
 public partial class ResourceDefinitionConfig : VConfig
 {
+	partial void InitConfigParams();
+
 	// internal readonly VNative<DefinitionList> _resourceDefinitions;
     //
 	// public DefinitionList Resources
@@ -45,7 +47,9 @@ public partial class ResourceDefinitionConfig : VConfig
             .Default(new Dictionary<string,Dictionary<string, Definition>>() {
             	})
             ;
-            _resourceDefinitions.MergeCollections = true;
+        _resourceDefinitions.MergeCollections = true;
+
+    	InitConfigParams();
 	}
 }
 

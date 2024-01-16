@@ -19,6 +19,8 @@ using GodotEGP.Config;
 
 public partial class InputMappingConfig : VConfig
 {
+	partial void InitConfigParams();
+
 	internal readonly VValue<Dictionary<string, InputMappingEventConfig>> _mappingConfig;
 
 	public Dictionary<string, InputMappingEventConfig> Mappings
@@ -32,6 +34,8 @@ public partial class InputMappingConfig : VConfig
 		_mappingConfig = AddValidatedValue<Dictionary<string, InputMappingEventConfig>>(this)
 		    .Default(new Dictionary<string, InputMappingEventConfig>())
 		    .ChangeEventsEnabled();
+
+		InitConfigParams();
 
 		// var da = new InputMappingEventConfig();
         //

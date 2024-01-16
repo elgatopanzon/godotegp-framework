@@ -19,6 +19,8 @@ using GodotEGP.Config;
 
 public partial class SceneTransitionManagerConfig : VObject
 {
+	partial void InitConfigParams();
+
 	internal readonly VValue<Dictionary<string, List<SceneTransitionChainItem>>> _transitionChains;
 
 	public  Dictionary<string, List<SceneTransitionChainItem>> TransitionChains
@@ -32,6 +34,8 @@ public partial class SceneTransitionManagerConfig : VObject
 		_transitionChains = AddValidatedValue<Dictionary<string, List<SceneTransitionChainItem>>>(this)
 	    	.Default(new Dictionary<string, List<SceneTransitionChainItem>>())
 	    	.ChangeEventsEnabled();
+	
+		InitConfigParams();
 	}
 }
 

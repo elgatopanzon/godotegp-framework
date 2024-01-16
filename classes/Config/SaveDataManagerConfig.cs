@@ -16,6 +16,8 @@ using GodotEGP.Config;
 
 public partial class SaveDataManagerConfig : VObject
 {
+	partial void InitConfigParams();
+
 	// configure autosave system enabled or disabled
 	internal readonly VValue<bool> _timedAutosaveEnabled;
 
@@ -55,6 +57,8 @@ public partial class SaveDataManagerConfig : VObject
 		_autosaveTimeDefaultSec = AddValidatedValue<int>(this)
 	    	.Default(15 * 86400)
 	    	.ChangeEventsEnabled();
+
+	    InitConfigParams();
 	}
 }
 

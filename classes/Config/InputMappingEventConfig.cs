@@ -19,6 +19,8 @@ using GodotEGP.Config;
 
 public partial class InputMappingEventConfig : VConfig
 {
+	partial void InitConfigParams();
+
 	internal readonly VValue<List<InputMappingEvent>> _mappingEvents;
 
 	public List<InputMappingEvent> Events
@@ -32,6 +34,8 @@ public partial class InputMappingEventConfig : VConfig
 		_mappingEvents = AddValidatedValue<List<InputMappingEvent>>(this)
 		    .Default(new List<InputMappingEvent>())
 		    .ChangeEventsEnabled();
+
+		InitConfigParams();
 
 		// var e1 = new InputMappingEvent();
 		// e1.Keycode = Key.A;

@@ -23,6 +23,8 @@ public enum InputActionType
 
 public partial class InputActionConfig : VConfig
 {
+	partial void InitConfigParams();
+
 	internal readonly VValue<InputActionType> _controlType;
 
 	public InputActionType ControlType
@@ -60,6 +62,8 @@ public partial class InputActionConfig : VConfig
 		_playerSlot = AddValidatedValue<int>(this)
 		    .Default(0)
 		    .ChangeEventsEnabled();
+
+		InitConfigParams();
 	}
 }
 
