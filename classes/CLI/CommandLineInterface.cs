@@ -26,10 +26,14 @@ public partial class CommandLineInterface
 	protected Dictionary<string, (Func<Task<int>> Command, string Description, bool includeInHelp)> _commands = new();
 	protected Dictionary<string, List<(string Arg, string Example, string Description, bool Required)>> _commandArgs = new();
 
-	public CommandLineInterface(string[] args)
+	public CommandLineInterface(string[] args = null)
 	{
-		_args = args;
-		_argsParsed = ParseArgs();
+		if (args == null)
+		{
+			args = new string[] {};
+		}
+
+		SetArgs(args);
 
     	_commands.Add("help", (CommandHelp, "Show help text with command usage", true));
 		_commandArgs.Add("help", new());
@@ -38,6 +42,12 @@ public partial class CommandLineInterface
     	LoggerManager.LogDebug("CLI arguments parsed", "", "argsParsed", _argsParsed);
 
 		SetLogLevel();
+	}
+
+	public void SetArgs(string[] args)
+	{
+		_args = args;
+		_argsParsed = ParseArgs();
 	}
 
 	public void SetLogLevel()
