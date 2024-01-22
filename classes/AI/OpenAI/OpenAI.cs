@@ -6,9 +6,6 @@
 
 namespace GodotEGP.AI.OpenAI;
 
-using GatoGPT.Config;
-using GatoGPT.WebAPI.Dtos;
-
 using Godot;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
