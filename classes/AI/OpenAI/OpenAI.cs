@@ -135,33 +135,33 @@ public partial class OpenAI
 	}
 
 	// /v1/embeddings
-	public async Task<EmbeddingsDto> Embeddings(EmbeddingCreateDto request)
+	public async Task<EmbeddingsResult> Embeddings(EmbeddingsRequest request)
 	{
-		return GetResultObject<EmbeddingsDto>(await MakeRequestPost("/v1/embeddings", request, false));
+		return GetResultObject<EmbeddingsResult>(await MakeRequestPost("/v1/embeddings", request, false));
 	}
 
 	// /v1/completions
-	public async Task<CompletionDto> Completions(CompletionCreateOpenAIDto request)
+	public async Task<CompletionResult> Completions(CompletionRequest request)
 	{
-		return GetResultObject<CompletionDto>(await MakeRequestPost("/v1/completions", request, request.Stream));
+		return GetResultObject<CompletionResult>(await MakeRequestPost("/v1/completions", request, request.Stream));
 	}
 	
 	// /v1/chat/completions
-	public async Task<ChatCompletionDto> ChatCompletions(ChatCompletionCreateOpenAIDto request)
+	public async Task<ChatCompletionResult> ChatCompletions(ChatCompletionRequest request)
 	{
-		return GetResultObject<ChatCompletionDto>(await MakeRequestPost("/v1/chat/completions", request, request.Stream));
+		return GetResultObject<ChatCompletionResult>(await MakeRequestPost("/v1/chat/completions", request, request.Stream));
 	}
 
 	// /v1/models
-	public async Task<ModelListDto> Models()
+	public async Task<ModelsResult> Models()
 	{
-		return GetResultObject<ModelListDto>(await MakeRequestGet("/v1/models"));
+		return GetResultObject<ModelsResult>(await MakeRequestGet("/v1/models"));
 	}
 
 	// /v1/models/{model}
-	public async Task<ModelDto> Models(string model)
+	public async Task<ModelResult> Models(string model)
 	{
-		return GetResultObject<ModelDto>(await MakeRequestGet($"/v1/models/{model}"));
+		return GetResultObject<ModelResult>(await MakeRequestGet($"/v1/models/{model}"));
 	}
 }
 
