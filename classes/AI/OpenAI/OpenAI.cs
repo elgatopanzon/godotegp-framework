@@ -59,6 +59,7 @@ public partial class OpenAI
 			using (var theStreamReader = new StreamReader(theStream))
 			{
     			string sseLine = null;
+    			string sseLines = "";
 
     			while ((sseLine = await theStreamReader.ReadLineAsync()) != null)
     			{
@@ -69,6 +70,26 @@ public partial class OpenAI
 
     					this.Emit<OpenAIServerSentEvent>(e => e.Event = sseLine.Replace("data: ", ""));
     				}
+    				else {
+						LoggerManager.LogDebug("Line received", "", "line", sseLine);
+
+						sseLines += sseLine+"\n";
+    				}
+    			}
+
+    			// check for SSE lines
+    			if (sseLines.Length > 0)
+    			{
+					var errorResult = await GetResultObject<ErrorResult>(sseLines);
+
+					if (errorResult.Error != null)
+					{
+						Error = errorResult;
+
+						LoggerManager.LogDebug("Request error response", "", "error", Error);
+
+						return "";
+					}
     			}
 			};
 
@@ -84,7 +105,7 @@ public partial class OpenAI
 			response.Dispose();
 			httpClient.Dispose();
 
-			var errorResult = GetResultObject<ErrorResult>(contents);
+			var errorResult = await GetResultObject<ErrorResult>(contents);
 
 			if (errorResult.Error != null)
 			{
@@ -111,7 +132,7 @@ public partial class OpenAI
             contents = response.Content.ReadAsStringAsync().Result;
         }
 
-		var errorResult = GetResultObject<ErrorResult>(contents);
+		var errorResult = await GetResultObject<ErrorResult>(contents);
 
 		if (errorResult.Error != null)
 		{
@@ -125,7 +146,7 @@ public partial class OpenAI
 		return contents;
 	}
 
-	public T GetResultObject<T>(string jsonObj)
+	public async Task<T> GetResultObject<T>(string jsonObj)
 	{
     	var resultObj = JsonConvert.DeserializeObject<T>(jsonObj, new JsonSerializerSettings {
     		ContractResolver = new DefaultContractResolver() { NamingStrategy = new SnakeCaseNamingStrategy() }}
@@ -137,31 +158,31 @@ public partial class OpenAI
 	// /v1/embeddings
 	public async Task<EmbeddingsResult> Embeddings(EmbeddingsRequest request)
 	{
-		return GetResultObject<EmbeddingsResult>(await MakeRequestPost("/v1/embeddings", request, false));
+		return await GetResultObject<EmbeddingsResult>(await MakeRequestPost("/v1/embeddings", request, false));
 	}
 
 	// /v1/completions
 	public async Task<CompletionResult> Completions(CompletionRequest request)
 	{
-		return GetResultObject<CompletionResult>(await MakeRequestPost("/v1/completions", request, request.Stream));
+		return await GetResultObject<CompletionResult>(await MakeRequestPost("/v1/completions", request, request.Stream));
 	}
 	
 	// /v1/chat/completions
 	public async Task<ChatCompletionResult> ChatCompletions(ChatCompletionRequest request)
 	{
-		return GetResultObject<ChatCompletionResult>(await MakeRequestPost("/v1/chat/completions", request, request.Stream));
+		return await GetResultObject<ChatCompletionResult>(await MakeRequestPost("/v1/chat/completions", request, request.Stream));
 	}
 
 	// /v1/models
 	public async Task<ModelsResult> Models()
 	{
-		return GetResultObject<ModelsResult>(await MakeRequestGet("/v1/models"));
+		return await GetResultObject<ModelsResult>(await MakeRequestGet("/v1/models"));
 	}
 
 	// /v1/models/{model}
 	public async Task<ModelResult> Models(string model)
 	{
-		return GetResultObject<ModelResult>(await MakeRequestGet($"/v1/models/{model}"));
+		return await GetResultObject<ModelResult>(await MakeRequestGet($"/v1/models/{model}"));
 	}
 }
 
