@@ -73,13 +73,23 @@ public partial class CommandLineInterface
 			_args = _args.Skip(1).ToArray();
 			
 			// invoke the matching command
-			if (_commands.ContainsKey(cmd))
+			if (IsCommand(cmd))
 			{
 				return await _commands[cmd].Command();
 			}
 		}
 
 		return await CommandHelp();
+	}
+
+	public bool IsCommand(string command)
+	{
+		return (_commands.ContainsKey(command));
+	}
+
+	public Func<Task<int>> GetCommandFunc(string command)
+	{
+		return _commands[command].Command;
 	}
 
 	public Dictionary<string, List<string>> ParseArgs()
