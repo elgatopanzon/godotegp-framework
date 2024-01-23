@@ -99,6 +99,8 @@ public partial class OpenAI
 			request.Dispose();
 			response.Dispose();
 			httpClient.Dispose();
+
+			this.Emit<OpenAIStreamingFinished>();
 		}
 		else
 		{
@@ -198,4 +200,6 @@ public partial class OpenAIError : OpenAIEvent {
 }
 public partial class OpenAIServerSentEvent : OpenAIEvent {
 	public string Event { get; set; }
+}
+public partial class OpenAIStreamingFinished : OpenAIEvent { 
 }
