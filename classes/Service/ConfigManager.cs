@@ -258,7 +258,7 @@ public partial class ConfigManager : Service
 		{
 			if (!_filesystemWatchers.ContainsKey(dataDir))
 			{
-				var watcher = new FileSystemWatcher(dataDir);
+				var watcher = new FileSystemWatcher(Path.Combine(dataDir, _configBaseDir));
 
 				watcher.NotifyFilter = NotifyFilters.Attributes
                                  		| NotifyFilters.CreationTime
