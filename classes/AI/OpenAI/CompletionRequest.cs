@@ -18,9 +18,11 @@ public partial class CompletionRequest : CompletionRequestBase
 	public object Prompt { get; set; }
 	public int BestOf { get; set; }
 	public string Suffix { get; set; }
+	public bool Echo { get; set; }
 
 	public CompletionRequest()
 	{
+		Echo = false;
 		Prompt = new();
 		BestOf = 1;
 		Suffix = "";

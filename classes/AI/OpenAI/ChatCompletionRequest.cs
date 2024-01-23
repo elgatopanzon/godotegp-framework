@@ -19,18 +19,21 @@ public partial class ChatCompletionRequest : CompletionRequestBase
 {
 	public ChatCompletionRequestResponseFormat ResponseFormat { get; set; }
 	public List<ChatCompletionRequestMessage> Messages { get; set; }
+
+	[JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
 	public List<ChatCompletionRequestTool> Tools { get; set; }
-	public object ToolChoice { get; set; }
+
+	[JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
+	public object? ToolChoice { get; set; }
 
 	public ChatCompletionRequest()
 	{
 		ResponseFormat = new();
-		Tools = new();
-		ToolChoice = (string) "auto";
+		// ToolChoice = (string) "auto";
 
 		// the Completion API has 16 as default, while the Chat Completion API
 		// has it set to null (presumably unlimited/max context length)
-		MaxTokens = -1;
+		// MaxTokens = -1;
 	}
 
 	public string GetToolChoice()

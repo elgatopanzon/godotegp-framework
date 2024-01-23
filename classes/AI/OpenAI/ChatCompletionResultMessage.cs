@@ -13,17 +13,19 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 public partial class ChatCompletionResultMessage
 {
 	public object Content { get; set; }
 	public string Role { get; set; }
+
+	[JsonProperty(NullValueHandling=NullValueHandling.Ignore)]
 	public List<ChatCompletionResultToolCall> ToolCalls { get; set; }
 	
 	public ChatCompletionResultMessage()
 	{
-		ToolCalls = new();
 	}
 
 	public string GetContent()

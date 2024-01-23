@@ -70,7 +70,7 @@ public partial class OpenAI
 
     					this.Emit<OpenAIServerSentEvent>(e => e.Event = sseLine.Replace("data: ", ""));
     				}
-    				else {
+    				else if (sseLine.Length > 0) {
 						LoggerManager.LogDebug("Line received", "", "line", sseLine);
 
 						sseLines += sseLine+"\n";
@@ -87,6 +87,8 @@ public partial class OpenAI
 						Error = errorResult;
 
 						LoggerManager.LogDebug("Request error response", "", "error", Error);
+
+						this.Emit<OpenAIError>(e => e.Error = Error);
 
 						return "";
 					}
@@ -112,6 +114,8 @@ public partial class OpenAI
 				Error = errorResult;
 
 				LoggerManager.LogDebug("Request error response", "", "error", Error);
+
+				this.Emit<OpenAIError>(e => e.Error = Error);
 
 				return "";
 			}
@@ -139,6 +143,8 @@ public partial class OpenAI
 			Error = errorResult;
 
 			LoggerManager.LogDebug("Request error response", "", "error", Error);
+
+			this.Emit<OpenAIError>(e => e.Error = Error);
 
 			return "";
 		}
@@ -187,6 +193,9 @@ public partial class OpenAI
 }
 
 public partial class OpenAIEvent : Event {}
+public partial class OpenAIError : OpenAIEvent { 
+	public ErrorResult Error { get; set; }
+}
 public partial class OpenAIServerSentEvent : OpenAIEvent {
 	public string Event { get; set; }
 }
