@@ -15,7 +15,7 @@ using GodotEGP.Config;
 
 using Newtonsoft.Json;
 
-public partial class CompletionRequestBase
+public partial class CompletionRequestBase : RequestBase
 {
 	public string Model { get; set; }
 	public double FrequencyPenalty { get; set; }
