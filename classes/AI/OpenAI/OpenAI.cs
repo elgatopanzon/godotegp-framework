@@ -68,7 +68,17 @@ public partial class OpenAI
     				{
     					LoggerManager.LogDebug("SSE event received", "", "sseEvent", sseLine);
 
-    					this.Emit<OpenAIServerSentEvent>(e => e.Event = sseLine.Replace("data: ", ""));
+    					this.Emit<OpenAIServerSentEvent>(e => {
+    							e.Event = sseLine.Replace("data: ", "");
+
+    							if (e.Event != "[DONE]")
+    							{
+    								e.Chunk = JsonConvert.DeserializeObject<ChatCompletionChunkResult>(sseLine.Replace("data: ", ""), new JsonSerializerSettings {
+    									ContractResolver = new DefaultContractResolver() { NamingStrategy = new SnakeCaseNamingStrategy() }}
+									);
+
+    							}
+    						});
     				}
     				else if (sseLine.Length > 0) {
 						LoggerManager.LogDebug("Line received", "", "line", sseLine);
@@ -166,31 +176,51 @@ public partial class OpenAI
 	// /v1/embeddings
 	public async Task<EmbeddingsResult> Embeddings(EmbeddingsRequest request)
 	{
-		return await GetResultObject<EmbeddingsResult>(await MakeRequestPost("/v1/embeddings", request, false));
+		var r = await GetResultObject<EmbeddingsResult>(await MakeRequestPost("/v1/embeddings", request, false));
+
+		this.Emit<OpenAIResult>(e => e.Result = r);
+
+		return r;
 	}
 
 	// /v1/completions
 	public async Task<CompletionResult> Completions(CompletionRequest request)
 	{
-		return await GetResultObject<CompletionResult>(await MakeRequestPost("/v1/completions", request, request.Stream));
+		var r = await GetResultObject<CompletionResult>(await MakeRequestPost("/v1/completions", request, request.Stream));
+
+		this.Emit<OpenAIResult>(e => e.Result = r);
+
+		return r;
 	}
 	
 	// /v1/chat/completions
 	public async Task<ChatCompletionResult> ChatCompletions(ChatCompletionRequest request)
 	{
-		return await GetResultObject<ChatCompletionResult>(await MakeRequestPost("/v1/chat/completions", request, request.Stream));
+		var r = await GetResultObject<ChatCompletionResult>(await MakeRequestPost("/v1/chat/completions", request, request.Stream));
+
+		this.Emit<OpenAIResult>(e => e.Result = r);
+
+		return r;
 	}
 
 	// /v1/models
 	public async Task<ModelsResult> Models()
 	{
-		return await GetResultObject<ModelsResult>(await MakeRequestGet("/v1/models"));
+		var r = await GetResultObject<ModelsResult>(await MakeRequestGet("/v1/models"));
+
+		this.Emit<OpenAIResult>(e => e.Result = r);
+
+		return r;
 	}
 
 	// /v1/models/{model}
 	public async Task<ModelResult> Models(string model)
 	{
-		return await GetResultObject<ModelResult>(await MakeRequestGet($"/v1/models/{model}"));
+		var r = await GetResultObject<ModelResult>(await MakeRequestGet($"/v1/models/{model}"));
+
+		this.Emit<OpenAIResult>(e => e.Result = r);
+
+		return r;
 	}
 }
 
@@ -198,8 +228,12 @@ public partial class OpenAIEvent : Event {}
 public partial class OpenAIError : OpenAIEvent { 
 	public ErrorResult Error { get; set; }
 }
+public partial class OpenAIResult : OpenAIEvent { 
+	public BaseResult Result { get; set; }
+}
 public partial class OpenAIServerSentEvent : OpenAIEvent {
-	public string Event { get; set; }
+	public string? Event { get; set; }
+	public ChatCompletionChunkResult? Chunk { get; set; }
 }
 public partial class OpenAIStreamingFinished : OpenAIEvent { 
 }
