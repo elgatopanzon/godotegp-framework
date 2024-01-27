@@ -164,11 +164,30 @@ public partial class OpenAI
 		return contents;
 	}
 
-	public async Task<T> GetResultObject<T>(string jsonObj)
+	public async Task<T> GetResultObject<T>(string jsonObj) where T : BaseResult, new()
 	{
-    	var resultObj = JsonConvert.DeserializeObject<T>(jsonObj, new JsonSerializerSettings {
-    		ContractResolver = new DefaultContractResolver() { NamingStrategy = new SnakeCaseNamingStrategy() }}
-		);
+		T resultObj = null;
+
+		try
+		{
+    		resultObj = JsonConvert.DeserializeObject<T>(jsonObj, new JsonSerializerSettings {
+    			ContractResolver = new DefaultContractResolver() { NamingStrategy = new SnakeCaseNamingStrategy() }}
+			);
+		}
+		catch (System.Exception e)
+		{
+			LoggerManager.LogError("Deserialising result object failed", "", "jsonObj", jsonObj);
+
+			if (resultObj is ErrorResult err)
+			{
+				err = new();
+				err.Error = new() {
+					Type = "internal_error",
+					Code = "deserialisation error",
+					Message = jsonObj,
+				};
+			}
+		}
 
 		return resultObj;
 	}

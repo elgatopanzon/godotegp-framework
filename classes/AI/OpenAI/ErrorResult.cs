@@ -13,7 +13,7 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial class ErrorResult
+public partial class ErrorResult : BaseResult
 {
 	public ErrorResultObj Error { get; set; }
 }
