@@ -203,3 +203,34 @@ public static partial class DataBindManagerObjectExtension
 		ServiceRegistry.Get<DataBindManager>().BindSignal<TT, T>(obj, signalName, hasParams, getterFirstCb, setterFirstCb, initialSet: initialSet);
 	}
 }
+
+static class StringExtensions
+{
+    public static IEnumerable<string> SplitOnLength(this string input, int length)
+    {
+        List<string> strings = new() {};
+        List<string> tempStrings = new() {};
+
+        foreach (string word in input.Split(" "))
+        {
+        	int tempLength = tempStrings.Select(x => x.Length).Sum();
+
+        	// check if next word sends it over the edge
+        	if (tempLength + word.Length >= length)
+        	{
+        		strings.Add(String.Join(" ", tempStrings));
+        		tempStrings = new();
+        	}
+
+        	tempStrings.Add(word);
+        }
+
+		// add all leftover temp strings as a string
+        if (tempStrings.Count > 0)
+        {
+        	strings.Add(String.Join(" ", tempStrings));
+        }
+
+        return strings;
+    }
+}
