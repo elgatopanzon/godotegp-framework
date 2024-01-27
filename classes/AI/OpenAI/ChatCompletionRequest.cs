@@ -144,6 +144,5 @@ public partial class ChatCompletionRequestMessage : ChatCompletionResultMessage
 
 	public ChatCompletionRequestMessage()
 	{
-		Name = "";
 	}
 }
