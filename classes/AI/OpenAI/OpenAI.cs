@@ -31,6 +31,7 @@ public partial class OpenAI
 		LoggerManager.LogDebug("Making request", "", "requestObj", requestObj);
 
 		var httpClient = new HttpClient();
+		httpClient.Timeout = TimeSpan.FromSeconds(600);
 
 		var jsonContent = JsonConvert.SerializeObject(requestObj, 
         				new JsonSerializerSettings
