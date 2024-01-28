@@ -40,9 +40,13 @@ public partial class ChatCompletionResultMessage
 		{
 			return String.Join(" ", GetContents().Where(x => x.Type == "text").Select(x => x.Text).ToArray<string>());
 		}
-		else
+		else if (Content is string)
 		{
 			return (string) Content;
+		}
+		else
+		{
+			return (string) JsonConvert.SerializeObject(Content);
 		}
 	}
 	public List<ChatCompletionResultMessageContent> GetContents()
