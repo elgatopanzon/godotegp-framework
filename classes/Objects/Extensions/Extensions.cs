@@ -139,6 +139,11 @@ public static partial class EventManagerObjectExtensions
 
 		return (Event) e;
 	}
+
+	public static void UnsubscribeAll(this object obj)
+	{
+		ServiceRegistry.Get<EventManager>().Unsubscribe(obj);
+	}
 }
 
 public static partial class ObjectPoolServiceObjectExtensions
