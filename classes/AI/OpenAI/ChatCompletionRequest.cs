@@ -181,4 +181,6 @@ public partial class GatoGPTExtendedInference
 
 	public string? CfgNegativePrompt { get; set; }
 	public double? CfgScale { get; set; }
+
+	public string? PromptCacheId { get; set; }
 }
