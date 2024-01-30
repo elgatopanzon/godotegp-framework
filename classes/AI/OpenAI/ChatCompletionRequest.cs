@@ -163,6 +163,8 @@ public partial class GatoGPTExtendedModel
 	public int? NGpuLayers { get; set; }
 	public string? Backend { get; set; }
 	public bool? PromptCache { get; set; }
+	public double? RopeFreqBase { get; set; }
+	public double? RopeFreqScale { get; set; }
 }
 public partial class GatoGPTExtendedInference
 {
