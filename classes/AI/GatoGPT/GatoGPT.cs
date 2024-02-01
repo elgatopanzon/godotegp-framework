@@ -31,5 +31,15 @@ public partial class GatoGPT : OpenAI
 
 		return r;
 	}
+
+	// /v1/extended/tokenize/chat
+	public async Task<TokenizeResult> TokenizeChat(ChatCompletionRequest request)
+	{
+		var r = await GetResultObject<TokenizeResult>(await MakeRequestPost("/v1/extended/tokenize/chat", request, false));
+
+		this.Emit<OpenAIResult>(e => e.Result = r);
+
+		return r;
+	}
 }
 

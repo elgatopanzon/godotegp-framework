@@ -180,6 +180,7 @@ public partial class GatoGPTExtendedInference
 
 	public string? ChatMessageTemplate { get; set; }
 	public string? ChatMessageGenerationTemplate { get; set; }
+	public string? PrePrompt { get; set; }
 
 	public string? CfgNegativePrompt { get; set; }
 	public double? CfgScale { get; set; }
