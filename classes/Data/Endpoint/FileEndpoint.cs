@@ -1,6 +1,7 @@
 namespace GodotEGP.Data.Endpoint;
 
 using GodotEGP.Logging;
+using Godot;
 
 // File object holding information about the provided filename and path
 public partial class FileEndpoint : IEndpoint
@@ -29,6 +30,9 @@ public partial class FileEndpoint : IEndpoint
 
 	public FileEndpoint(string filePath)
 	{
+		// first globalize the path
+		filePath = ProjectSettings.GlobalizePath(filePath);
+
         // get platform safe path from a provided unix path (because we use
         // that, because godot uses that even for windows)
         LoggerManager.LogDebug("", "", "path", filePath);
