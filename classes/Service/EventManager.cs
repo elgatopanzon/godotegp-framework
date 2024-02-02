@@ -197,6 +197,7 @@ public partial class EventManager : Service
 		if (eventObj == null)
 		{
 			LoggerManager.LogCritical("TODO: fix null event object");
+			return false;
 		}
 
 		// emit the event to high-priority subscribers
