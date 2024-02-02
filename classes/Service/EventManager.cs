@@ -181,6 +181,12 @@ public partial class EventManager : Service
 				// remove item from the queue
 				eventObj = eventQueue.Dequeue();
 
+				if (eventObj == null)
+				{
+					LoggerManager.LogCritical("TODO: fix null event object");
+					return;
+				}
+
 				bool eventConsumed = BroadcastEvent(eventObj, false);
 
 				LoggerManager.LogDebug("Deferred event consumed state", "", "event", new Dictionary<string, string> { { "eventType", eventObj.GetType().Name }, {"consumed", eventConsumed.ToString() } });
@@ -193,12 +199,6 @@ public partial class EventManager : Service
 	public bool BroadcastEvent(IEvent eventObj, bool broadcastHighPriority = false)
 	{
 		bool eventConsumed = false;
-
-		if (eventObj == null)
-		{
-			LoggerManager.LogCritical("TODO: fix null event object");
-			return false;
-		}
 
 		// emit the event to high-priority subscribers
 		if (_eventSubscriptions.TryGetValue(eventObj.GetType(), out List<IEventSubscription<Event>> subList))
