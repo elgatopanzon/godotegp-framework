@@ -17,7 +17,7 @@ public partial class HTTPOperator : Operator, IOperator
 
 	private object _dataObject;
 
-	public void Load()
+	public void Load(object dataObj = null)
 	{
 		LoggerManager.LogDebug($"Load from endpoint", "", "endpoint", _httpEndpoint);
 

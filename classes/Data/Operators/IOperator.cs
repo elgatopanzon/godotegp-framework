@@ -7,7 +7,7 @@ using GodotEGP.Data.Endpoint;
 public partial interface IOperator
 {
 	void SetDataEndpoint(IEndpoint dataEndpoint);
-	void Load();
-	void Save(object dataObj);
+	void Load(object dataObj = null);
+	void Save(object dataObj = null);
 }
 

@@ -1,3 +1,9 @@
+/**
+ * @author      : ElGatoPanzon (contact@elgatopanzon.io) Copyright (c) ElGatoPanzon
+ * @file        : RemoteTransferOperator
+ * @created     : Friday Feb 02, 2024 12:30:46 CST
+ */
+
 namespace GodotEGP.Data.Operator;
 
 using System.ComponentModel;
@@ -8,26 +14,28 @@ using GodotEGP.Logging;
 using GodotEGP.Data.Endpoint;
 
 // operates on file based objects 
-public partial class FileOperator : Operator, IOperator
+public partial class RemoteTransferOperator : Operator, IOperator
 {
 	private FileEndpoint _fileEndpoint;
+	private HTTPEndpoint _httpEndpoint;
 	private int _operationType;
 
 	private object _dataObject;
 
 	public void Load(object dataObj = null)
 	{
-		LoggerManager.LogDebug($"Load from endpoint", "", "endpoint", _fileEndpoint);
+		LoggerManager.LogDebug($"Upload to endpoint", "", "endpoint", _httpEndpoint);
+		LoggerManager.LogDebug($"Upload from endpoint", "", "endpoint", _fileEndpoint);
 
 		_operationType = 0;
 
 		Run();
 	}
 
-	public void Save(object dataObj)
+	public void Save(object dataObj = null)
 	{
-		LoggerManager.LogDebug($"Save to endpoint", "", "endpoint", _fileEndpoint);
-		// LoggerManager.LogDebug($"", "", "dataObj", dataObj);
+		LoggerManager.LogDebug($"Download from endpoint", "", "endpoint", _httpEndpoint);
+		LoggerManager.LogDebug($"Download to endpoint", "", "endpoint", _fileEndpoint);
 
 		_dataObject = dataObj;
 
@@ -38,6 +46,9 @@ public partial class FileOperator : Operator, IOperator
 
 	public void SetDataEndpoint(IEndpoint dataEndpoint) {
 		_fileEndpoint = (FileEndpoint) dataEndpoint;
+	}
+	public void SetHttpEndpoint(IEndpoint dataEndpoint) {
+		_httpEndpoint = (HTTPEndpoint) dataEndpoint;
 	}
 
 	public FileEndpoint GetDataEndpoint()
@@ -63,32 +74,18 @@ public partial class FileOperator : Operator, IOperator
 
 	public void LoadOperationDoWork(object sender, DoWorkEventArgs e)
 	{
-		LoggerManager.LogDebug("Load operation starting");
-    	using (StreamReader reader = new StreamReader(_fileEndpoint.Path))
-    	{
-    		e.Result = reader.ReadToEnd();
-    		ReportProgress(100);
-    	}
+		throw new NotImplementedException("Load/Upload operation is not implemented");
 	}
 
 	public void SaveOperationDoWork(object sender, DoWorkEventArgs e)
 	{
-		// LoggerManager.LogDebug("Save operation starting", "", "object", _dataObject);
 		LoggerManager.LogDebug("Save operation starting");
 
+		// ensure that the base directory of the download path exists
 		EnsureDirectoryExists(_fileEndpoint.Path);
 
-    	using (StreamWriter writer = new StreamWriter(_fileEndpoint.Path))
-    	{
-			// for now, serialise the object as json
-			var jsonString = JsonConvert.SerializeObject(
-        			_dataObject, Formatting.Indented);
-
-    		writer.WriteLine(jsonString);
-
-    		e.Result = true;
-    		ReportProgress(100);
-    	}
+		// download the file using a resumable stream instance
+		// TODO
 	}
 
 	public override void ProgressChanged(object sender, ProgressChangedEventArgs e)
