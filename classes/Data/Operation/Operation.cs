@@ -24,6 +24,8 @@ public abstract partial class Operation<T> : Operation, IOperation
 
 	protected object _dataObject;
 
+	public bool Completed { get; set; } = false;
+
 	public void __On_OperatorComplete(RunWorkerCompletedEventArgs e)
 	{
 		// once operator worker is completed, run the operation worker
@@ -48,17 +50,26 @@ public abstract partial class Operation<T> : Operation, IOperation
 			OperationResult<T> resultObj = new OperationResult<T>(_completedArgs.Result);
 
 			// LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
-			LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}");
 
 			if (resultObj.ResultObject != null)
 			{
 				e.Result = resultObj;
+
+				LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}");
+			}
+			else
+			{
+				LoggerManager.LogDebug($"Failed to create instance of {typeof(T).Name}");
+
+				throw new InvalidDataException("Result object is null");
 			}
 		}
-		catch (System.Exception)
+		catch (System.Exception ex)
 		{
 			// copy over the completed args from the operator thread
 			e.Result = _completedArgs.Result;
+
+			_error = ex;
 		}
 
 		ReportProgress(100);
@@ -72,11 +83,15 @@ public abstract partial class Operation<T> : Operation, IOperation
 	public override void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Data operation thread completed");
+
+		Completed = true;
 	}
 
 	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
 		LoggerManager.LogDebug("Data operation thread error");
+
+		Completed = true;
 	}
 
 	// override event methods to send different events
