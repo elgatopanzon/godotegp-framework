@@ -28,23 +28,25 @@ public partial class LoggerConfig : VObject
 	public LoggerConfig(VObject parent = null) : base(parent)
 	{
         _logLevel = AddValidatedValue<Logging.Message.LogLevel>(this)
-            .Default((OS.IsDebugBuild()) ? Logging.Message.LogLevel.Debug : Logging.Message.LogLevel.Info)
+            .Default(Logging.Message.DefaultLogLevel)
             .AllowedValues(Logging.Message.LogLevel.GetValues<Logging.Message.LogLevel>())
         	.ChangeEventsEnabled()
             ;
 
         _logLevelOverrides = AddValidatedValue<Dictionary<string, Logging.Message.LogLevel>>(this)
             .Default(new Dictionary<string, Logging.Message.LogLevel>() {
-					{"EventManager", Logging.Message.LogLevel.Info},
-    				{"EventFilter", Logging.Message.LogLevel.Info},
-    				{"EventQueue", Logging.Message.LogLevel.Info},
-    				{"VValue", Logging.Message.LogLevel.Info},
-    				{"VObject", Logging.Message.LogLevel.Info},
-    				{"VNative", Logging.Message.LogLevel.Info},
-    				{"ObjectPool", Logging.Message.LogLevel.Info},
+					{"EventManager", Logging.Message.LogLevel.Trace},
+    				{"EventFilter", Logging.Message.LogLevel.Trace},
+    				{"EventQueue", Logging.Message.LogLevel.Trace},
+    				{"VValue", Logging.Message.LogLevel.Trace},
+    				{"VObject", Logging.Message.LogLevel.Trace},
+    				{"VNative", Logging.Message.LogLevel.Trace},
+    				{"ObjectPool", Logging.Message.LogLevel.Trace},
             	})
         	.ChangeEventsEnabled()
             ;
+
+        _logLevelOverrides.MergeCollections = true;
 
         InitConfigParams();
 	}
