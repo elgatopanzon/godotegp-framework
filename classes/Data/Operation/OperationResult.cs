@@ -20,6 +20,12 @@ public partial class OperationResult<T>
 	public OperationResult(object rawObject)
 	{
 		// LoggerManager.LogDebug("Creating result object from raw data", "", "raw", rawObject);
+		if (rawObject is null)
+		{
+			LoggerManager.LogDebug("Result object null");
+			return;
+		}
+
 		LoggerManager.LogDebug("Creating result object", "", "rawType", rawObject.GetType().Name);
 
 		if (typeof(T).IsSubclassOf(typeof(VObject)) && rawObject is string)
