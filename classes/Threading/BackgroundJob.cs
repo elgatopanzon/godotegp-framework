@@ -23,6 +23,11 @@ public partial class BackgroundJob
 		get { return _completedArgs; }
 	}
 
+	protected Exception _error { get; set; }
+	public Exception Error {
+		get { return _error; }
+	}
+
 	public BackgroundJob()
 	{
 	}
@@ -51,14 +56,21 @@ public partial class BackgroundJob
 	// handlers for background worker events
 	public virtual void _On_DoWork(object sender, DoWorkEventArgs e)
 	{
-		DoWork(sender, e);
-
-		if (OnWorking != null)
+		try
 		{
-			OnWorking(e);
-		}
+			DoWork(sender, e);
 
-		EmitEventDoWork(sender, e);
+			if (OnWorking != null)
+			{
+				OnWorking(e);
+			}
+
+			EmitEventDoWork(sender, e);
+		}
+		catch (System.Exception)
+		{
+			throw;
+		}
 	}
 
 	public virtual void _On_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -77,9 +89,9 @@ public partial class BackgroundJob
 	{
 	 	_completedArgs = e;
 
-		if (e.Error != null)
+		if (_error != null)
 		{
-			_On_RunWorkerError(sender, e);
+			_On_RunWorkerError(sender, new RunWorkerCompletedEventArgs(_completedArgs.Result, _error, true));
 			return;
 		}
 
