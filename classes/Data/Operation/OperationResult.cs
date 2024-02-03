@@ -54,7 +54,10 @@ public partial class OperationResult<T>
 			ResultObject = deserialisedObj;
 		}
 
-		// TODO: implement different types of raw result to T stuff?
+		else
+		{
+			ResultObject = (T) rawObject;
+		}
 	}
 }
 
