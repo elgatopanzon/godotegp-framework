@@ -60,7 +60,13 @@ public partial class RemoteTransferOperator : Operator, IOperator
     // transfer start time
     public DateTime TransferStartTime { get; set; }
     // transfer speed
-    public long TransferSpeed { get; set; }
+    private List<long> _transferSpeedSamples = new();
+    private int _transferSpeedSampleSize = 10;
+    public long TransferSpeed { 
+    	get {
+			return (long) _transferSpeedSamples.Average();
+    	}
+    }
     // public int TransferSpeed {
     // 	get {
 	// 		return (int) ((TransferBytesWritten - TransferBytesWrittenInitial) * 1000000000 / TransferTime.TotalNanoseconds);
@@ -295,30 +301,25 @@ public partial class RemoteTransferOperator : Operator, IOperator
 		// update download stats and adjust bandwidth limit modifiers
 		if (_transferAllowedToRun && _transferStatsReadIterations > 0)
 		{
-        	LoggerManager.LogDebug("Bytes read last sec", "", "bytes", _transferStatsBytesRead);
-        	LoggerManager.LogDebug("Read iterations last sec", "", "reads", _transferStatsReadIterations);
-        	LoggerManager.LogDebug("Target bytes per sec", "", "target", _transferBandwidthLimit);
+			double bytesReadTargetPercent = ((double) TransferSpeed) / ((double) _transferBandwidthLimit);
 
-			double bytesReadTargetPercent = ((double) _transferStatsBytesRead) / ((double) _transferBandwidthLimit);
-
-			LoggerManager.LogDebug("Percent on target", "", "percent", bytesReadTargetPercent);
-
-			// calculate how much to delay to read loop based on the transfered
+			// calculate how much to delay the read loop based on the transfered
 			// bytes since the last update
 			float precision = (float) (_transferStatsTimerSpeed * (float) 1000000);
 
 			double maxChunksPerSec = (double) _transferBandwidthLimit / (double) _transferChunkSize;
 
         	double delay = precision / maxChunksPerSec;
-        	delay = delay * Math.Min(1, bytesReadTargetPercent);
+        	delay = delay * bytesReadTargetPercent;
 
         	_transferReadDelayMs = TimeSpan.FromMicroseconds(delay);
 
-        	LoggerManager.LogDebug("Delay microseconds", "", "delayMicrosecs", delay);
+        	LoggerManager.LogDebug("Calculating transfer stats", "", "stats", $"bytesRead:{_transferStatsBytesRead}, bytesTarget:{_transferBandwidthLimit}, bytesAvg:{TransferSpeed}, targetPerc:{Math.Round(bytesReadTargetPercent, 2)}%");
 		}
 
 		// set current speed to bytes read since last update
-		TransferSpeed = _transferStatsBytesRead;
+		_transferSpeedSamples.Add(_transferStatsBytesRead);
+		_transferSpeedSamples = _transferSpeedSamples.TakeLast(_transferSpeedSampleSize).ToList();
 		_transferStatsBytesRead = 0;
 		_transferStatsReadIterations = 0;
 	}
