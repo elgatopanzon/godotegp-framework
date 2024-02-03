@@ -216,9 +216,9 @@ public partial class ConfigManager : Service
 		configObject.Save();
 	}
 
-	public IEndpoint GetDefaultSaveEndpoint(Type configInstanceType)
+	public IEndpoint GetDefaultSaveEndpoint(Type configInstanceType, string configName = "Config.json")
 	{
-		return new FileEndpoint(Path.Combine(OS.GetUserDataDir(), _configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, "Config.json"));
+		return new FileEndpoint(Path.Combine(OS.GetUserDataDir(), _configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, configName));
 	}
 
 	public void Save<T>(IEndpoint dataEndpoint = null) where T : VObject
