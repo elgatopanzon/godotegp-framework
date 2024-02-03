@@ -71,6 +71,13 @@ public partial class HTTPEndpoint : IEndpoint
 		set { _params = value; }
 	}
 
+	private long _bandwidthLimit;
+	public long BandwidthLimit
+	{
+		get { return _bandwidthLimit; }
+		set { _bandwidthLimit = value; }
+	}
+
 	public HTTPEndpoint(string hostname, int port = 0, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
 	{
 		SetUriFromParams(hostname, port, path, (port == 443), urlParams);
@@ -81,8 +88,6 @@ public partial class HTTPEndpoint : IEndpoint
 		_timeout = timeout;
 		_headers = headers;
 		_params = urlParams;
-
-        LoggerManager.LogDebug("Creating new instance", "", "http", this);
 	}
 
 	public HTTPEndpoint(string uri, Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
@@ -95,8 +100,6 @@ public partial class HTTPEndpoint : IEndpoint
 		_headers = headers;
 
 		// TODO: create _params dictionary from uri string
-
-        LoggerManager.LogDebug("Creating new instance from string url", "", "http", this);
 	}
 
 	public HTTPEndpoint(Uri uri, Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
@@ -107,8 +110,6 @@ public partial class HTTPEndpoint : IEndpoint
 		_verifySsl = verifySSL;
 		_timeout = timeout;
 		_headers = headers;
-
-        LoggerManager.LogDebug("Creating new instance from uri", "", "http", this);
 	}
 
 	public void SetUriFromParams(string host, int port, string path, bool useSsl = true, Dictionary<string,object> urlParams = null)

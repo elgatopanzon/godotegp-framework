@@ -28,7 +28,10 @@ public partial class RemoteTransferOperator : Operator, IOperator
     private volatile bool _transferAllowedToRun;
 
     // size to download in bytes for each request
-    private int _transferChunkSize = 10000;
+    private long _transferChunkSize = 10000;
+
+    // transfer bandwidth limit
+    private long _transferBandwidthLimit = 999999999999;
 
     // IProgress instance to report progress
     private IProgress<double> _transferProgress;
@@ -47,11 +50,12 @@ public partial class RemoteTransferOperator : Operator, IOperator
     // transfer start time
     public DateTime TransferStartTime { get; set; }
     // transfer speed
-    public int TransferSpeed {
-    	get {
-			return (int) ((TransferBytesWritten - TransferBytesWrittenInitial) * 1000000000 / TransferTime.TotalNanoseconds);
-    	}
-    }
+    public long TransferSpeed { get; set; }
+    // public int TransferSpeed {
+    // 	get {
+	// 		return (int) ((TransferBytesWritten - TransferBytesWrittenInitial) * 1000000000 / TransferTime.TotalNanoseconds);
+    // 	}
+    // }
 
 	// when bytes written matches content length, it's considered finished
     public bool TransferDone => TransferContentLength == TransferBytesWritten;
@@ -228,6 +232,11 @@ public partial class RemoteTransferOperator : Operator, IOperator
             }
         }
 
+		if (_httpEndpoint.BandwidthLimit > 0)
+		{
+			_transferBandwidthLimit = _httpEndpoint.BandwidthLimit;
+		}
+
         LoggerManager.LogDebug("Transfer content start point", "", "bytesWritten", TransferBytesWritten);
     }
 
@@ -278,15 +287,60 @@ public partial class RemoteTransferOperator : Operator, IOperator
             {
                 using (var fs = new FileStream(_fileEndpoint.Path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
                 {
+                	long bytesReadLastSec = 0;
+                	int readIterationsLastSec = 0;
+                	int delayMs = 0;
+                	DateTime prevBytesReadTime = DateTime.Now;
+
+                	if (_transferBandwidthLimit < _transferChunkSize)
+                	{
+                		LoggerManager.LogDebug("Limiting chunk size to bandwidth limit", "", "limit", _transferBandwidthLimit);
+
+                		_transferChunkSize = _transferBandwidthLimit;
+                	}
+
                     while (_transferAllowedToRun)
                     {
-                        var buffer = new byte[_transferChunkSize];
-                        var bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                    	if (bytesReadLastSec < _transferBandwidthLimit)
+                    	{
+                        	var buffer = new byte[_transferChunkSize];
+                        	var bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
 
-                        if (bytesRead == 0) break;
+                        	if (bytesRead == 0) break;
 
-                        await fs.WriteAsync(buffer, 0, bytesRead);
-                        TransferBytesWritten += bytesRead;
+                        	await fs.WriteAsync(buffer, 0, bytesRead);
+
+                        	readIterationsLastSec++;
+
+                        	bytesReadLastSec += _transferChunkSize;
+
+                        	TransferBytesWritten += bytesRead;
+
+                        	delayMs = (DateTime.Now - prevBytesReadTime).Milliseconds / Math.Max(1, readIterationsLastSec);
+                    	}
+
+						// adjust download speed
+                        if ((DateTime.Now - prevBytesReadTime).Seconds >= 1)
+                        {
+                        	LoggerManager.LogDebug("Bytes read last sec", "", "bytes", bytesReadLastSec);
+                        	LoggerManager.LogDebug("Read iterations last sec", "", "reads", readIterationsLastSec);
+                        	LoggerManager.LogDebug("Target bytes per sec", "", "target", _transferBandwidthLimit);
+
+							double bytesReadTargetPercent = ((double) bytesReadLastSec) / ((double) _transferBandwidthLimit);
+
+							LoggerManager.LogDebug("Percent on target", "", "percent", bytesReadTargetPercent);
+
+							LoggerManager.LogDebug("Updating delay time ms", "", "delayMs", delayMs);
+
+
+                        	bytesReadLastSec = 0;
+                        	readIterationsLastSec = 0;
+                        	prevBytesReadTime = DateTime.Now;
+                        }
+
+						TransferSpeed = bytesReadLastSec;
+
+						await Task.Delay(delayMs);
 
 						TransferTime = DateTime.Now - TransferStartTime;
 
