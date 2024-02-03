@@ -1,5 +1,6 @@
 namespace GodotEGP.Data.Operation;
 using System;
+using System.ComponentModel;
 
 using System.Collections.Generic;
 using System.Net.Http;
@@ -13,6 +14,8 @@ public partial class OperationProcess<T>
 	protected object _dataObject;
 
 	public Operation<T> DataOperation;
+
+	TaskCompletionSource<T> _taskCompletionSource = new TaskCompletionSource<T>();
 
 	public OperationProcess(Operation<T> dataOperation, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null)
 	{
@@ -45,6 +48,25 @@ public partial class OperationProcess<T>
 	{
 		DataOperation.Save();
 	}
+
+	public Task<T> SaveAsync()
+	{
+		DataOperation.Save();
+
+		DataOperation.SubscribeOwner<DataOperationComplete>(_On_OperationCompleted, oneshot: true, isHighPriority: true);
+		DataOperation.SubscribeOwner<DataOperationError>(_On_OperationError, oneshot: true, isHighPriority: true);
+
+    	return _taskCompletionSource.Task;
+	}
+
+	public void _On_OperationCompleted(DataOperationComplete e)
+	{
+		_taskCompletionSource.SetResult((T) (e.RunWorkerCompletedEventArgs.Result as OperationResult<T>).ResultObject);
+	}
+	public void _On_OperationError(DataOperationError e)
+	{
+		_taskCompletionSource.SetException((Exception) e.RunWorkerCompletedEventArgs.Error);
+	}
 }
 
 public partial class DataOperationProcessFile<T> : OperationProcess<T>
@@ -65,6 +87,13 @@ public partial class DataOperationProcessHTTP<T> : OperationProcess<T>
 	}
 
 	public DataOperationProcessHTTP(HTTPEndpoint httpEndpoint, object dataObject = null, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null) : base(new HTTPOperation<T>(httpEndpoint, dataObject), onWorkingCb, onProgressCb, onCompleteCb, onErrorCb)
+	{
+	}
+}
+
+public partial class DataOperationProcessRemoteTransfer<T> : OperationProcess<T>
+{
+	public DataOperationProcessRemoteTransfer(FileEndpoint fileEndpoint, HTTPEndpoint httpEndpoint, Action<IEvent> onWorkingCb = null, Action<IEvent> onProgressCb = null, Action<IEvent> onCompleteCb = null, Action<IEvent> onErrorCb = null) : base(new RemoteTransferOperation<T>(fileEndpoint, httpEndpoint), onWorkingCb, onProgressCb, onCompleteCb, onErrorCb)
 	{
 	}
 }
