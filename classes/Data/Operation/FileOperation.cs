@@ -40,10 +40,12 @@ public partial class FileOperation<T> : Operation<T>
 	}
 
 	public override void Load() {
+		Working = true;
 		_dataOperator.Load();
 	}
 
 	public override void Save() {
+		Working = true;
 		_dataOperator.Save(_dataObject);
 	}
 }

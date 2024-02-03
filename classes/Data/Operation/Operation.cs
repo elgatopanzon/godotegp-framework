@@ -10,6 +10,7 @@ using GodotEGP.Objects.Extensions;
 
 public abstract partial class Operation : BackgroundJob, IOperation
 {
+	public bool Working { get; set; } = false;
 	public abstract void Load();
 	public abstract void Save();
 }
@@ -42,7 +43,6 @@ public abstract partial class Operation<T> : Operation, IOperation
 	public override void DoWork(object sender, DoWorkEventArgs e)
 	{
 		LoggerManager.LogDebug("Starting operation thread");
-
 		// for now, if the _dataObject is null then we can assume that this is a
 		// load request, therefore we proceed to create the loaded instance
 		try
@@ -85,6 +85,7 @@ public abstract partial class Operation<T> : Operation, IOperation
 		LoggerManager.LogDebug("Data operation thread completed");
 
 		Completed = true;
+		Working = false;
 	}
 
 	public override void RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
@@ -92,6 +93,7 @@ public abstract partial class Operation<T> : Operation, IOperation
 		LoggerManager.LogDebug("Data operation thread error");
 
 		Completed = true;
+		Working = false;
 	}
 
 	// override event methods to send different events
