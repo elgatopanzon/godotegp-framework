@@ -6,12 +6,17 @@
 
 namespace GodotEGP.Data.Operator;
 
+using Godot;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
 using Newtonsoft.Json;
 
+using GodotEGP;
+using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
+using GodotEGP.Event.Events;
+using GodotEGP.Misc;
 using GodotEGP.Data.Endpoint;
 
 // operates on file based objects 
@@ -56,9 +61,18 @@ public partial class RemoteTransferOperator : Operator, IOperator
 	// 		return (int) ((TransferBytesWritten - TransferBytesWrittenInitial) * 1000000000 / TransferTime.TotalNanoseconds);
     // 	}
     // }
+    
+    public float _transferStatsTimerSpeed { get; set; } = 1;
+
+    // transfer stats
+    private long _transferStatsBytesRead { get; set; }
+    private int _transferStatsReadIterations { get; set; }
+    private int _transferReadDelayMs { get; set; }
 
 	// when bytes written matches content length, it's considered finished
     public bool TransferDone => TransferContentLength == TransferBytesWritten;
+
+	private Timer _downloadStatsTimer;
 
 	public void Load(object dataObj = null)
 	{
@@ -139,7 +153,7 @@ public partial class RemoteTransferOperator : Operator, IOperator
 		}
 
 		// create Resource<RemoteTransfer> instance
-		e.Result = new GodotEGP.Resource.Resource<Resource.RemoteTransferResult>() {
+		e.Result = new GodotEGP.Resource.Resource<GodotEGP.Resource.RemoteTransferResult>() {
 			Value = new() {
 				FileEndpoint = _fileEndpoint,
 				HTTPEndpoint = _httpEndpoint,
@@ -232,10 +246,14 @@ public partial class RemoteTransferOperator : Operator, IOperator
             }
         }
 
-		if (_httpEndpoint.BandwidthLimit > 0)
-		{
-			_transferBandwidthLimit = _httpEndpoint.BandwidthLimit;
-		}
+		// init download stats timer
+		_downloadStatsTimer = new Timer();
+		_downloadStatsTimer.WaitTime = _transferStatsTimerSpeed;
+		_downloadStatsTimer.Autostart = true;
+		_downloadStatsTimer.OneShot = false;
+		_downloadStatsTimer.SubscribeSignal(StringNames.Instance["timeout"], false, _On_DownloadStatsTimer_Timeout);
+
+		SceneTree.Instance.Root.AddChild(_downloadStatsTimer);
 
         LoggerManager.LogDebug("Transfer content start point", "", "bytesWritten", TransferBytesWritten);
     }
@@ -253,6 +271,37 @@ public partial class RemoteTransferOperator : Operator, IOperator
             return response.ContentLength;
         }
     }
+
+	public void _On_DownloadStatsTimer_Timeout(IEvent e)
+	{
+		if (_httpEndpoint.BandwidthLimit > 0)
+		{
+			_transferBandwidthLimit = _httpEndpoint.BandwidthLimit;
+		}
+
+		// update download stats and adjust bandwidth limit modifiers
+		if (_transferAllowedToRun && _transferStatsReadIterations > 0)
+		{
+        	LoggerManager.LogDebug("Bytes read last sec", "", "bytes", _transferStatsBytesRead);
+        	LoggerManager.LogDebug("Read iterations last sec", "", "reads", _transferStatsReadIterations);
+        	LoggerManager.LogDebug("Target bytes per sec", "", "target", _transferBandwidthLimit);
+
+			double bytesReadTargetPercent = ((double) _transferStatsBytesRead) / ((double) _transferBandwidthLimit);
+
+			LoggerManager.LogDebug("Percent on target", "", "percent", bytesReadTargetPercent);
+
+			// calculate how much to delay to read loop based on the transfered
+			// bytes since the last update
+        	_transferReadDelayMs = ((int) bytesReadTargetPercent * (int) (_transferStatsTimerSpeed * (float) 1000)) / Math.Max(1, _transferStatsReadIterations);
+
+        	LoggerManager.LogDebug("Delay ms", "", "delayMs", _transferReadDelayMs);
+		}
+
+		// set current speed to bytes read since last update
+		TransferSpeed = _transferStatsBytesRead;
+		_transferStatsBytesRead = 0;
+		_transferStatsReadIterations = 0;
+	}
 
     private async Task StartTransfer(long range)
     {
@@ -287,11 +336,6 @@ public partial class RemoteTransferOperator : Operator, IOperator
             {
                 using (var fs = new FileStream(_fileEndpoint.Path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
                 {
-                	long bytesReadLastSec = 0;
-                	int readIterationsLastSec = 0;
-                	int delayMs = 0;
-                	DateTime prevBytesReadTime = DateTime.Now;
-
                 	if (_transferBandwidthLimit < _transferChunkSize)
                 	{
                 		LoggerManager.LogDebug("Limiting chunk size to bandwidth limit", "", "limit", _transferBandwidthLimit);
@@ -301,46 +345,20 @@ public partial class RemoteTransferOperator : Operator, IOperator
 
                     while (_transferAllowedToRun)
                     {
-                    	if (bytesReadLastSec < _transferBandwidthLimit)
-                    	{
-                        	var buffer = new byte[_transferChunkSize];
-                        	var bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                        var buffer = new byte[_transferChunkSize];
+                        var bytesRead = await responseStream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
 
-                        	if (bytesRead == 0) break;
+                        if (bytesRead == 0) break;
 
-                        	await fs.WriteAsync(buffer, 0, bytesRead);
+                        await fs.WriteAsync(buffer, 0, bytesRead);
 
-                        	readIterationsLastSec++;
+                        _transferStatsReadIterations++;
+                        _transferStatsBytesRead += _transferChunkSize;
 
-                        	bytesReadLastSec += _transferChunkSize;
+                        TransferBytesWritten += bytesRead;
 
-                        	TransferBytesWritten += bytesRead;
-
-                        	delayMs = (DateTime.Now - prevBytesReadTime).Milliseconds / Math.Max(1, readIterationsLastSec);
-                    	}
-
-						// adjust download speed
-                        if ((DateTime.Now - prevBytesReadTime).Seconds >= 1)
-                        {
-                        	LoggerManager.LogDebug("Bytes read last sec", "", "bytes", bytesReadLastSec);
-                        	LoggerManager.LogDebug("Read iterations last sec", "", "reads", readIterationsLastSec);
-                        	LoggerManager.LogDebug("Target bytes per sec", "", "target", _transferBandwidthLimit);
-
-							double bytesReadTargetPercent = ((double) bytesReadLastSec) / ((double) _transferBandwidthLimit);
-
-							LoggerManager.LogDebug("Percent on target", "", "percent", bytesReadTargetPercent);
-
-							LoggerManager.LogDebug("Updating delay time ms", "", "delayMs", delayMs);
-
-
-                        	bytesReadLastSec = 0;
-                        	readIterationsLastSec = 0;
-                        	prevBytesReadTime = DateTime.Now;
-                        }
-
-						TransferSpeed = bytesReadLastSec;
-
-						await Task.Delay(delayMs);
+						// delay the read loop (used for bandwidth control)
+						await Task.Delay(_transferReadDelayMs);
 
 						TransferTime = DateTime.Now - TransferStartTime;
 
