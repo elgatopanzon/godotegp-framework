@@ -16,6 +16,7 @@ public partial class BackgroundJob
 	public Action<RunWorkerCompletedEventArgs> OnError;
 
 	public bool IsCompleted { get; set; }
+	public bool IsWorking { get; set; }
 
 	private RunWorkerCompletedEventArgs _completedArgs;
 
@@ -56,6 +57,7 @@ public partial class BackgroundJob
 	// handlers for background worker events
 	public virtual void _On_DoWork(object sender, DoWorkEventArgs e)
 	{
+		IsWorking = true;
 		try
 		{
 			DoWork(sender, e);
@@ -87,6 +89,7 @@ public partial class BackgroundJob
 
 	public virtual void _On_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 	{
+		IsWorking = false;
 	 	_completedArgs = e;
 
 		if (_error != null)
@@ -109,6 +112,7 @@ public partial class BackgroundJob
 
 	public virtual void _On_RunWorkerError(object sender, RunWorkerCompletedEventArgs e)
 	{
+		IsWorking = false;
 		RunWorkerError(sender, e);
 
 		if (OnError != null)
