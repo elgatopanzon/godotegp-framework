@@ -47,9 +47,9 @@ public partial class RemoteTransferOperator : Operator, IOperator
     // transfer start time
     public DateTime TransferStartTime { get; set; }
     // transfer speed
-    public double TransferSpeed {
+    public int TransferSpeed {
     	get {
-			return ((TransferBytesWritten - TransferBytesWrittenInitial) / TransferTime.TotalSeconds);
+			return (int) ((TransferBytesWritten - TransferBytesWrittenInitial) * 1000000000 / TransferTime.TotalNanoseconds);
     	}
     }
 
@@ -161,7 +161,7 @@ public partial class RemoteTransferOperator : Operator, IOperator
 		{
 			TransferProgress = progressPercent;
 
-			LoggerManager.LogDebug("File transfer progress", (_operationType == 0 ? "Load" : "Save"), "progress", $"progress:{progressPercent}%, remoteUri:{_httpEndpoint.Uri.AbsoluteUri}, fileEndpoint:{_fileEndpoint.Path}");
+			LoggerManager.LogDebug("File transfer progress", (_operationType == 0 ? "Load" : "Save"), "progress", $"progress:{progressPercent}%, speed:{TransferSpeed}, time:{TransferTime} remoteUri:{_httpEndpoint.Uri.AbsoluteUri}, fileEndpoint:{_fileEndpoint.Path}");
 		}
 	}
 
@@ -288,6 +288,8 @@ public partial class RemoteTransferOperator : Operator, IOperator
                         await fs.WriteAsync(buffer, 0, bytesRead);
                         TransferBytesWritten += bytesRead;
 
+						TransferTime = DateTime.Now - TransferStartTime;
+
 						var progress = (double)TransferBytesWritten / TransferContentLength;
                         _transferProgress?.Report(progress * 100);
                         ReportProgress((int) (progress * 100));
@@ -299,8 +301,6 @@ public partial class RemoteTransferOperator : Operator, IOperator
         }
 
         LoggerManager.LogDebug("Transfer process finished");
-
-		TransferTime = DateTime.Now - TransferStartTime;
     }
 
     public Task StartTransfer()
