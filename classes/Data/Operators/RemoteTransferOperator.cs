@@ -67,12 +67,12 @@ public partial class RemoteTransferOperator : Operator, IOperator
     // 	}
     // }
     
-    public float _transferStatsTimerSpeed { get; set; } = 1;
+    public float _transferStatsTimerSpeed { get; set; } = (float) 0.5;
 
     // transfer stats
     private long _transferStatsBytesRead { get; set; }
     private int _transferStatsReadIterations { get; set; }
-    private int _transferReadDelayMs { get; set; }
+    private TimeSpan _transferReadDelayMs { get; set; }
 
 	// when bytes written matches content length, it's considered finished
     public bool TransferDone => TransferContentLength == TransferBytesWritten;
@@ -305,9 +305,16 @@ public partial class RemoteTransferOperator : Operator, IOperator
 
 			// calculate how much to delay to read loop based on the transfered
 			// bytes since the last update
-        	_transferReadDelayMs = ((int) bytesReadTargetPercent * (int) (_transferStatsTimerSpeed * (float) 1000)) / Math.Max(1, _transferStatsReadIterations);
+			float precision = (float) (_transferStatsTimerSpeed * (float) 1000000);
 
-        	LoggerManager.LogDebug("Delay ms", "", "delayMs", _transferReadDelayMs);
+			double maxChunksPerSec = (double) _transferBandwidthLimit / (double) _transferChunkSize;
+
+        	double delay = precision / maxChunksPerSec;
+        	delay = delay * Math.Min(1, bytesReadTargetPercent);
+
+        	_transferReadDelayMs = TimeSpan.FromMicroseconds(delay);
+
+        	LoggerManager.LogDebug("Delay microseconds", "", "delayMicrosecs", delay);
 		}
 
 		// set current speed to bytes read since last update
