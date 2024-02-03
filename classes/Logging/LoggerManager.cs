@@ -70,6 +70,7 @@ public partial class LoggerManager : Service
 		{
 			LogError(eventArgs.Exception.GetType().Name, eventArgs.Exception.TargetSite.Name, "exceptionData", eventArgs.Exception.Data);
 			LogError(eventArgs.Exception.Message, eventArgs.Exception.TargetSite.Name, "stackTrace", eventArgs.Exception.StackTrace);
+			Console.WriteLine(eventArgs.Exception.StackTrace);
 		};
 	}
 
