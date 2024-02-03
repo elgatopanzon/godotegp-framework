@@ -40,7 +40,7 @@ public partial class Definition : VObject
 	}
 
 	private Type _resourceType;
-	public Type ClassType
+	internal Type ClassType
 	{
 		get { return _resourceType; }
 		set { _resourceType = value; }
@@ -48,7 +48,7 @@ public partial class Definition : VObject
 
 	internal readonly VValue<string> _fileHash;
 
-	public string FileHash
+	internal string FileHash
 	{
 		get { return _fileHash.Value; }
 		set { _fileHash.Value = value; }
