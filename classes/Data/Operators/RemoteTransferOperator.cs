@@ -23,6 +23,11 @@ using GodotEGP.Data.Endpoint;
 public partial class RemoteTransferOperator : Operator, IOperator
 {
 	private FileEndpoint _fileEndpoint;
+	private string _fileTempPath { 
+		get {
+			return _fileEndpoint.Path+".part";
+		}
+	}
 	private HTTPEndpoint _httpEndpoint;
 	private int _operationType;
 
@@ -231,20 +236,28 @@ public partial class RemoteTransferOperator : Operator, IOperator
         _transferAllowedToRun = true;
         _transferContentLength = new Lazy<long>(GetHttpEndpointContentLength);
 
-        if (!File.Exists(_fileEndpoint.Path))
-            TransferBytesWritten = 0;
-        else
-        {
-            try
-            {
-                TransferBytesWritten = new FileInfo(_fileEndpoint.Path).Length;
-                TransferBytesWrittenInitial = TransferBytesWritten;
-            }
-            catch
-            {
-                TransferBytesWritten = 0;
-            }
-        }
+		if (!File.Exists(_fileEndpoint.Path))
+		{
+        	if (!File.Exists(_fileTempPath))
+            	TransferBytesWritten = 0;
+        	else
+        	{
+            	try
+            	{
+                	TransferBytesWritten = new FileInfo(_fileTempPath).Length;
+                	TransferBytesWrittenInitial = TransferBytesWritten;
+            	}
+            	catch
+            	{
+                	TransferBytesWritten = 0;
+            	}
+        	}
+		}
+		else
+		{
+            TransferBytesWritten = new FileInfo(_fileEndpoint.Path).Length;
+            TransferBytesWrittenInitial = TransferBytesWritten;
+		}
 
 		// init download stats timer
 		_downloadStatsTimer = new Timer();
@@ -334,7 +347,7 @@ public partial class RemoteTransferOperator : Operator, IOperator
         {
             using (var responseStream = response.GetResponseStream())
             {
-                using (var fs = new FileStream(_fileEndpoint.Path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                using (var fs = new FileStream(_fileTempPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
                 {
                 	if (_transferBandwidthLimit < _transferChunkSize)
                 	{
@@ -371,6 +384,8 @@ public partial class RemoteTransferOperator : Operator, IOperator
                 }
             }
         }
+
+        File.Move(_fileTempPath, _fileEndpoint.Path);
 
         LoggerManager.LogDebug("Transfer process finished");
     }
