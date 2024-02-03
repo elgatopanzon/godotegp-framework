@@ -71,27 +71,56 @@ public partial class HTTPEndpoint : IEndpoint
 		set { _params = value; }
 	}
 
-	public HTTPEndpoint(string hostname, int port = 443, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
+	public HTTPEndpoint(string hostname, int port = 0, string path = "/", Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
 	{
-		_hostname = hostname;
-		_port = port;
-		_path = path;
+		SetUriFromParams(hostname, port, path, (port == 443), urlParams);
+		SetPropertiesFromUri();
+
 		_requestMethod = requestMethod;
 		_verifySsl = verifySSL;
 		_timeout = timeout;
 		_headers = headers;
 		_params = urlParams;
 
-		string queryString = "";
-
-		if (_params != null)
-		{
-			queryString = QueryString(_params);
-		}
-
-		_uri = new System.Uri($"https://{Hostname}:{Port}{Path}{queryString}");
-
         LoggerManager.LogDebug("Creating new instance", "", "http", this);
+	}
+
+	public HTTPEndpoint(string uri, Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
+	{
+		_uri = new System.Uri(uri);
+
+		_requestMethod = requestMethod;
+		_verifySsl = verifySSL;
+		_timeout = timeout;
+		_headers = headers;
+
+		// TODO: create _params dictionary from uri string
+
+        LoggerManager.LogDebug("Creating new instance from string url", "", "http", this);
+	}
+
+	public HTTPEndpoint(Uri uri, Dictionary<string,object> urlParams = null, HttpMethod requestMethod = null, bool verifySSL = true, int timeout = 30, Dictionary<string, string> headers = null)
+	{
+		_uri = uri;
+
+		_requestMethod = requestMethod;
+		_verifySsl = verifySSL;
+		_timeout = timeout;
+		_headers = headers;
+
+        LoggerManager.LogDebug("Creating new instance from uri", "", "http", this);
+	}
+
+	public void SetUriFromParams(string host, int port, string path, bool useSsl = true, Dictionary<string,object> urlParams = null)
+	{
+		_uri = new System.Uri($"{(useSsl ? "https" : "http")}://{host}:{port}{path}{QueryString(urlParams)}");
+	}
+
+	public void SetPropertiesFromUri()
+	{
+		_hostname = _uri.Host;
+		_port = _uri.Port;
+		_path = _uri.PathAndQuery;
 	}
 
 	public string QueryString(IDictionary<string, object> dict)
