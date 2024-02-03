@@ -35,7 +35,6 @@ public partial class FileEndpoint : IEndpoint
 
         // get platform safe path from a provided unix path (because we use
         // that, because godot uses that even for windows)
-        LoggerManager.LogDebug("", "", "path", filePath);
         if (filePath.StartsWith("/"))
         {
         	_path = "/"+System.IO.Path.Combine(filePath.Split("/"));
@@ -46,8 +45,6 @@ public partial class FileEndpoint : IEndpoint
         }
         _extension = System.IO.Path.GetExtension(_path);
         _mimetype = MimeType.GetMimeType(_extension);
-
-        LoggerManager.LogDebug("Creating new instance", "", "file", this);
 	}
 }
 
