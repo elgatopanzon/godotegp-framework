@@ -79,6 +79,53 @@ public static partial class ObjectExtensions
 	}
 }
 
+public static partial class DictionaryExtensions
+{
+	public static void Merge<TKey, TValue>(this Dictionary<TKey, TValue> me, Dictionary<TKey, TValue> merge)
+    {
+        foreach (var item in merge)
+        {
+            me[item.Key] = item.Value;
+        }
+    }
+
+	public static Dictionary<TKey, TValue> ShallowClone<TKey, TValue>(this Dictionary<TKey, TValue> me)
+    {
+		Dictionary<TKey, TValue> clone = new();
+
+		// merge the existing one with the new empty one, to produce a populated
+		// cloned version
+		clone.Merge(me);
+
+		return clone;
+    }
+}
+
+public static partial class ListExtensions
+{
+	public static void Merge<T>(this List<T> me, List<T> merge)
+    {
+        foreach (var item in merge)
+        {
+        	if (!me.Contains(item))
+        	{
+        		me.Add(item);
+        	}
+        }
+    }
+
+	public static List<T> ShallowClone<T>(this List<T> me)
+    {
+    	List<T> clone = new();
+
+		// merge the existing one with the new empty one, to produce a populated
+		// cloned version
+    	clone.Merge(me);
+
+    	return clone;
+    }
+}
+
 public static partial class EventManagerObjectExtensions
 {
 	public static EventSubscription<T> Subscribe<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
