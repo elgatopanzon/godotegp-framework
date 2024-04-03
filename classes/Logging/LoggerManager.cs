@@ -135,7 +135,7 @@ public partial class LoggerManager : Service
         if (!Instance._loggers.TryGetValue(loggerType, out var obj) || obj is not Logger logger)
         {
             logger = new Logger(Instance.LoggerDestinationCollectionDefault);
-            Instance._loggers.Add(loggerType, logger);
+            Instance._loggers.TryAdd(loggerType, logger);
 
             LoggerManager.LogDebug($"Creating Logger instance", "", "instanceName", loggerType.FullName);
         }
