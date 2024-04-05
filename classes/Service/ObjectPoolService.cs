@@ -41,28 +41,34 @@ public partial class ObjectPoolService : Service
 	/// </summary>
     public ObjectPool<T> GetPoolInstance<T>() where T: class
     {
-        if (!_pools.TryGetValue(typeof(T), out var obj) || obj is not ObjectPool<T> pool)
-        {
-            var poolConfig = GetPoolConfig<T>();
+    	lock(_pools)
+    	{
+        	if (!_pools.TryGetValue(typeof(T), out var obj) || obj is not ObjectPool<T> pool)
+        	{
+            	var poolConfig = GetPoolConfig<T>();
 
-            pool = new ObjectPool<T>(poolConfig["capacityInitial"], poolConfig["capacityMax"]);
-            _pools.Add(typeof(T), pool);
+            	pool = new ObjectPool<T>(poolConfig["capacityInitial"], poolConfig["capacityMax"]);
+            	_pools.Add(typeof(T), pool);
 
-			LoggerManager.LogDebug($"Creating pool", "", "pool", typeof(T));
+				LoggerManager.LogDebug($"Creating pool", "", "pool", typeof(T));
+        	}
+
+        	return pool;
         }
-
-        return pool;
     }
 
     public Dictionary<string, int> GetPoolConfig<T>()
     {
-        if (!_poolsConfig.TryGetValue(typeof(T), out var obj) || obj is not Dictionary<string, int> config)
-        {
-        	SetPoolConfig<T>();
-        	config = GetPoolConfig<T>();
-        }
+    	lock(_poolsConfig)
+    	{
+        	if (!_poolsConfig.TryGetValue(typeof(T), out var obj) || obj is not Dictionary<string, int> config)
+        	{
+        		SetPoolConfig<T>();
+        		config = GetPoolConfig<T>();
+        	}
 
-        return config;
+        	return config;
+        }
     }
 
     public void SetPoolConfig<T>(int capacityInitial = 0, int capacityMax = 100)

@@ -13,7 +13,29 @@ using GodotEGP.Service;
 public partial class ServiceRegistry : Node
 {
 	// Static ServiceRegistry instance
-	public static ServiceRegistry Instance { get; private set; }
+	// public static ServiceRegistry _instance;
+	// public static ServiceRegistry Instance { 
+	// 	get {
+	// 		if (_instance == null)
+	// 		{
+	// 			_instance = new ServiceRegistry();
+	// 		}
+    //
+	// 		return _instance;
+	// 	}
+	// 	private set {
+	// 		_instance = value;
+	// 	}
+	// }
+	// Lazy singleton instance
+	private static readonly Lazy<ServiceRegistry> _instance = 
+		new Lazy<ServiceRegistry>(
+			() => new ServiceRegistry(), isThreadSafe: true
+		);
+
+	public static ServiceRegistry Instance {
+		get { return _instance.Value; }
+	}
 
 	// Dictionary of BaseService objects
 	private Dictionary<Type, Service.Service> _serviceObjs = new Dictionary<Type, Service.Service>();
@@ -32,10 +54,10 @@ public partial class ServiceRegistry : Node
 		}
 	}
 
-	public ServiceRegistry() 
-	{
-		Instance = this;
-	}
+	// public ServiceRegistry() 
+	// {
+	// 	Instance = this;
+	// }
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -59,16 +81,19 @@ public partial class ServiceRegistry : Node
 	/// </summary>
 	public void RegisterService(Service.Service serviceObj)
 	{
-		_serviceObjs.Add(serviceObj.GetType(), serviceObj);
+		lock(_serviceObjs)
+		{
+			_serviceObjs.Add(serviceObj.GetType(), serviceObj);
 
-		AddChild(serviceObj);
+			AddChild(serviceObj);
 
-		LoggerManager.LogDebug($"Service registered!", "", "service", serviceObj.GetType().Name);
+			LoggerManager.LogDebug($"Service registered!", "", "service", serviceObj.GetType().Name);
 
-		serviceObj._OnServiceRegistered();
+			serviceObj._OnServiceRegistered();
 
-		// Get<EventManager>().Emit(new EventServiceRegistered().SetOwner(serviceObj));
-		serviceObj.Emit<ServiceRegistered>();
+			// Get<EventManager>().Emit(new EventServiceRegistered().SetOwner(serviceObj));
+			serviceObj.Emit<ServiceRegistered>();
+		}
 	}
 
 	public void __On_EventServiceReady(IEvent eventObj)
@@ -98,15 +123,18 @@ public partial class ServiceRegistry : Node
 	/// </summary>
 	public static T Get<T>() where T : Service.Service, new()
 	{
-		if (!Instance._serviceObjs.TryGetValue(typeof(T), out Service.Service obj))
+		lock(Instance)
 		{
-			LoggerManager.LogDebug("Lazy-creating service instance", "", "service", typeof(T).Name);
+			if (!Instance._serviceObjs.TryGetValue(typeof(T), out Service.Service obj))
+			{
+				LoggerManager.LogDebug("Lazy-creating service instance", "", "service", typeof(T).Name);
 
-			obj = new T();
-			Instance.RegisterService(obj);
+				obj = new T();
+				Instance.RegisterService(obj);
+			}
+
+			return (T) obj;
 		}
-
-		return (T) obj;
 	}
 
 	/// <summary>

@@ -132,15 +132,18 @@ public partial class LoggerManager : Service
 
 	public static Logger GetLoggerInstance(Type loggerType)
 	{
-        if (!Instance._loggers.TryGetValue(loggerType, out var obj) || obj is not Logger logger)
-        {
-            logger = new Logger(Instance.LoggerDestinationCollectionDefault);
-            Instance._loggers.TryAdd(loggerType, logger);
+		lock(Instance._loggers)
+		{
+        	if (!Instance._loggers.TryGetValue(loggerType, out var obj) || obj is not Logger logger)
+        	{
+            	logger = new Logger(Instance.LoggerDestinationCollectionDefault);
+            	Instance._loggers.TryAdd(loggerType, logger);
 
-            LoggerManager.LogDebug($"Creating Logger instance", "", "instanceName", loggerType.FullName);
+            	LoggerManager.LogDebug($"Creating Logger instance", "", "instanceName", loggerType.FullName);
+        	}
+
+        	return logger;
         }
-
-        return logger;
 	}
 
 	public static void SetLoggerDestinationCollection<T>(DestinationCollection ldc)
