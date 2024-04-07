@@ -30,7 +30,7 @@ public partial class OpenAI
 	{
 		LoggerManager.LogDebug("Making request", "", "requestObj", requestObj);
 
-		var httpClient = new HttpClient();
+		var httpClient = new System.Net.Http.HttpClient();
 		httpClient.Timeout = TimeSpan.FromSeconds(600);
 
 		var jsonContent = JsonConvert.SerializeObject(requestObj, 
@@ -57,7 +57,7 @@ public partial class OpenAI
 		if (useSse)
 		{
 			using (var theStream = await response.Content.ReadAsStreamAsync())
-			using (var theStreamReader = new StreamReader(theStream))
+			using (var theStreamReader = new System.IO.StreamReader(theStream))
 			{
     			string sseLine = null;
     			string sseLines = "";
@@ -142,7 +142,7 @@ public partial class OpenAI
 	public async Task<string> MakeRequestGet(string endpoint = "")
 	{
 		string contents = "";
-		using (var client = new HttpClient(new HttpClientHandler {  }))
+		using (var client = new System.Net.Http.HttpClient(new HttpClientHandler {  }))
         {
             client.BaseAddress = new Uri(Config.Host);
             HttpResponseMessage response = client.GetAsync(endpoint).Result;

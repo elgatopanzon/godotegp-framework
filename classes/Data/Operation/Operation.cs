@@ -61,7 +61,7 @@ public abstract partial class Operation<T> : Operation, IOperation
 			{
 				LoggerManager.LogDebug($"Failed to create instance of {typeof(T).Name}");
 
-				throw new InvalidDataException("Result object is null");
+				throw new System.IO.InvalidDataException("Result object is null");
 			}
 		}
 		catch (System.Exception ex)
