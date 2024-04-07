@@ -15,6 +15,9 @@ using GodotEGP.Config;
 
 using Newtonsoft.Json;
 
+using System;
+using System.Collections.Generic;
+
 public partial class ChatCompletionRequest : CompletionRequestBase
 {
 	public ChatCompletionRequestResponseFormat ResponseFormat { get; set; }

@@ -13,6 +13,9 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System;
+using System.Collections.Generic;
+
 public partial class ChatCompletionChunkResult : BaseResult
 {
 	public string Id { get; set; }

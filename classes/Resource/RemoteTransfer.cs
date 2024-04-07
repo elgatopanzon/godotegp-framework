@@ -14,6 +14,8 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Data.Endpoint;
 
+using System;
+
 public partial class RemoteTransferResult : Godot.Resource
 {
 	public FileEndpoint FileEndpoint { get; set; }

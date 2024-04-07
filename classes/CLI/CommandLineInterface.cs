@@ -14,8 +14,11 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public partial class CommandLineInterface
 {

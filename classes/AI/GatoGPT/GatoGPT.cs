@@ -15,6 +15,8 @@ using GodotEGP.Config;
 
 using GodotEGP.AI.OpenAI;
 
+using System.Threading.Tasks;
+
 public partial class GatoGPT : OpenAI
 {
 	public GatoGPT(OpenAIConfig config) : base(config) 

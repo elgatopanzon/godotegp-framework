@@ -13,6 +13,8 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System;
+
 public partial class ErrorResultExtended : BaseResult
 {
 	public ErrorResultExtendedObj Error { get; set; }

@@ -14,6 +14,8 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.AI.OpenAI;
 
+using System.Collections.Generic;
+
 public partial class TokenizeResult : BaseResult
 {
 	public List<TokenizedString> Tokens { get; set; }

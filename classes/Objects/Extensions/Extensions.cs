@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
+using System.Linq;
 
 using GodotEGP.Event;
 using GodotEGP.Event.Events;

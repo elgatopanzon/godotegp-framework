@@ -13,6 +13,8 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System.Collections.Generic;
+
 public partial class ChatCompletionResult : CompletionBaseResult<ChatCompletionResultChoice>
 {
 	public ChatCompletionResult()

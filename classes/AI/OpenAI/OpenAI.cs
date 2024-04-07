@@ -15,6 +15,10 @@ using GodotEGP.Config;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 public partial class OpenAI
 {

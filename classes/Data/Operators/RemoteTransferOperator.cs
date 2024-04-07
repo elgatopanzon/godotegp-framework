@@ -7,9 +7,13 @@
 namespace GodotEGP.Data.Operator;
 
 using Godot;
+using System;
 using System.ComponentModel;
 using System.IO;
+using System.Collections.Generic;
 using System.Net;
+using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 using GodotEGP;

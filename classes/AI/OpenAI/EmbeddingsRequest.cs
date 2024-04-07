@@ -13,6 +13,8 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System.Collections.Generic;
+
 public partial class EmbeddingsRequest : RequestBase
 {
 	public object Input { get; set; }

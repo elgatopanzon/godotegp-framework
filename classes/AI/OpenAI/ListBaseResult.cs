@@ -13,6 +13,8 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System.Collections.Generic;
+
 public partial class ListBaseResult<T> : BaseResult where T : BaseResult
 {
 	public List<T> Data { get; set; }
