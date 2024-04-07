@@ -272,7 +272,7 @@ public partial class RemoteTransferOperator : Operator, IOperator
 		_downloadStatsTimer.OneShot = false;
 		_downloadStatsTimer.SubscribeSignal(StringNames.Instance["timeout"], false, _On_DownloadStatsTimer_Timeout);
 
-		SceneTree.Instance.Root.AddChild(_downloadStatsTimer);
+		var timerNode = new DownloadStatsTimerNode(_downloadStatsTimer);
 
         LoggerManager.LogDebug("Transfer content start point", "", "bytesWritten", TransferBytesWritten);
     }
@@ -305,14 +305,14 @@ public partial class RemoteTransferOperator : Operator, IOperator
 
 			// calculate how much to delay the read loop based on the transfered
 			// bytes since the last update
-			float precision = (float) (_transferStatsTimerSpeed * (float) 1000000);
+			float precision = (float) (_transferStatsTimerSpeed * (float) 1000);
 
 			double maxChunksPerSec = (double) _transferBandwidthLimit / (double) _transferChunkSize;
 
         	double delay = precision / maxChunksPerSec;
         	delay = delay * bytesReadTargetPercent;
 
-        	_transferReadDelayMs = TimeSpan.FromMicroseconds(delay);
+        	_transferReadDelayMs = TimeSpan.FromMilliseconds(delay);
 
         	LoggerManager.LogDebug("Calculating transfer stats", "", "stats", $"bytesRead:{_transferStatsBytesRead}, bytesTarget:{_transferBandwidthLimit}, bytesAvg:{TransferSpeed}, targetPerc:{Math.Round(bytesReadTargetPercent, 2)}%");
 		}
@@ -355,7 +355,7 @@ public partial class RemoteTransferOperator : Operator, IOperator
         {
             using (var responseStream = response.GetResponseStream())
             {
-                using (var fs = new FileStream(_fileTempPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite))
+                using (var fs = new FileStream(_fileTempPath, FileMode.Append, System.IO.FileAccess.Write, FileShare.ReadWrite))
                 {
                 	if (_transferBandwidthLimit < _transferChunkSize)
                 	{
@@ -408,4 +408,14 @@ public partial class RemoteTransferOperator : Operator, IOperator
     {
         _transferAllowedToRun = false;
     }
+}
+
+// workaround for adding operator timer to scene when it's not a Node
+public partial class DownloadStatsTimerNode : Node
+{
+	public DownloadStatsTimerNode(Timer timer)
+	{
+		// add the passed timer to the scene
+		GetTree().Root.AddChild(timer);
+	}
 }
