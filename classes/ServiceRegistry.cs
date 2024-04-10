@@ -13,29 +13,29 @@ using GodotEGP.Service;
 public partial class ServiceRegistry : Node
 {
 	// Static ServiceRegistry instance
-	// public static ServiceRegistry _instance;
-	// public static ServiceRegistry Instance { 
-	// 	get {
-	// 		if (_instance == null)
-	// 		{
-	// 			_instance = new ServiceRegistry();
-	// 		}
-    //
-	// 		return _instance;
-	// 	}
-	// 	private set {
-	// 		_instance = value;
-	// 	}
-	// }
-	// Lazy singleton instance
-	private static readonly Lazy<ServiceRegistry> _instance = 
-		new Lazy<ServiceRegistry>(
-			() => new ServiceRegistry(), isThreadSafe: true
-		);
+	public static ServiceRegistry _instance;
+	public static ServiceRegistry Instance { 
+		get {
+			if (_instance == null)
+			{
+				_instance = new ServiceRegistry();
+			}
 
-	public static ServiceRegistry Instance {
-		get { return _instance.Value; }
+			return _instance;
+		}
+		private set {
+			_instance = value;
+		}
 	}
+	// // Lazy singleton instance
+	// private static readonly Lazy<ServiceRegistry> _instance = 
+	// 	new Lazy<ServiceRegistry>(
+	// 		() => new ServiceRegistry(), isThreadSafe: true
+	// 	);
+    //
+	// public static ServiceRegistry Instance {
+	// 	get { return _instance.Value; }
+	// }
 
 	// Dictionary of BaseService objects
 	private Dictionary<Type, Service.Service> _serviceObjs = new Dictionary<Type, Service.Service>();
@@ -54,10 +54,12 @@ public partial class ServiceRegistry : Node
 		}
 	}
 
-	// public ServiceRegistry() 
-	// {
-	// 	Instance = this;
-	// }
+	private static readonly object _lock = new object();
+
+	public ServiceRegistry() 
+	{
+		Instance = this;
+	}
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
