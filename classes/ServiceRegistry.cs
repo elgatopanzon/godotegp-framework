@@ -12,30 +12,39 @@ using GodotEGP.Service;
 
 public partial class ServiceRegistry : Node
 {
+	public static bool UseLazyInstance = false;
 	// Static ServiceRegistry instance
 	public static ServiceRegistry _instance;
-	public static ServiceRegistry Instance { 
-		get {
-			if (_instance == null)
-			{
-				_instance = new ServiceRegistry();
-			}
 
-			return _instance;
+	// // Lazy singleton instance
+	private static readonly Lazy<ServiceRegistry> _instanceLazy = 
+		new Lazy<ServiceRegistry>(
+			() => new ServiceRegistry(), isThreadSafe: true
+		);
+
+	public static ServiceRegistry Instance {
+		get { 
+			if (UseLazyInstance)
+			{
+				return _instanceLazy.Value;
+			}
+			else
+			{
+				if (_instance == null)
+				{
+					_instance = new ServiceRegistry();
+				}
+
+				return _instance;
+			}
 		}
 		private set {
-			_instance = value;
+			if (!UseLazyInstance)
+			{
+				_instance = value;
+			}
 		}
 	}
-	// // Lazy singleton instance
-	// private static readonly Lazy<ServiceRegistry> _instance = 
-	// 	new Lazy<ServiceRegistry>(
-	// 		() => new ServiceRegistry(), isThreadSafe: true
-	// 	);
-    //
-	// public static ServiceRegistry Instance {
-	// 	get { return _instance.Value; }
-	// }
 
 	// Dictionary of BaseService objects
 	private Dictionary<Type, Service.Service> _serviceObjs = new Dictionary<Type, Service.Service>();
