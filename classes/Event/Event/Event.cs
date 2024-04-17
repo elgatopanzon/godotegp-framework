@@ -9,6 +9,7 @@ using GodotEGP.Service;
 
 using GodotEGP.Resource;
 using GodotEGP.Scripting;
+using GodotEGP.Chainables;
 
 public partial class Event : IEvent
 {
@@ -423,3 +424,22 @@ public partial class InputStateJoypadAvailable : InputStateEvent
 }
 public partial class InputStateJoypadUnavailable : InputStateJoypadAvailable {}
 public partial class InputStateNoJoypadsAvailable : InputStateJoypadAvailable {}
+
+// Chainable events
+public partial class EventChainable : Event
+{
+	public object Input { get; set; }
+	public object Output { get; set; }
+	public Exception Error { get; set; }
+	public IChainable Chainable {
+		get {
+			return (IChainable) Owner;
+		}
+	}
+}
+
+public partial class EventChainableExecuting : EventChainable {}
+public partial class EventChainableFinished : EventChainable {}
+public partial class EventChainableError : EventChainable {}
+public partial class EventChainableStreamOutput : EventChainable {}
+
