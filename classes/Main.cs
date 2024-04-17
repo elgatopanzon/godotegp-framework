@@ -13,10 +13,10 @@ using GodotEGP.Service;
 using GodotEGP.Logging;
 using GodotEGP.Event;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.Config;
 using GodotEGP.Handler;
-using GodotEGP.Data.Operation;
+using GodotEGP.DAL.Operations;
 
 public partial class Main : Node
 {

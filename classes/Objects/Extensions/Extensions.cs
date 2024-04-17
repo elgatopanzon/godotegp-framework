@@ -9,7 +9,7 @@ using System.Linq;
 
 using GodotEGP.Event;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.Service;
 
 public static partial class ObjectExtensions
@@ -129,7 +129,7 @@ public static partial class ListExtensions
 
 public static partial class EventManagerObjectExtensions
 {
-	public static EventSubscription<T> Subscribe<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
+	public static EventSubscription<T> Subscribe<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null, string groupName = "") where T : Event
 	{
 		EventSubscription<T> subscription = new EventSubscription<T>(obj, callbackMethod, isHighPriority, oneshot, eventFilters, groupName);
 		ServiceRegistry.Get<EventManager>().Subscribe(subscription);
@@ -137,7 +137,7 @@ public static partial class EventManagerObjectExtensions
 		return subscription;
 	}
 
-	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "") where T : Event
+	public static EventSubscription<T> SubscribeOwner<T>(this object obj, Action<T> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null, string groupName = "") where T : Event
 	{
 		EventSubscription<T> subscription = obj.Subscribe<T>(callbackMethod, isHighPriority, oneshot, eventFilters, groupName);
 		subscription.Owner(obj);
@@ -153,7 +153,7 @@ public static partial class EventManagerObjectExtensions
 	}
 
 
-	public static EventSubscription<GodotSignal> SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null, string groupName = "")
+	public static EventSubscription<GodotSignal> SubscribeSignal(this GodotObject obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null, string groupName = "")
 	{
 		var sub = new EventSubscription<GodotSignal>(obj, callbackMethod, isHighPriority, oneshot, eventFilters, groupName);
 		ServiceRegistry.Get<EventManager>().SubscribeSignal(obj, signalName, hasParams, sub);
@@ -218,7 +218,7 @@ public static partial class NodeManagerObjectExtension
 		return ServiceRegistry.Get<NodeManager>().GetNodes<T>(obj);
 	}
 
-	public static void Connect(this string obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
+	public static void Connect(this string obj, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
 	{
 		ServiceRegistry.Get<NodeManager>().SubscribeSignal(obj, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
 	}
@@ -227,9 +227,9 @@ public static partial class NodeManagerObjectExtension
 
 public static partial class EventSubscriptionExtensionMethods
 {
-	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IFilter[] filters)
+	public static IEventSubscription<Event> Filters(this IEventSubscription<Event> obj, params IEventFilter[] filters)
 	{
-		foreach (IFilter filter in filters)
+		foreach (IEventFilter filter in filters)
 		{
 			obj.EventFilters.Add(filter);
 		}
@@ -238,7 +238,7 @@ public static partial class EventSubscriptionExtensionMethods
 
 	public static IEventSubscription<Event> Owner(this IEventSubscription<Event> obj, object ownerObject)
 	{
-		obj.Filters(new OwnerObject(ownerObject));
+		obj.Filters(new OwnerObjectFilter(ownerObject));
 
 		return obj;
 	}

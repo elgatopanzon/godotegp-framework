@@ -18,9 +18,9 @@ using GodotEGP.Config;
 
 public partial class DefinitionList : VObject
 {
-	private readonly VValue<Dictionary<string, Definition>> _images;
+	private readonly VValue<Dictionary<string, ResourceDefinition>> _images;
 
-	public Dictionary<string, Definition> Images
+	public Dictionary<string, ResourceDefinition> Images
 	{
 		get { return _images.Value; }
 		set { _images.Value = value; }
@@ -28,8 +28,8 @@ public partial class DefinitionList : VObject
 
 	public DefinitionList()
 	{
-        _images = AddValidatedValue<Dictionary<string, Definition>>(this)
-            .Default(new Dictionary<string, Definition>() {
+        _images = AddValidatedValue<Dictionary<string, ResourceDefinition>>(this)
+            .Default(new Dictionary<string, ResourceDefinition>() {
             	})
             ;
             _images.MergeCollections = true;

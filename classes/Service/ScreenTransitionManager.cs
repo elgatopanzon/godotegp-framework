@@ -21,7 +21,7 @@ using GodotEGP.Resource;
 
 public partial class ScreenTransitionManager : Service
 {
-	private Dictionary<string, ResourceBase> _transitionScenes = new Dictionary<string, ResourceBase>();
+	private Dictionary<string, ResourceObjectBase> _transitionScenes = new Dictionary<string, ResourceObjectBase>();
 	private Dictionary<string, ScreenTransition.ScreenTransition> _transitionSceneInstances = new Dictionary<string, ScreenTransition.ScreenTransition>();
 
 	private string _currentTransitionId;
@@ -31,7 +31,7 @@ public partial class ScreenTransitionManager : Service
 		
 	}
 
-	public void SetConfig(Dictionary<string, ResourceBase> config)
+	public void SetConfig(Dictionary<string, ResourceObjectBase> config)
 	{
 		LoggerManager.LogDebug("Setting transition scenes config");
 		

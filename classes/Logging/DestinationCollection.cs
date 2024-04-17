@@ -4,23 +4,23 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-using GodotEGP.Logging.Destination;
+using GodotEGP.Logging.Destinations;
 
 public partial class DestinationCollection
 {
-	private List<IDestination> _loggerDestinations = new List<IDestination>();
+	private List<ILoggingDestination> _loggerDestinations = new List<ILoggingDestination>();
 
-	public void AddDestination(IDestination destination)
+	public void AddDestination(ILoggingDestination destination)
 	{
 		_loggerDestinations.Add(destination);
 	}
 
-	public bool RemoveDestination(IDestination destination)
+	public bool RemoveDestination(ILoggingDestination destination)
 	{
 		return _loggerDestinations.Remove(destination);
 	}
 
-	public List<IDestination> GetDestinations()
+	public List<ILoggingDestination> GetDestinations()
 	{
 		return _loggerDestinations;
 	}

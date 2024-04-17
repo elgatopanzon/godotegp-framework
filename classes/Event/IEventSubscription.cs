@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 
 public partial interface IEventSubscription<in T> where T : Event
 {
@@ -13,7 +13,7 @@ public partial interface IEventSubscription<in T> where T : Event
 	Type EventType { get; }
 	bool IsHighPriority { get; }
 	bool Oneshot { get; }
-	List<IFilter> EventFilters { get; set; }
+	List<IEventFilter> EventFilters { get; set; }
 	string Group { get; set; }
 	void RunCallback(IEvent e);
 }

@@ -14,13 +14,13 @@ using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.Config;
 using GodotEGP.Resource;
 
 public partial class SceneManager : Service
 {
-	private Dictionary<string, Resource<PackedScene>> _sceneDefinitions = new Dictionary<string, Resource<PackedScene>>();
+	private Dictionary<string, ResourceObject<PackedScene>> _sceneDefinitions = new Dictionary<string, ResourceObject<PackedScene>>();
 
 	private string _currentSceneId {
 		get {
@@ -39,7 +39,7 @@ public partial class SceneManager : Service
 		
 	}
 
-	public void SetConfig(Dictionary<string, Resource<PackedScene>> config)
+	public void SetConfig(Dictionary<string, ResourceObject<PackedScene>> config)
 	{
 		// LoggerManager.LogDebug("Setting scene definition config", "", "scenes", config);
 		LoggerManager.LogDebug("Setting scene definition config");

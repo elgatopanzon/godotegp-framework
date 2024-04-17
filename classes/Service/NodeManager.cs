@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 
 public partial class NodeManager : Service
 {
@@ -198,7 +198,7 @@ public partial class NodeManager : Service
 		return null;
 	}
 
-	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IFilter> eventFilters = null)
+	public void SubscribeSignal(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority = false, bool oneshot = false, List<IEventFilter> eventFilters = null)
 	{
 		// converts params to object
 		DeferredSignalSubscription sub = new DeferredSignalSubscription(nodeId, signalName, hasParams, callbackMethod, isHighPriority, oneshot, eventFilters);
@@ -268,10 +268,10 @@ public partial class NodeManager : Service
 		public Action<IEvent> CallbackMethod;
 		public bool IsHighPriority;
 		public bool Oneshot;
-		public List<IFilter> EventFilters;
+		public List<IEventFilter> EventFilters;
 		public List<Node> ConnectedTo;
 
-		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, bool oneshot, List<IFilter> eventFilters)
+		public DeferredSignalSubscription(string nodeId, string signalName, bool hasParams, Action<IEvent> callbackMethod, bool isHighPriority, bool oneshot, List<IEventFilter> eventFilters)
 		{
 			this.NodeId = nodeId;
 			this.SignalName = signalName;

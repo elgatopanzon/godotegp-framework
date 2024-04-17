@@ -3,7 +3,7 @@ namespace GodotEGP.Logging;
 using Godot;
 using System;
 
-using GodotEGP.Logging.Destination;
+using GodotEGP.Logging.Destinations;
 
 public partial class Logger
 {
@@ -18,7 +18,7 @@ public partial class Logger
 
 	public void ProcessLoggerMessage(Logging.Message loggerMessage)
 	{
-        foreach (IDestination loggerDestination in LoggerDestinationCollection.GetDestinations())
+        foreach (ILoggingDestination loggerDestination in LoggerDestinationCollection.GetDestinations())
         {
         	loggerDestination.Process(loggerMessage);
         }

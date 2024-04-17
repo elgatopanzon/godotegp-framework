@@ -23,7 +23,7 @@ public partial class ResourceManager : Service
 {
 	private ResourceDefinitionConfig _resourceDefinitions;
 
-	private Dictionary<string, Dictionary<string, ResourceBase>> _resources = new Dictionary<string, Dictionary<string, ResourceBase>>();
+	private Dictionary<string, Dictionary<string, ResourceObjectBase>> _resources = new Dictionary<string, Dictionary<string, ResourceObjectBase>>();
 
 	public ResourceManager()
 	{
@@ -103,25 +103,25 @@ public partial class ResourceManager : Service
 	*  Resource management methods  *
 	*********************************/
 	
-	public void SetResourceObject(string category, string id, ResourceBase resource)
+	public void SetResourceObject(string category, string id, ResourceObjectBase resource)
 	{
 		// LoggerManager.LogDebug($"Setting resource object {id}", "", "resource", resource);
 		// LoggerManager.LogDebug($"Setting resource object {id}");
 
 		if (!_resources.TryGetValue(category, out var d))
 		{
-			d = new Dictionary<string, ResourceBase>();
+			d = new Dictionary<string, ResourceObjectBase>();
 			_resources[category] = d;
 		}
 
 		_resources[category][id] = resource;
 	}
 
-	public ResourceBase GetResourceObject(string category, string id)
+	public ResourceObjectBase GetResourceObject(string category, string id)
 	{
 		if (_resources.TryGetValue(category, out var d))
 		{
-			if (d.TryGetValue(id, out ResourceBase r))
+			if (d.TryGetValue(id, out ResourceObjectBase r))
 			{
 				return r;
 			}
@@ -135,7 +135,7 @@ public partial class ResourceManager : Service
 		return (T) GetResourceObject(category, id).RawValue;
 	}
 
-	public bool TryGetCategory(string category, out Dictionary<string, ResourceBase> x)
+	public bool TryGetCategory(string category, out Dictionary<string, ResourceObjectBase> x)
 	{
 		if (_resources.TryGetValue(category, out var d))
 		{
@@ -147,15 +147,15 @@ public partial class ResourceManager : Service
 		return false;
 	}
 
-	public Dictionary<string, Resource<T>> GetResources<T>() where T : Godot.Resource
+	public Dictionary<string, ResourceObject<T>> GetResources<T>() where T : Godot.Resource
 	{
-		var matchingResources = new Dictionary<string, Resource<T>>();
+		var matchingResources = new Dictionary<string, ResourceObject<T>>();
 
 		foreach (var resourceCat in _resources)
 		{
 			foreach (var resourceObj in resourceCat.Value)
 			{
-				if (resourceObj.Value.RawValue is T && resourceObj.Value is Resource<T> rt)
+				if (resourceObj.Value.RawValue is T && resourceObj.Value is ResourceObject<T> rt)
 				{
 					matchingResources.Add(resourceObj.Key, rt);
 				}

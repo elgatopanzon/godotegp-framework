@@ -16,10 +16,10 @@ using GodotEGP.Objects.Extensions;
 using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.Config;
 using GodotEGP.SaveData;
-using GodotEGP.Data.Endpoint;
+using GodotEGP.DAL.Endpoints;
 
 public partial class SaveDataManager : Service
 {
@@ -27,7 +27,7 @@ public partial class SaveDataManager : Service
 
 	private SaveDataManagerConfig _config = new SaveDataManagerConfig();
 
-	private Dictionary<string, Config.Object> _saveData = new Dictionary<string, Config.Object>();
+	private Dictionary<string, Config.ConfigObject> _saveData = new Dictionary<string, Config.ConfigObject>();
 
 	private Timer _timedAutosaveTimer = new Timer();
 
@@ -114,7 +114,7 @@ public partial class SaveDataManager : Service
 
 				// if it's a valid config object, and if the base type is
 				// ValidatedObject, then let's load the content
-				if (configDirType != null && configDirType.Namespace == typeof(SaveData.Data).Namespace)
+				if (configDirType != null && configDirType.Namespace == typeof(SaveData.SaveDataBase).Namespace)
 				{
 					foreach (FileInfo file in dir.GetFiles("*.json").OrderBy((f) => f.ToString()))
 					{
@@ -133,7 +133,7 @@ public partial class SaveDataManager : Service
 		if (fileQueue.Count > 0)
 		{
 			// load all the save data objects using Config.Loader
-			Config.Loader configLoader = new Config.Loader(fileQueue);
+			Config.ConfigLoader configLoader = new Config.ConfigLoader(fileQueue);
 
 			configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_SaveDataLoad_Completed, oneshot: true, isHighPriority: true);
 			configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_SaveDataLoad_Error, oneshot: true, isHighPriority: true);
@@ -145,9 +145,9 @@ public partial class SaveDataManager : Service
 		
 	}
 
-	public T Get<T>(string saveName) where T : SaveData.Data, new()
+	public T Get<T>(string saveName) where T : SaveData.SaveDataBase, new()
 	{
-		if (_saveData.TryGetValue(saveName, out Config.Object obj))
+		if (_saveData.TryGetValue(saveName, out Config.ConfigObject obj))
 		{
 			return (T) obj.RawValue;
 		}
@@ -155,9 +155,9 @@ public partial class SaveDataManager : Service
 		throw new SaveDataNotFoundException($"Save data with the name {saveName} doesn't exist!");
 	}
 
-	public Config.Object Get(string saveName)
+	public Config.ConfigObject Get(string saveName)
 	{
-		if (_saveData.TryGetValue(saveName, out Config.Object obj))
+		if (_saveData.TryGetValue(saveName, out Config.ConfigObject obj))
 		{
 			return obj;
 		}
@@ -166,7 +166,7 @@ public partial class SaveDataManager : Service
 	}
 
 
-	public bool Register(string saveName, Config.Object saveData)
+	public bool Register(string saveName, Config.ConfigObject saveData)
 	{
 		if (_saveData.TryAdd(saveName, saveData))
 		{
@@ -197,7 +197,7 @@ public partial class SaveDataManager : Service
 
 		if (Exists(autosaveName))
 		{
-			var autosave = Get<Data>(autosaveName);
+			var autosave = Get<SaveDataBase>(autosaveName);
 
 			autosave.Loaded = false;
 			autosave.SaveType = SaveDataType.Autosave;
@@ -224,7 +224,7 @@ public partial class SaveDataManager : Service
 		// watch for object changes by subscribing to all validated value
 		// changes on SaveData.Data objects, starting the timer if one is Loaded
 		this.Subscribe<ValidatedValueChanged>((e) => {
-				if (e.Owner is Data sd && _config.TimedAutosaveEnabled)
+				if (e.Owner is SaveDataBase sd && _config.TimedAutosaveEnabled)
 				{
 					// if one of the objects is Loaded, start the timer if it's
 					// not already started
@@ -234,7 +234,7 @@ public partial class SaveDataManager : Service
 					}
 				}
 			// });
-			}).Filters(new OwnerObjectType(typeof(Data)));
+			}).Filters(new OwnerObjectTypeFilter(typeof(SaveDataBase)));
 	}
 
 	public void StartTimedAutosave()
@@ -261,7 +261,7 @@ public partial class SaveDataManager : Service
 	{
 		foreach (var save in GetLoadedSaves())
 		{
-			if (save.RawValue is SaveData.Data sd)
+			if (save.RawValue is SaveData.SaveDataBase sd)
 			{
 				if (sd.AutosaveSupported())
 				{
@@ -275,14 +275,14 @@ public partial class SaveDataManager : Service
 	{
 		foreach (var save in GetSaves())
 		{
-			if (save.Value.RawValue is Data sd)
+			if (save.Value.RawValue is SaveDataBase sd)
 			{
 				if (sd.SaveType == SaveDataType.Autosave || sd.SaveType == SaveDataType.Backup)
 				{
 					continue;
 				}
 
-				List<Data> autosaves = new List<Data>();
+				List<SaveDataBase> autosaves = new List<SaveDataBase>();
 
 				foreach (var csave in GetChildSaves(sd.Name))
 				{
@@ -319,9 +319,9 @@ public partial class SaveDataManager : Service
 	*  Save management methods  *
 	*****************************/
 
-	public Config.Object Create<T>(string saveName, bool saveCreated = true) where T : SaveData.Data, new()
+	public Config.ConfigObject Create<T>(string saveName, bool saveCreated = true) where T : SaveData.SaveDataBase, new()
 	{
-		Config.Object<T> save = new Config.Object<T>();
+		Config.ConfigObject<T> save = new Config.ConfigObject<T>();
 
 		if (Register(saveName, save))
 		{
@@ -350,7 +350,7 @@ public partial class SaveDataManager : Service
 	{
 		var obj = _saveData[saveName];
 
-		if (obj.RawValue is SaveData.Data sd)
+		if (obj.RawValue is SaveData.SaveDataBase sd)
 		{
 			sd.UpdateDateSaved();
 		}
@@ -428,7 +428,7 @@ public partial class SaveDataManager : Service
 			var objNew = Create<GameSaveFile>(toName, saveCreated: false);
 
 			// only works with GameSaveFile for now
-			if (obj.RawValue is Data sd && objNew.RawValue is Data sdn)
+			if (obj.RawValue is SaveDataBase sd && objNew.RawValue is SaveDataBase sdn)
 			{
 				sdn.MergeFrom(sd);
 				sdn.Name = toName;
@@ -555,7 +555,7 @@ public partial class SaveDataManager : Service
 		}
 	}
 
-	public Dictionary<string, Config.Object> GetSaves()
+	public Dictionary<string, Config.ConfigObject> GetSaves()
 	{
 		return _saveData;
 	}
@@ -579,7 +579,7 @@ public partial class SaveDataManager : Service
 		return Exists($"Save{slotNumber}");
 	}
 
-	public void SetSlot(int slotNumber, Config.Object saveData)
+	public void SetSlot(int slotNumber, Config.ConfigObject saveData)
 	{
 		 Set($"Save{slotNumber}", saveData);
 	}
@@ -628,13 +628,13 @@ public partial class SaveDataManager : Service
 	*  Helper methods  *
 	********************/
 
-	public List<Config.Object> GetLoadedSaves()
+	public List<Config.ConfigObject> GetLoadedSaves()
 	{
-		List<Config.Object> loadedSaves = new List<Config.Object>();
+		List<Config.ConfigObject> loadedSaves = new List<Config.ConfigObject>();
 
 		foreach (var save in GetSaves())
 		{
-			if (save.Value.RawValue is SaveData.Data sd)
+			if (save.Value.RawValue is SaveData.SaveDataBase sd)
 			{
 				if (sd.Loaded)
 				{
@@ -651,18 +651,18 @@ public partial class SaveDataManager : Service
 		return _saveData.ContainsKey(saveName);
 	}
 
-	public void Set(string saveName, Config.Object saveData)
+	public void Set(string saveName, Config.ConfigObject saveData)
 	{
 		_saveData[saveName] = saveData;
 	}
 
-	public List<Data> GetChildSaves(string parentSave)
+	public List<SaveDataBase> GetChildSaves(string parentSave)
 	{
-		List<Data> parentSaves = new List<Data>();
+		List<SaveDataBase> parentSaves = new List<SaveDataBase>();
 
 		foreach (var save in GetSaves())
 		{
-			if (save.Value.RawValue is Data sd)
+			if (save.Value.RawValue is SaveDataBase sd)
 			{
 				if (sd.ParentName == parentSave)
 				{
@@ -682,14 +682,14 @@ public partial class SaveDataManager : Service
 	{
 		if (e is DataOperationComplete ee)
 		{
-			LoggerManager.LogDebug("Save data object saved", "", "saveName", (e.Owner as Config.Object).Name);
+			LoggerManager.LogDebug("Save data object saved", "", "saveName", (e.Owner as Config.ConfigObject).Name);
 		}
 	}
 	public void _On_SaveDataSave_Error(IEvent e)
 	{
 		if (e is DataOperationError ee)
 		{
-			LoggerManager.LogDebug("Save data object save failed", "", "saveName", (e.Owner as Config.Object).Name);
+			LoggerManager.LogDebug("Save data object save failed", "", "saveName", (e.Owner as Config.ConfigObject).Name);
 		}
 	}
 
@@ -700,7 +700,7 @@ public partial class SaveDataManager : Service
 			// LoggerManager.LogDebug("Loading of save files completed", "", "e", ec.ConfigObjects);	
 			LoggerManager.LogDebug("Loading of save files completed", "", "loadedCount", ec.ConfigObjects.Count);	
 
-			foreach (Config.Object obj in ec.ConfigObjects)
+			foreach (Config.ConfigObject obj in ec.ConfigObjects)
 			{
 				// when we load saves from disk, they are always overwritten
 				// with the new objects

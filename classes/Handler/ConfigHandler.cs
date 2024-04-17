@@ -6,10 +6,11 @@ using GodotEGP.Service;
 using GodotEGP.Config;
 using GodotEGP.Logging;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.Objects.Extensions;
 
 using GodotEGP.Resource;
+using GodotEGP.Resource.Resources;
 
 public partial class ConfigHandler : Handler
 {
@@ -17,9 +18,9 @@ public partial class ConfigHandler : Handler
 	{
 		// subscribe to services ready so that we can set initial configs for
 		// services
-		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ConfigManager_Ready).Filters(new OwnerObjectType(typeof(ConfigManager)));
+		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ConfigManager_Ready).Filters(new OwnerObjectTypeFilter(typeof(ConfigManager)));
 
-		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ResourceManager_Ready).Filters(new OwnerObjectType(typeof(ResourceManager)));
+		ServiceRegistry.Get<EventManager>().Subscribe<ServiceReady>(_On_ResourceManager_Ready).Filters(new OwnerObjectTypeFilter(typeof(ResourceManager)));
 	}
 
 	public void _On_ConfigManager_Ready(IEvent e)

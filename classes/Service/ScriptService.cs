@@ -19,11 +19,12 @@ using GodotEGP.Config;
 
 using GodotEGP.Scripting;
 using GodotEGP.Resource;
+using GodotEGP.Resource.Resources;
 using GodotEGP.Scripting.Functions;
 
 public partial class ScriptService : Service
 {
-	private Dictionary<string, Resource<GameScript>> _gameScripts = new();
+	private Dictionary<string, ResourceObject<GameScript>> _gameScripts = new();
 
 	private string _scriptFunctionsNamespace = "GodotEGP.Scripting.Functions";
 
@@ -40,7 +41,7 @@ public partial class ScriptService : Service
 	{
 	}
 
-	public void SetConfig(Dictionary<string, Resource<GameScript>> gameScripts)
+	public void SetConfig(Dictionary<string, ResourceObject<GameScript>> gameScripts)
 	{
 		LoggerManager.LogDebug("Setting config");
 
@@ -130,7 +131,7 @@ public partial class ScriptService : Service
 
 	public string AddScriptContent(string scriptContent)
 	{
-		var scriptResource = new Resource<GameScript>();
+		var scriptResource = new ResourceObject<GameScript>();
 		scriptResource.Value = new GameScript();
 		scriptResource.Value.ScriptContent = scriptContent;
 

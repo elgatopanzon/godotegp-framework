@@ -29,9 +29,9 @@ public partial class ResourceDefinitionConfig : VConfig
 	// 	set { _resourceDefinitions.Value = value; }
 	// }
 	//
-	private readonly VValue<Dictionary<string, Dictionary<string, Definition>>> _resourceDefinitions;
+	private readonly VValue<Dictionary<string, Dictionary<string, ResourceDefinition>>> _resourceDefinitions;
 
-	public Dictionary<string, Dictionary<string, Definition>> Resources
+	public Dictionary<string, Dictionary<string, ResourceDefinition>> Resources
 	{
 		get { return _resourceDefinitions.Value; }
 		set { _resourceDefinitions.Value = value; }
@@ -43,8 +43,8 @@ public partial class ResourceDefinitionConfig : VConfig
 		//     .Default(new DefinitionList())
 		//     .ChangeEventsEnabled();
 
-        _resourceDefinitions = AddValidatedValue<Dictionary<string, Dictionary<string, Definition>>>(this)
-            .Default(new Dictionary<string,Dictionary<string, Definition>>() {
+        _resourceDefinitions = AddValidatedValue<Dictionary<string, Dictionary<string, ResourceDefinition>>>(this)
+            .Default(new Dictionary<string,Dictionary<string, ResourceDefinition>>() {
             	})
             ;
         _resourceDefinitions.MergeCollections = true;

@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using GodotEGP.Logging;
 using GodotEGP.Event;
 using GodotEGP.Event.Events;
-using GodotEGP.Event.Filter;
+using GodotEGP.Event.Filters;
 using GodotEGP.Objects.Extensions;
 
 public partial class EventManager : Service
@@ -144,17 +144,17 @@ public partial class EventManager : Service
 		GetQueue<T>().Queue(eventObj);
 	}
 
-	public Queue<IEvent> Fetch<T>(Type eventType, List<IFilter> eventFilters = null, int fetchCount = 1) where T : EventQueue, new()
+	public Queue<IEvent> Fetch<T>(Type eventType, List<IEventFilter> eventFilters = null, int fetchCount = 1) where T : EventQueue, new()
 	{
 		// init eventFilters list if it's null
 		lock (_eventQueuesLock) {
-			if (Object.Equals(eventFilters, default(List<IFilter>)))
+			if (Object.Equals(eventFilters, default(List<IEventFilter>)))
 			{
-				eventFilters = new List<IFilter>();
+				eventFilters = new List<IEventFilter>();
 			}
 
 			// add the eventType filter
-			eventFilters.Add(new ObjectType(eventType));
+			eventFilters.Add(new ObjectTypeFilter(eventType));
 
 			return GetQueue<T>().Fetch(eventFilters, fetchCount);
 		}
@@ -212,7 +212,7 @@ public partial class EventManager : Service
 
 					if (eventSubscription.EventFilters != null) 
 					{
-						foreach (IFilter eventFilter in eventSubscription.EventFilters)
+						foreach (IEventFilter eventFilter in eventSubscription.EventFilters)
 						{
 							filtersMatch = eventFilter.Match(eventObj);
 
@@ -274,8 +274,8 @@ public partial class EventManager : Service
 		}
 
 
-		eventSubscription.EventFilters.Add(new OwnerObject(connectObject));
-		eventSubscription.EventFilters.Add(new SignalType(signalName));
+		eventSubscription.EventFilters.Add(new OwnerObjectFilter(connectObject));
+		eventSubscription.EventFilters.Add(new SignalTypeFilter(signalName));
 
 		Subscribe(eventSubscription);
 	}

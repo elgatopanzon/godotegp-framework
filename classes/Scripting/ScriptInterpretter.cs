@@ -20,6 +20,7 @@ using GodotEGP.Config;
 
 using GodotEGP.State;
 using GodotEGP.Resource;
+using GodotEGP.Resource.Resources;
 using GodotEGP.Scripting.Functions;
 
 public partial class ScriptInterpretter : Node
@@ -42,7 +43,7 @@ public partial class ScriptInterpretter : Node
 	private const int STATE_FINISHED = 2;
 
 	// gamescript related properties
-	private Dictionary<string, Resource<GameScript>> _gameScripts;
+	private Dictionary<string, ResourceObject<GameScript>> _gameScripts;
 	private GameScript _gameScript;
 	private string[] _currentScriptLinesSplit;
 	private int _scriptLineCounter = 0;
@@ -132,7 +133,7 @@ public partial class ScriptInterpretter : Node
 	// 0.025 = 40 per sec
 	// 0.0125 = 80 per sec
 
-	public ScriptInterpretter(Dictionary<string, Resource<GameScript>> gameScripts, Dictionary<string, IScriptFunction> scriptFuncs, string[] scriptParams = null)
+	public ScriptInterpretter(Dictionary<string, ResourceObject<GameScript>> gameScripts, Dictionary<string, IScriptFunction> scriptFuncs, string[] scriptParams = null)
 	{
 		_scriptParams = scriptParams;
 		_gameScripts = gameScripts;
@@ -178,7 +179,7 @@ public partial class ScriptInterpretter : Node
 	
 	public void RunScript(string scriptName, Dictionary<string, object> scriptVars = null)
 	{
-		if (_gameScripts.TryGetValue(scriptName, out Resource<GameScript> gs))
+		if (_gameScripts.TryGetValue(scriptName, out ResourceObject<GameScript> gs))
 		{
 			Reset();
 
@@ -218,7 +219,7 @@ public partial class ScriptInterpretter : Node
 
 	public void RegisterFunctionFromContent(string func, string scriptContent)
 	{
-		var scriptResource = new Resource<GameScript>();
+		var scriptResource = new ResourceObject<GameScript>();
 		scriptResource.Value = new GameScript();
 		scriptResource.Value.ScriptContent = scriptContent;
 

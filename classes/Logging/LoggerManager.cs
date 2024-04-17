@@ -9,7 +9,7 @@ using GodotEGP.Objects.Extensions;
 using GodotEGP.Config;
 using GodotEGP.Service;
 using GodotEGP.Logging;
-using GodotEGP.Logging.Destination;
+using GodotEGP.Logging.Destinations;
 using GodotEGP.Event.Events;
 
 /// <summary>

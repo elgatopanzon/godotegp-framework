@@ -11,7 +11,7 @@ using GodotEGP.Service;
 using GodotEGP.Logging;
 using GodotEGP.Config;
 using GodotEGP.Event.Events;
-using GodotEGP.Data.Endpoint;
+using GodotEGP.DAL.Endpoints;
 using GodotEGP.Objects.Extensions;
 
 public partial class ConfigManager : Service
@@ -25,7 +25,7 @@ public partial class ConfigManager : Service
 
 	private List<String> _configDataDirs { get; set; }
 
-	private Dictionary<Type, Config.Object> _configObjects = new Dictionary<Type, Config.Object>();
+	private Dictionary<Type, Config.ConfigObject> _configObjects = new Dictionary<Type, Config.ConfigObject>();
 
 	private Dictionary<string, FileSystemWatcher> _filesystemWatchers { get; set; }
 	private bool _configReload { get; set; }
@@ -116,7 +116,7 @@ public partial class ConfigManager : Service
 		if (fileQueue.Count > 0)
 		{
 			// load all the config objects using ConfigManagerLoader
-			Config.Loader configLoader = new Config.Loader(fileQueue);
+			Config.ConfigLoader configLoader = new Config.ConfigLoader(fileQueue);
 
 			configLoader.SubscribeOwner<ConfigManagerLoaderCompleted>(_On_ConfigManagerLoaderCompleted, oneshot: true, isHighPriority: true);
 			configLoader.SubscribeOwner<ConfigManagerLoaderError>(_On_ConfigManagerLoaderError, oneshot: true, isHighPriority: true);
@@ -144,9 +144,9 @@ public partial class ConfigManager : Service
 		}
 	}
 
-	public void MergeConfigObjects(List<Config.Object> configObjects)
+	public void MergeConfigObjects(List<Config.ConfigObject> configObjects)
 	{
-    	foreach (Config.Object obj in configObjects)
+    	foreach (Config.ConfigObject obj in configObjects)
     	{
         	Type type = obj.RawValue.GetType();
 
@@ -159,7 +159,7 @@ public partial class ConfigManager : Service
     	}
 	}
 
-	public bool RegisterConfigObjectInstance(Type configInstanceType, Config.Object configFileObject)
+	public bool RegisterConfigObjectInstance(Type configInstanceType, Config.ConfigObject configFileObject)
 	{
 		// return true if we added the object
 		if (_configObjects.TryAdd(configInstanceType, configFileObject))
@@ -172,18 +172,18 @@ public partial class ConfigManager : Service
 		return false;
 	}
 
-	public void SetConfigObjectInstance(Config.Object configFileObject)
+	public void SetConfigObjectInstance(Config.ConfigObject configFileObject)
 	{
 		_configObjects[configFileObject.GetType()] = configFileObject;
 	}
 
-	public Config.Object GetConfigObjectInstance(Type configInstanceType)
+	public Config.ConfigObject GetConfigObjectInstance(Type configInstanceType)
 	{
-		if(!_configObjects.TryGetValue(configInstanceType, out Config.Object obj))
+		if(!_configObjects.TryGetValue(configInstanceType, out Config.ConfigObject obj))
 		{
 			LoggerManager.LogDebug("Creating config file object", "", "objType", configInstanceType.Name);
 
-			obj = Config.Object.Create(configInstanceType.ToString());
+			obj = Config.ConfigObject.Create(configInstanceType.ToString());
 			RegisterConfigObjectInstance(configInstanceType, obj);
 
 			return obj;
@@ -202,7 +202,7 @@ public partial class ConfigManager : Service
 		return (T) GetConfigObjectValue<T>();
 	}
 
-	public void SaveConfigObjectInstance(Type configInstanceType, IEndpoint dataEndpoint = null)
+	public void SaveConfigObjectInstance(Type configInstanceType, IDataEndpoint dataEndpoint = null)
 	{
 		// generate default filepath for type we are saving
 		if (dataEndpoint == null)
@@ -210,18 +210,18 @@ public partial class ConfigManager : Service
 			dataEndpoint = GetDefaultSaveEndpoint(configInstanceType);
 		}
 
-		Config.Object configObject = GetConfigObjectInstance(configInstanceType);
+		Config.ConfigObject configObject = GetConfigObjectInstance(configInstanceType);
 
 		configObject.DataEndpoint = dataEndpoint;
 		configObject.Save();
 	}
 
-	public IEndpoint GetDefaultSaveEndpoint(Type configInstanceType, string configName = "Config.json")
+	public IDataEndpoint GetDefaultSaveEndpoint(Type configInstanceType, string configName = "Config.json")
 	{
 		return new FileEndpoint(Path.Combine(OS.GetUserDataDir(), _configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, configName));
 	}
 
-	public void Save<T>(IEndpoint dataEndpoint = null) where T : VObject
+	public void Save<T>(IDataEndpoint dataEndpoint = null) where T : VObject
 	{
 		SaveConfigObjectInstance(typeof(T), dataEndpoint);
 	}
