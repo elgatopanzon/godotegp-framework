@@ -29,6 +29,8 @@ public partial class CommandLineInterface
 	protected Dictionary<string, (Func<Task<int>> Command, string Description, bool includeInHelp)> _commands = new();
 	protected Dictionary<string, List<(string Arg, string Example, string Description, bool Required)>> _commandArgs = new();
 
+	protected string _defaultCommand = "help";
+
 	public CommandLineInterface(string[] args = null)
 	{
 		if (args == null)
@@ -40,6 +42,8 @@ public partial class CommandLineInterface
 
     	_commands.Add("help", (CommandHelp, "Show help text with command usage", true));
 		_commandArgs.Add("help", new());
+
+		SetDefaultCommand(_commands.Keys.FirstOrDefault());
 
     	LoggerManager.LogDebug("CLI arguments list", "", "args", _args);
     	LoggerManager.LogDebug("CLI arguments parsed", "", "argsParsed", _argsParsed);
@@ -88,7 +92,16 @@ public partial class CommandLineInterface
 		}
 
 		// return the first key of the defined commands, usually help
-		return _commands.Keys.FirstOrDefault();
+		return _defaultCommand;
+	}
+
+	public void SetDefaultCommand(string defaultCommand)
+	{
+		if (!IsCommand(defaultCommand))
+		{
+			throw new ArgumentException($"No command definition for '{defaultCommand}'");
+		}
+		_defaultCommand = defaultCommand;
 	}
 
 	public void AddCommandDefinition(string command, Func<Task<int>> commandFunc, string description = "Help text for this command", bool includeInHelp = true)
@@ -189,6 +202,11 @@ public partial class CommandLineInterface
 	public List<string> GetArgumentValues(string arg)
 	{
 		return _argsParsed.GetValueOrDefault(arg, new List<string>());
+	}
+
+	public List<string> GetPositionalValues()
+	{
+		return GetArgumentValues(GetParsedCommand());
 	}
 
 	public string GetArgumentValue(string arg, string defaultVal = "")
