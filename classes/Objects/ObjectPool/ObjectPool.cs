@@ -1,4 +1,4 @@
-namespace GodotEGP.Objects;
+namespace GodotEGP.Objects.ObjectPool;
 
 using Godot;
 using System;

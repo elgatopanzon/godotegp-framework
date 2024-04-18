@@ -6,10 +6,12 @@ using Godot;
 using System.ComponentModel;
 
 using GodotEGP.Service;
+using GodotEGP.Logging;
 
 using GodotEGP.Resource;
 using GodotEGP.Scripting;
 using GodotEGP.Chainables;
+using GodotEGP.Objects.ObjectPool;
 
 public partial class Event : IEvent
 {

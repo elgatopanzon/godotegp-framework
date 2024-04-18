@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 
 using GodotEGP.Logging;
-using GodotEGP.Objects;
+using GodotEGP.Objects.ObjectPool;
 
 public partial class ObjectPoolService : Service
 {

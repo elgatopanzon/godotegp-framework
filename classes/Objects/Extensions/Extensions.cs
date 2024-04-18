@@ -11,6 +11,7 @@ using GodotEGP.Event;
 using GodotEGP.Event.Events;
 using GodotEGP.Event.Filters;
 using GodotEGP.Service;
+using GodotEGP.Objects.ObjectPool;
 
 public static partial class ObjectExtensions
 {
