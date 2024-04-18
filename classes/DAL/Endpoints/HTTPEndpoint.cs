@@ -128,9 +128,12 @@ public partial class HTTPEndpoint : IDataEndpoint
 	public string QueryString(IDictionary<string, object> dict)
 	{
     	var list = new List<string>();
-    	foreach(var item in dict)
+    	if (dict != null)
     	{
-        	list.Add(item.Key + "=" + item.Value);
+    		foreach(var item in dict)
+    		{
+        		list.Add(item.Key + "=" + item.Value);
+    		}
     	}
     	return $"{(list.Count > 0 ? "?" : "")}"+string.Join("&", list);
 	}
