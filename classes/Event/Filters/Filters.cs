@@ -64,7 +64,7 @@ public partial class ObjectTypeFilter : IEventFilter
 
 	public bool Match(IEvent matchEvent)
 	{
-		return matchEvent.GetType().IsSubclassOf(_matchType);
+		return matchEvent.GetType().IsSubclassOf(_matchType) || matchEvent.GetType() == _matchType;
 	}
 }
 
