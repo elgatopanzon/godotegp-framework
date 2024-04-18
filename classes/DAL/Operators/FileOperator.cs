@@ -73,18 +73,22 @@ public partial class FileOperator : Operator, IOperator
 
 	public void SaveOperationDoWork(object sender, DoWorkEventArgs e)
 	{
-		// LoggerManager.LogDebug("Save operation starting", "", "object", _dataObject);
 		LoggerManager.LogDebug("Save operation starting");
 
 		EnsureDirectoryExists(_fileEndpoint.Path);
 
     	using (StreamWriter writer = new StreamWriter(_fileEndpoint.Path))
     	{
-			// for now, serialise the object as json
-			var jsonString = JsonConvert.SerializeObject(
-        			_dataObject, Formatting.Indented);
+			var writeString = _dataObject.ToString();
 
-    		writer.WriteLine(jsonString);
+			// for now, serialise the object as json if it's a class
+			if (_dataObject.GetType().IsSubclassOf(typeof(GodotEGP.Objects.Validated.VObject)))
+			{
+				writeString = JsonConvert.SerializeObject(
+        			_dataObject, Formatting.Indented);
+			}
+
+    		writer.Write(writeString);
 
     		e.Result = true;
     		ReportProgress(100);
