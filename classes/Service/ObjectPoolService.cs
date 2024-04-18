@@ -2,6 +2,7 @@ namespace GodotEGP.Service;
 
 using Godot;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using GodotEGP.Logging;
@@ -12,6 +13,24 @@ public partial class ObjectPoolService : Service
 	private Dictionary<Type, object> _pools = new Dictionary<Type, object>();
 
 	private Dictionary<Type, Dictionary<string, int>> _poolsConfig = new Dictionary<Type, Dictionary<string, int>>();
+
+	private Dictionary<Type, IObjectPoolHandler> _poolHandlers = new Dictionary<Type, IObjectPoolHandler>();
+
+	public ObjectPoolService()
+	{
+		var type = typeof(IObjectPoolHandler);
+		var objectPoolHandlers = AppDomain.CurrentDomain.GetAssemblies()
+    		.SelectMany(s => s.GetTypes())
+    		.Where(p => type.IsAssignableFrom(p) && p.IsClass && p != typeof(ObjectPoolHandler<>));
+
+    	foreach (var handler in objectPoolHandlers)
+    	{
+    		Type handlerType = handler.GetInterfaces()[0].GetGenericArguments()[0];
+    		LoggerManager.LogDebug("Creating pool handler instance", "", handlerType.Name, handler);
+
+    		_poolHandlers.Add(handlerType, (IObjectPoolHandler) Activator.CreateInstance(handler));
+    	}
+	}
 
 	public override void _Ready()
 	{
@@ -25,7 +44,10 @@ public partial class ObjectPoolService : Service
 	/// </summary>
 	public T Get<T>() where T: class
     {
-        return GetPoolInstance<T>().Get();
+        T instance = GetPoolInstance<T>().Get();
+        TryOnTakeObjectFromPool(instance);
+
+        return instance;
     }
 
     /// <summary>
@@ -33,6 +55,7 @@ public partial class ObjectPoolService : Service
     /// </summary>
     public void Return<T>(T obj) where T: class
     {
+    	TryOnReturnObjectToPool(obj);
 		GetPoolInstance<T>().Return(obj);
     }
 
@@ -78,5 +101,46 @@ public partial class ObjectPoolService : Service
 			{ "capacityInitial", capacityInitial },
 			{ "capacityMax", capacityMax }
 		});
+    }
+
+    public bool TryOnReturnObjectToPool<T>(T obj)
+    {
+    	if (TryGetPoolHandler<T>(out IObjectPoolHandler handler))
+    	{
+    		handler.Return(obj);
+
+    		return true;
+    	}
+
+    	return false;
+    }
+
+    public bool TryOnTakeObjectFromPool<T>(T obj)
+    {
+    	if (TryGetPoolHandler<T>(out IObjectPoolHandler handler))
+    	{
+    		handler.Take(obj);
+
+    		return true;
+    	}
+
+    	return false;
+    }
+
+    public bool TryGetPoolHandler<T>(out IObjectPoolHandler handler)
+    {
+    	handler = null;
+
+		foreach (var poolHandler in _poolHandlers)
+		{
+			if (typeof(T).IsSubclassOf(poolHandler.Key) || typeof(T) == poolHandler.Key)
+			{
+				handler = poolHandler.Value;
+
+				return true;
+			}			
+		}
+
+    	return false;
     }
 }

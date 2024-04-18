@@ -49,3 +49,37 @@ public partial class ObjectPool<T> where T: class
 			_objects.Push(obj);
 	}
 }
+
+public interface IObjectPoolHandler 
+{
+
+	public object Take(object instance);
+	public object Return(object instance);
+};
+
+public interface IObjectPoolHandler<T> : IObjectPoolHandler
+{
+	public T OnTake(T instance);
+	public T OnReturn(T instance);
+}
+
+public partial class ObjectPoolHandler<T>: IObjectPoolHandler<T>
+{
+	public virtual T OnTake(T instance)
+	{
+		return instance;
+	}
+	public virtual T OnReturn(T instance)
+	{
+		return instance;
+	}
+
+	public object Take(object instance)
+	{
+		return (object) OnTake((T) instance);
+	}
+	public object Return(object instance)
+	{
+		return (object) OnReturn((T) instance);
+	}
+}
