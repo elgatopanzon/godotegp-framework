@@ -3,6 +3,7 @@ namespace GodotEGP.Config;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 using GodotEGP.Logging;
 using GodotEGP.Threading;
@@ -36,69 +37,97 @@ public partial class ConfigLoader : BackgroundJob
 
 		_queueSize = _loadQueue.Count;
 
-		// keep running until the queue is empty
-		while (_queueSizeCurrent > 0)
+		try
 		{
-			if (_loadQueue.TryPeek(out var queuedItem))
+			// keep running until the queue is empty
+			while (_queueSizeCurrent > 0)
 			{
-				// if currently loading object is null, then we can queue a new
-				// load
-				if (_currentlyLoadingObj == null)
+				if (_loadQueue.TryPeek(out var queuedItem))
 				{
-					LoggerManager.LogDebug("Loading config item", "", "config", queuedItem);
-
-					// create config object instance to load into
-					var obj = ConfigObject.Create(queuedItem["configType"].ToString());
-
-					if (queuedItem.TryGetValue("name", out object name))
+					// if currently loading object is null, then we can queue a new
+					// load
+					if (_currentlyLoadingObj == null)
 					{
-						obj.Name = name.ToString();
+						LoggerManager.LogDebug("Loading config item", "", "config", queuedItem);
+
+						// create config object instance to load into
+						var obj = ConfigObject.Create(queuedItem["configType"].ToString());
+
+						if (queuedItem.TryGetValue("name", out object name))
+						{
+							obj.Name = name.ToString();
+						}
+						else
+						{
+							// use a generic name when the dictionary doesn't
+							// include a name
+							obj.Name = queuedItem["configType"].ToString()+(_queueSize - _queueSizeCurrent).ToString();
+						}
+
+						// set data endpoint to current instance's file path
+						obj.DataEndpoint = new FileEndpoint(queuedItem["path"].ToString());
+
+						var tcs = new TaskCompletionSource();
+
+						obj.SubscribeOwner<DataOperationComplete>((ee) => {
+							tcs.SetResult();
+							}, isHighPriority:true, oneshot:true);
+						obj.SubscribeOwner<DataOperationError>((ee) => {
+							tcs.SetResult();
+							// throwing this should be a configurable engine
+							// setting, since it will stop the entire loading
+							// process and cause the loader to fail just because
+							// of one config file containing invalid data
+							//
+							// what will happen is the config object will
+							// contain the default property value instead
+							// throw ee.RunWorkerCompletedEventArgs.Error;
+							}, isHighPriority:true, oneshot:true);
+
+						obj.Load();
+
+						_currentlyLoadingObj = obj;
+
+						// wait for the result
+						tcs.Task.Wait();
 					}
-					else
+					// while loading, just do nothing?
+					else if (_currentlyLoadingObj.Loading)
 					{
-						// use a generic name when the dictionary doesn't
-						// include a name
-						obj.Name = queuedItem["configType"].ToString()+(_queueSize - _queueSizeCurrent).ToString();
 					}
-
-					// set data endpoint to current instance's file path
-					obj.DataEndpoint = new FileEndpoint(queuedItem["path"].ToString());
-					obj.Load();
-
-					_currentlyLoadingObj = obj;
-				}
-				// while loading, just do nothing?
-				else if (_currentlyLoadingObj.Loading)
-				{
-				}
-				// if it's not loading, then assume the process ended and queue
-				// the next one
-				else if (!_currentlyLoadingObj.Loading)
-				{
-					LoggerManager.LogDebug("Loading config item process finished", "", "config", queuedItem);
-
-					// add loaded object to list
-					_configObjects.Add(_currentlyLoadingObj);
-
-					e.Result = _configObjects;
-
-					// reset currently loading object
-					_currentlyLoadingObj = null;
-					_loadQueue.Dequeue();
-
-
-					// report progress of the load
-					double progress = ((_queueSize - _queueSizeCurrent) / _queueSize) * 100;
-					ReportProgress(Convert.ToInt32(progress));
-
-					// this just allows for the progress reports to be sent
-					// before the loop continues
-					if (progress != 100)
+					// if it's not loading, then assume the process ended and queue
+					// the next one
+					else if (!_currentlyLoadingObj.Loading)
 					{
-						System.Threading.Thread.Sleep(50);
+						LoggerManager.LogDebug("Loading config item process finished", "", "config", queuedItem);
+
+						// add loaded object to list
+						_configObjects.Add(_currentlyLoadingObj);
+
+						e.Result = _configObjects;
+
+						// reset currently loading object
+						_currentlyLoadingObj = null;
+						_loadQueue.Dequeue();
+
+
+						// report progress of the load
+						double progress = ((_queueSize - _queueSizeCurrent) / _queueSize) * 100;
+						ReportProgress(Convert.ToInt32(progress));
+
+						// this just allows for the progress reports to be sent
+						// before the loop continues
+						if (progress != 100)
+						{
+							System.Threading.Thread.Sleep(50);
+						}
 					}
 				}
 			}
+		}
+		catch (System.Exception err)
+		{
+			_error = err;
 		}
 	}
 
