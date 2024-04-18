@@ -69,7 +69,14 @@ public partial class RemoteTransferOperator : Operator, IOperator
     private int _transferSpeedSampleSize = 10;
     public long TransferSpeed { 
     	get {
-			return (long) _transferSpeedSamples.Average();
+    		if (_transferSpeedSamples.Count > 0)
+    		{
+				return (long) _transferSpeedSamples.Average();
+    		}
+    		else
+    		{
+				return 0;
+    		}
     	}
     }
     // public int TransferSpeed {
