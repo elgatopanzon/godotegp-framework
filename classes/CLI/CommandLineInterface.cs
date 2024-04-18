@@ -91,6 +91,22 @@ public partial class CommandLineInterface
 		return _commands.Keys.FirstOrDefault();
 	}
 
+	public void AddCommandDefinition(string command, Func<Task<int>> commandFunc, string description = "Help text for this command", bool includeInHelp = true)
+	{
+		_commands[command] = (commandFunc, description, includeInHelp);
+	}
+
+	public void AddCommandArg(string command, string argName, string example = "Example for this argument", string description = "Description of this argument", bool required = false)
+	{
+		if (!_commandArgs.TryGetValue(command, out var args))
+		{
+			args = new();
+			_commandArgs.Add(command, args);
+		}
+
+		args.Add((argName, example, description, required));	
+	}
+
 	public bool IsCommand(string command)
 	{
 		return (_commands.ContainsKey(command));
