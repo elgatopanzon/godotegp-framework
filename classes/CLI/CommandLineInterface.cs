@@ -69,6 +69,11 @@ public partial class CommandLineInterface
 
 	public async Task<int> Run()
 	{
+		return await _commands[GetParsedCommand()].Command();
+	}
+
+	public string GetParsedCommand()
+	{
 		if (_args.Count() >= 1)
 		{
 			// get the running command and remove from args
@@ -78,11 +83,12 @@ public partial class CommandLineInterface
 			// invoke the matching command
 			if (IsCommand(cmd))
 			{
-				return await _commands[cmd].Command();
+				return cmd;
 			}
 		}
 
-		return await CommandHelp();
+		// return the first key of the defined commands, usually help
+		return _commands.Keys.FirstOrDefault();
 	}
 
 	public bool IsCommand(string command)
