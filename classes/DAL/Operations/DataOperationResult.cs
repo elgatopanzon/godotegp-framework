@@ -6,6 +6,8 @@ using Newtonsoft.Json;
 using GodotEGP.Objects.Validated;
 using GodotEGP.Logging;
 
+using GodotEGP.Objects.Extensions;
+
 // accept a result object and create a ValidatedObject from T
 public partial class DataOperationResult<T>
 {
@@ -56,7 +58,10 @@ public partial class DataOperationResult<T>
 
 		else
 		{
-			ResultObject = (T) rawObject;
+			if (rawObject.TryCast<T>(out T casted))
+			{
+				ResultObject = casted;
+			}
 		}
 	}
 }

@@ -11,8 +11,11 @@ using GodotEGP.Objects.Extensions;
 public abstract partial class DataOperation : BackgroundJob, IDataOperation
 {
 	public bool Working { get; set; } = false;
+	public bool IsLoad { get; set; }
 	public abstract void Load();
 	public abstract void Save();
+	public abstract void Loading();
+	public abstract void Saving();
 }
 
 // base class for operation classes interfacing with operator classes
@@ -26,6 +29,17 @@ public abstract partial class DataOperation<T> : DataOperation, IDataOperation
 	protected object _dataObject;
 
 	public bool Completed { get; set; } = false;
+
+	public override void Loading()
+	{
+		Working = true;
+		IsLoad = true;
+	}
+	public override void Saving()
+	{
+		Working = true;
+		IsLoad = false;
+	}
 
 	public void __On_OperatorComplete(RunWorkerCompletedEventArgs e)
 	{
@@ -42,26 +56,27 @@ public abstract partial class DataOperation<T> : DataOperation, IDataOperation
 	// operation thread methods
 	public override void DoWork(object sender, DoWorkEventArgs e)
 	{
-		LoggerManager.LogDebug("Starting operation thread");
-		// for now, if the _dataObject is null then we can assume that this is a
-		// load request, therefore we proceed to create the loaded instance
+		LoggerManager.LogDebug("Starting operation thread", "", "isLoad", IsLoad);
+
 		try
 		{
 		 DataOperationResult<T> resultObj = new DataOperationResult<T>(_completedArgs.Result);
 
-			// LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}", "", "object", resultObj);
+			e.Result = resultObj;
 
 			if (resultObj.ResultObject != null)
 			{
-				e.Result = resultObj;
-
 				LoggerManager.LogDebug($"Created object instance of {typeof(T).Name}");
 			}
 			else
 			{
-				LoggerManager.LogDebug($"Failed to create instance of {typeof(T).Name}");
+				// don't allow null results while loading
+				if (IsLoad)
+				{
+					LoggerManager.LogDebug($"Failed to create instance of {typeof(T).Name}");
 
-				throw new System.IO.InvalidDataException("Result object is null");
+					throw new System.IO.InvalidDataException("Result object is null");
+				}
 			}
 		}
 		catch (System.Exception ex)

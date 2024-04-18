@@ -39,13 +39,13 @@ public partial class HTTPOperation<T> : DataOperation<T>
 	}
 
 	public override void Load() {
-		Working = true;
 		_dataOperator.Load();
+		Loading();
 	}
 
 	public override void Save() {
-		Working = true;
 		_dataOperator.Save(_dataObject);
+		Saving();
 	}
 }
 
