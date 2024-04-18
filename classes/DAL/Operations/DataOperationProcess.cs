@@ -49,6 +49,16 @@ public partial class DataOperationProcess<T>
 		DataOperation.Save();
 	}
 
+	public Task<T> LoadAsync()
+	{
+		DataOperation.Load();
+
+		DataOperation.SubscribeOwner<DataOperationComplete>(_On_OperationCompleted, oneshot: true, isHighPriority: true);
+		DataOperation.SubscribeOwner<DataOperationError>(_On_OperationError, oneshot: true, isHighPriority: true);
+
+    	return _taskCompletionSource.Task;
+	}
+
 	public Task<T> SaveAsync()
 	{
 		DataOperation.Save();
