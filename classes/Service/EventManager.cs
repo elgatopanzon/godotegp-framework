@@ -191,7 +191,7 @@ public partial class EventManager : Service
 
 				LoggerManager.LogDebug("Deferred event consumed state", "", "event", new Dictionary<string, string> { { "eventType", eventObj.GetType().Name }, {"consumed", eventConsumed.ToString() } });
 
-				// eventObj.ReturnInstance();
+				eventObj.ReturnInstance();
 			}
 		}
 	}

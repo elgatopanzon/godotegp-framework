@@ -22,7 +22,32 @@ public partial class Event : IEvent
 
 	public Event()
 	{
+		Init();
+	}
+
+	public virtual void Init()
+	{
 		Created = DateTime.Now;
+	}
+	public virtual void Reset()
+	{
+		Owner = null;
+		Data = null;
+		Exception = null;
+	}
+}
+
+public class EventObjectPoolHandler : ObjectPoolHandler<Event>
+{
+	public override Event OnReturn(Event instance)
+	{
+		instance.Reset();
+		return instance;
+	}
+	public override Event OnTake(Event instance)
+	{
+		instance.Init();
+		return instance;
 	}
 }
 
@@ -69,6 +94,13 @@ public partial class GodotSignal : Event
  	public string SignalName { get; set; }
  	public Variant[] SignalParams { get; set; }
 
+	public override void Reset()
+	{
+		SignalName = null;
+		SignalParams = null;;
+
+		base.Reset();
+	}
 }
 static class SignalExtensionMethods
 {
@@ -87,7 +119,15 @@ static class SignalExtensionMethods
 public partial class NodeEvent : Event
 {
 	public Node NodeObj;
+
+	public override void Reset()
+	{
+		NodeObj = null;
+
+		base.Reset();
+	}
 }
+
 static class NodeExtensionMethods
 {
 	static public T SetNode<T>(this T o, Node node) where T : NodeEvent
@@ -117,6 +157,17 @@ public partial class BackgroundJobEvent : Event
 	public DoWorkEventArgs DoWorkEventArgs;
 	public ProgressChangedEventArgs ProgressChangedEventArgs;
 	public RunWorkerCompletedEventArgs RunWorkerCompletedEventArgs;
+
+
+	public override void Reset()
+	{
+		JobOwner = null;
+		DoWorkEventArgs = null;
+		ProgressChangedEventArgs = null;
+		RunWorkerCompletedEventArgs = null;
+
+		base.Reset();
+	}
 }
 static class EventBackgroundJobExtensionMethods
 {
@@ -173,6 +224,14 @@ public partial class ValidatedValueEvent : Event
 {
 	public object Value;
 	public object PrevValue;
+
+	public override void Reset()
+	{
+		Value = null;
+		PrevValue = null;
+
+		base.Reset();
+	}
 }
 
 static public partial class ValidatedValueExtensions
@@ -201,7 +260,14 @@ public partial class ValidatedValueSet : ValidatedValueEvent
 public partial class ConfigManagerLoader : BackgroundJobEvent
 {
 	public List<Config.ConfigObject> ConfigObjects;
+
 	
+	public override void Reset()
+	{
+		ConfigObjects = null;
+
+		base.Reset();
+	}
 }
 static public partial class ConfigManagerLoaderExtensions
 {
@@ -226,6 +292,14 @@ public partial class SaveDataEvent : BackgroundJobEvent
 {
 	public string Name;
 	public Config.ConfigObject SaveData;
+
+	public override void Reset()
+	{
+		Name = null;
+		SaveData = null;
+
+		base.Reset();
+	}
 }
 static public partial class SaveDataEventExtensions
 {
@@ -277,6 +351,13 @@ public class SaveDataRemoveError : SaveDataEvent
 public partial class ResourceLoaderEvent : BackgroundJobEvent
 {
 	public List<LoaderQueueItem> Resources;
+
+	public override void Reset()
+	{
+		Resources = null;
+
+		base.Reset();
+	}
 	
 }
 static public partial class ResourceLoaderEventExtensions
@@ -303,6 +384,13 @@ public partial class SceneEvent : Event
 	public string SceneId;
 	public Node SceneInstance;
 	
+	public override void Reset()
+	{
+		SceneId = null;
+		SceneInstance = null;
+
+		base.Reset();
+	}
 }
 static public partial class SceneEventExtensions
 {
@@ -363,7 +451,13 @@ public partial class SceneTransitionChainFinished : SceneTransitionChainEvent
 public partial class ScriptInterpretterEvent : Event
 {
 	public ScriptResultOutput Result;
-	
+
+	public override void Reset()
+	{
+		Result = null;
+
+		base.Reset();
+	}
 }
 static public partial class ScriptInterpretterEventExtensions
 {
@@ -383,6 +477,12 @@ public partial class ScriptServiceEvent : ScriptInterpretterEvent
 {
 	public ScriptInterpretter Interpretter;
 	
+	public override void Reset()
+	{
+		Interpretter = null;
+
+		base.Reset();
+	}
 }
 static public partial class ScriptServiceEventExtensions
 {
@@ -406,6 +506,14 @@ public partial class InputStateEvent : Event
 	public Dictionary<string, JoypadState> JoypadStates;
 	public MouseState MouseState;
 	
+	public override void Reset()
+	{
+		ActionStates = null;
+		JoypadStates = null;
+		MouseState = null;
+
+		base.Reset();
+	}
 }
 static public partial class InputStateEventExtensions
 {
@@ -423,6 +531,13 @@ public partial class InputStateChanged : InputStateEvent {}
 public partial class InputStateJoypadAvailable : InputStateEvent
 {
 	public string JoypadGuid = "";
+
+	public override void Reset()
+	{
+		JoypadGuid = null;
+
+		base.Reset();
+	}
 }
 public partial class InputStateJoypadUnavailable : InputStateJoypadAvailable {}
 public partial class InputStateNoJoypadsAvailable : InputStateJoypadAvailable {}
@@ -438,10 +553,18 @@ public partial class EventChainable : Event
 			return (IChainable) Owner;
 		}
 	}
+
+	public override void Reset()
+	{
+		Input = null;
+		Output = null;
+		Error = null;
+
+		base.Reset();
+	}
 }
 
 public partial class EventChainableExecuting : EventChainable {}
 public partial class EventChainableFinished : EventChainable {}
 public partial class EventChainableError : EventChainable {}
 public partial class EventChainableStreamOutput : EventChainable {}
-
