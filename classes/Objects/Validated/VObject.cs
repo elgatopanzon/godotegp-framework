@@ -11,7 +11,7 @@ using GodotEGP.Logging;
 using GodotEGP.Event.Events;
 using GodotEGP.Objects.ObjectPool;
 
-public partial class VObject
+public partial class VObject : IPoolableObject
 {
 	protected VObject _parent;
 
@@ -37,11 +37,11 @@ public partial class VObject
 			Properties[i].Reset();
 		}
 	}
-	public virtual void Init()
+	public virtual void Init(params object[] p)
 	{
 		for (int i = 0; i < Properties.Count; i++)
 		{
-			Properties[i].Init();
+			Properties[i].Init(p);
 			Properties[i].Parent = this;
 		}
 	}
@@ -195,9 +195,9 @@ public class VObjectObjectPoolHandler : ObjectPoolHandler<VObject>
 		instance.Reset();
 		return instance;
 	}
-	public override VObject OnTake(VObject instance)
+	public override VObject OnTake(VObject instance, params object[] p)
 	{
-		instance.Init();
+		instance.Init(p);
 		return instance;
 	}
 }

@@ -14,7 +14,7 @@ using GodotEGP.Scripting;
 using GodotEGP.Chainables;
 using GodotEGP.Objects.ObjectPool;
 
-public partial class Event : IEvent
+public partial class Event : IEvent, IPoolableObject
 {
 	public object Owner { get; set; }
 	public object Data { get; set; }
@@ -26,7 +26,7 @@ public partial class Event : IEvent
 		Init();
 	}
 
-	public virtual void Init()
+	public virtual void Init(params object[] p)
 	{
 		Created = DateTime.Now;
 	}
@@ -45,9 +45,9 @@ public class EventObjectPoolHandler : ObjectPoolHandler<Event>
 		instance.Reset();
 		return instance;
 	}
-	public override Event OnTake(Event instance)
+	public override Event OnTake(Event instance, params object[] p)
 	{
-		instance.Init();
+		instance.Init(p);
 		return instance;
 	}
 }

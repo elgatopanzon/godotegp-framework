@@ -42,10 +42,10 @@ public partial class ObjectPoolService : Service
 	/// <c>ObjectPool<T></c>.
 	/// If no pool for <c>T</c> exists, creates one.
 	/// </summary>
-	public T Get<T>() where T: class
+	public T Get<T>(params object[] p) where T: class
     {
-        T instance = GetPoolInstance<T>().Get();
-        TryOnTakeObjectFromPool(instance);
+        T instance = GetPoolInstance<T>().Get(p);
+        TryOnTakeObjectFromPool(instance, p);
 
         return instance;
     }
@@ -115,11 +115,11 @@ public partial class ObjectPoolService : Service
     	return false;
     }
 
-    public bool TryOnTakeObjectFromPool<T>(T obj)
+    public bool TryOnTakeObjectFromPool<T>(T obj, params object[] p)
     {
     	if (TryGetPoolHandler<T>(out IObjectPoolHandler handler))
     	{
-    		handler.Take(obj);
+    		handler.Take(obj, p);
 
     		return true;
     	}

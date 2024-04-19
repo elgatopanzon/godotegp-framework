@@ -8,17 +8,18 @@ using System.Reflection;
 using System.Linq;
 
 using GodotEGP.Logging;
+using GodotEGP.Objects.Extensions;
 using GodotEGP.Objects.Validated.Constraint;
 using GodotEGP.Objects.ObjectPool;
 
-public abstract partial class VValue : Validated.IVValue
+public abstract partial class VValue : Validated.IVValue, IPoolableObject
 {
 	public abstract bool Validate();
 	public abstract bool IsDefault();
 	public abstract bool IsNull();
 
 	public abstract void Reset();
-	public abstract void Init();
+	public abstract void Init(params object[] p);
 
 	public abstract void MergeCollection(VValue mergeFromVV);
 
@@ -90,7 +91,7 @@ public partial class VValue<T> : VValue
 	}
 	
 	
-	public override void Init()
+	public override void Init(params object[] p)
 	{
 	}
 
@@ -180,27 +181,27 @@ public partial class VValue<T> : VValue
 	// constraint classes to activate constraints on an object
 	public virtual VValue<T> AllowedLength(int minLength = 0, int maxLength = 0)
 	{
-		return AddConstraint(new MinMaxLength<T>(minLength, maxLength));
+		return AddConstraint(this.CreateInstance<MinMaxLength<T>>(minLength, maxLength));
 	}
 
 	public virtual VValue<T> AllowedRange(T min, T max)
 	{
-		return AddConstraint(new MinMaxValue<T>(min, max));
+		return AddConstraint(this.CreateInstance<MinMaxValue<T>>(min, max));
 	}
 
 	public virtual VValue<T> AllowedSize(int min, int max)
 	{
-		return AddConstraint(new MinMaxItems<T>(min, max));
+		return AddConstraint(this.CreateInstance<MinMaxItems<T>>(min, max));
 	}
 
 	public virtual VValue<T> AllowedValues(IList allowedValues)
 	{
-		return AddConstraint(new AllowedValues<T>(allowedValues));
+		return AddConstraint(this.CreateInstance<AllowedValues<T>>(allowedValues));
 	}
 
 	public virtual VValue<T> UniqueItems()
 	{
-		return AddConstraint(new UniqueItems<T>());
+		return AddConstraint(this.CreateInstance<UniqueItems<T>>());
 	}
 
 	public VValue<T> AddConstraint(VConstraint<T> constraint)
@@ -296,9 +297,9 @@ public class VValueObjectPoolHandler : ObjectPoolHandler<VValue>
 		instance.Reset();
 		return instance;
 	}
-	public override VValue OnTake(VValue instance)
+	public override VValue OnTake(VValue instance, params object[] p)
 	{
-		instance.Init();
+		instance.Init(p);
 		return instance;
 	}
 }

@@ -208,9 +208,9 @@ public static partial class ObjectPoolServiceObjectExtensions
 	}
 
 	// allow creating instance of T using any object
-	public static T CreateInstance<T>(this object obj) where T : class
+	public static T CreateInstance<T>(this object obj, params object[] p) where T : class
 	{
-		return ServiceRegistry.Get<ObjectPoolService>().Get<T>();
+		return ServiceRegistry.Get<ObjectPoolService>().Get<T>(p);
 	}
 }
 

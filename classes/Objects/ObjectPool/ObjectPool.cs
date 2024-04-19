@@ -26,7 +26,7 @@ public partial class ObjectPool<T> where T: class
 		}
 	}
 
-	public T Get()
+	public T Get(params object[] p)
 	{
 		if (_objects.TryPop(out T obj))
 		{
@@ -34,7 +34,7 @@ public partial class ObjectPool<T> where T: class
 		}
 		else
 		{
-			return (T) Activator.CreateInstance(typeof(T));
+			return (T) Activator.CreateInstance(typeof(T), p);
 		}
 	}
 
@@ -52,19 +52,19 @@ public partial class ObjectPool<T> where T: class
 public interface IObjectPoolHandler 
 {
 
-	public object Take(object instance);
+	public object Take(object instance, params object[] p);
 	public object Return(object instance);
 };
 
 public interface IObjectPoolHandler<T> : IObjectPoolHandler
 {
-	public T OnTake(T instance);
+	public T OnTake(T instance, params object[] p);
 	public T OnReturn(T instance);
 }
 
-public partial class ObjectPoolHandler<T>: IObjectPoolHandler<T>
+public partial class ObjectPoolHandler<T>: IObjectPoolHandler<T> where T : IPoolableObject
 {
-	public virtual T OnTake(T instance)
+	public virtual T OnTake(T instance, params object[] p)
 	{
 		return instance;
 	}
@@ -73,9 +73,9 @@ public partial class ObjectPoolHandler<T>: IObjectPoolHandler<T>
 		return instance;
 	}
 
-	public object Take(object instance)
+	public object Take(object instance, params object[] p)
 	{
-		return (object) OnTake((T) instance);
+		return (object) OnTake((T) instance, p);
 	}
 	public object Return(object instance)
 	{
