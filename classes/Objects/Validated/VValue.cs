@@ -83,7 +83,7 @@ public partial class VValue<T> : VValue
 
 		if (ChangeEventsState)
 		{
-			Type root = this.Parent.GetType().BaseType;
+			// Type root = this.Parent.GetType().BaseType;
 			if (this.Parent is VObject vo)
 			{
 				vo._onValueChange(this, _value, newValue);
