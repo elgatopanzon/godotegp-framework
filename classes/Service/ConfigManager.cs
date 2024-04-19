@@ -259,9 +259,11 @@ public partial class ConfigManager : Service
 		// setup filesystem watchers
 		foreach (var dataDir in _configDataDirs)
 		{
-			if (!_filesystemWatchers.ContainsKey(dataDir))
+			string watchPath = Path.Combine(dataDir, _configBaseDir);
+
+			if (!_filesystemWatchers.ContainsKey(dataDir) && Directory.Exists(watchPath))
 			{
-				var watcher = new FileSystemWatcher(Path.Combine(dataDir, _configBaseDir));
+				var watcher = new FileSystemWatcher(watchPath);
 
 				watcher.NotifyFilter = NotifyFilters.Attributes
                                  		| NotifyFilters.CreationTime
@@ -292,6 +294,8 @@ public partial class ConfigManager : Service
     	QueueConfigReload();
 
         LoggerManager.LogDebug($"Config dir changed: {e.FullPath}");
+
+        this.Emit<ConfigManagerDirectoryChanged>((ee) => ee.SetDirectory(e.FullPath));
     }
 
     private void QueueConfigReload()
@@ -302,6 +306,8 @@ public partial class ConfigManager : Service
     private void _On_ConfigDirError(object sender, ErrorEventArgs e)
     {
         LoggerManager.LogError("Config dir watcher error", "", "error", e.GetException());
+
+        this.Emit<ConfigManagerDirectoryError>();
     }
 
 }

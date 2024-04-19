@@ -288,6 +288,26 @@ public partial class ConfigManagerLoaderError : ConfigManagerLoader
 {
 }
 
+public partial class ConfigManagerDirectory : Event
+{
+	public string Directory { get; set; }
+}
+public partial class ConfigManagerDirectoryChanged : ConfigManagerDirectory
+{
+}
+public partial class ConfigManagerDirectoryError : ConfigManagerDirectory
+{
+}
+
+static public partial class ConfigManagerDirectoryExtensions
+{
+	static public T SetDirectory<T>(this T o, string directory) where T : ConfigManagerDirectory
+	{
+		o.Directory = directory;
+		return o;
+	}
+}
+
 public partial class SaveDataEvent : BackgroundJobEvent
 {
 	public string Name;
