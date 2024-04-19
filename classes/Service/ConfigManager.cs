@@ -130,11 +130,11 @@ public partial class ConfigManager : Service
 			// LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "e", ec.ConfigObjects);	
 			LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "loadedCount", ec.ConfigObjects.Count);	
 
-			this.Emit<ConfigManagerLoaderCompleted>((eee) => eee.SetConfigObjects(ec.ConfigObjects));
-
 			MergeConfigObjects(ec.ConfigObjects);
 
 			_SetServiceReady(true);
+
+			this.Emit<ConfigManagerLoaderCompleted>((eee) => eee.SetConfigObjects(ec.ConfigObjects));
 		}
 	}
 
