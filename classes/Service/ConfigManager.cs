@@ -130,6 +130,8 @@ public partial class ConfigManager : Service
 			// LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "e", ec.ConfigObjects);	
 			LoggerManager.LogDebug("ConfigManager: loader completed cb", "", "loadedCount", ec.ConfigObjects.Count);	
 
+			this.Emit<ConfigManagerLoaderCompleted>((eee) => eee.SetConfigObjects(ec.ConfigObjects));
+
 			MergeConfigObjects(ec.ConfigObjects);
 
 			_SetServiceReady(true);
@@ -140,6 +142,7 @@ public partial class ConfigManager : Service
 	{
 		if (e is ConfigManagerLoaderError ee)
 		{
+			this.Emit<ConfigManagerLoaderError>();
 			throw ee.RunWorkerCompletedEventArgs.Error;
 		}
 	}
