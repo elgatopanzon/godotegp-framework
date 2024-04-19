@@ -5,12 +5,24 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using GodotEGP.Objects.Extensions;
+using GodotEGP.Objects.ObjectPool;
 
-public partial class VConstraint<T>
+public partial class VConstraint<T> : IPoolableObject
 {
+	public bool Enabled { get; set; } = true;
+
 	public virtual bool Validate(T value)
 	{
 		return true;
+	}
+
+	public virtual void Init(params object[] p)
+	{
+		Enabled = true;
+	}
+	public virtual void Reset()
+	{
+		Enabled = false;
 	}
 }
 
@@ -18,7 +30,7 @@ public partial class UniqueItems<T> : VConstraint<T>
 {
 	public override bool Validate(T value)
 	{
-		if (value is IList list)
+		if (value is IList list && Enabled)
 		{
 			List<object> seen = new List<object>();
 
@@ -57,14 +69,25 @@ public partial class MinMaxLength<T> : VConstraint<T>
 
 	public MinMaxLength(int minLength, int maxLength)
 	{
+		Init((int) minLength, (int) maxLength);
+	}
+
+	public void Init(int minLength, int maxLength)
+	{
 		_minLength = minLength;
 		_maxLength = maxLength;
+	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0], p[1]);
+
+		base.Init(p);
 	}
 
 	// validate method
 	public override bool Validate(T value)
 	{
-		if (value.TryCast<string>(out string val))
+		if (value.TryCast<string>(out string val) && Enabled)
 		{
 			if (val.Length < _minLength && _minLength > 0)
 			{
@@ -98,14 +121,25 @@ public partial class MinMaxItems<T> : VConstraint<T>
 
 	public MinMaxItems(int minItems, int maxItems)
 	{
+		Init((int) minItems, (int) maxItems);
+	}
+
+	public void Init(int minItems, int maxItems)
+	{
 		_minItems = minItems;
 		_maxItems = maxItems;
+	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0], p[1]);
+
+		base.Init(p);
 	}
 
 	// validate method
 	public override bool Validate(T value)
 	{
-		if (value is IList list)
+		if (value is IList list && Enabled)
 		{
 			if (list.Count < _minItems && _minItems > 0)
 			{
@@ -116,7 +150,7 @@ public partial class MinMaxItems<T> : VConstraint<T>
 				throw new ValidationMaxItemsException($"{typeof(T).Name}'s '{list.Count}' items is more than allowed {_maxItems}");
 			}
 		}
-		else if (value is ICollection collection)
+		else if (value is ICollection collection && Enabled)
 		{
 			if (collection.Count < _minItems && _minItems > 0)
 			{
@@ -154,13 +188,28 @@ public partial class MinMaxValue<T> : VConstraint<T>
 
 	public MinMaxValue(T minValue, T maxValue)
 	{
+		Init((T) minValue, (T) maxValue);
+	}
+
+	public void Init(T minValue, T maxValue)
+	{
 		_minValue = minValue;
 		_maxValue = maxValue;
+	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0], p[1]);
+
+		base.Init(p);
 	}
 
 	// validate method
 	public override bool Validate(T value)
 	{
+		if (!Enabled)
+		{
+			return true;
+		}
 		if (Comparer<T>.Default.Compare(value, _minValue) < 0 && !_minValue.Equals(0))
 		{
 			throw new ValidationMinValueException($"'{value}' is less than minValue of {_minValue}");
@@ -242,11 +291,31 @@ public partial class AllowedValues<T> : VConstraint<T>
 
 	public AllowedValues(IList allowedValues)
 	{
+		Init(allowedValues);
+	}
+
+	public void Init(IList allowedValues)
+	{
 		_allowedValues = allowedValues;
+	}
+	public override void Init(params object[] p)
+	{
+		Init((IList) p[0]);
+
+		base.Init(p);
+	}
+	public override void Reset()
+	{
+		_allowedValues = null;
 	}
 
 	public override bool Validate(T value)
 	{
+		if (!Enabled)
+		{
+			return true;
+		}
+
 		if (value is IList list)
 		{
 			foreach (var item in list)
@@ -285,4 +354,3 @@ public partial class AllowedValues<T> : VConstraint<T>
 				: base(info, context) { }
 	}
 }
-
