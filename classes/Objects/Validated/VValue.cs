@@ -9,12 +9,16 @@ using System.Linq;
 
 using GodotEGP.Logging;
 using GodotEGP.Objects.Validated.Constraint;
+using GodotEGP.Objects.ObjectPool;
 
 public abstract partial class VValue : Validated.IVValue
 {
 	public abstract bool Validate();
 	public abstract bool IsDefault();
 	public abstract bool IsNull();
+
+	public abstract void Reset();
+	public abstract void Init();
 
 	public abstract void MergeCollection(VValue mergeFromVV);
 
@@ -73,6 +77,28 @@ public partial class VValue<T> : VValue
 		}
     }
 
+	protected List<VConstraint<T>> _constraints = new List<VConstraint<T>>();
+
+	/*********************************
+	*  Object pool handler methods  *
+	*********************************/
+
+	public override void Reset()
+	{
+		RawValue = Default(_default);
+		HasBeenSet = false;
+	}
+	
+	
+	public override void Init()
+	{
+	}
+
+
+	/*******************************
+	*  VValue management methods  *
+	*******************************/
+
 	private void _SetValue(T newValue)
 	{
 		HasBeenSet = true;
@@ -93,10 +119,10 @@ public partial class VValue<T> : VValue
 		_value = newValue;
 	}
 
-	protected List<VConstraint<T>> _constraints = new List<VConstraint<T>>();
 
 	public VValue()
 	{
+		Init();
 	}
 	
 	public override bool IsDefault()
@@ -123,13 +149,33 @@ public partial class VValue<T> : VValue
 		return this;
 	}
 
-	public virtual VValue<T> Reset()
+	public virtual VValue<T> Prototype(VValue<T> from)
 	{
-		LoggerManager.LogDebug("Resetting value");
+		_default = from._default;
 
-		return Default(_default);
+		foreach (VConstraint<T> constraint in from._constraints)
+		{
+			_constraints.Add(constraint);
+		}
+
+		return this;
 	}
-	
+
+	public VValue<T> NotNull()
+	{
+		NullAllowed = false;
+		return this;
+	}
+
+	public virtual VValue<T> ChangeEventsEnabled(bool changeEventsState = true)
+	{
+		ChangeEventsState = changeEventsState;
+		return this;
+	}
+
+	/********************************
+	*  Constraint shortcut values  *
+	********************************/
 
 	// constraint classes to activate constraints on an object
 	public virtual VValue<T> AllowedLength(int minLength = 0, int maxLength = 0)
@@ -157,18 +203,6 @@ public partial class VValue<T> : VValue
 		return AddConstraint(new UniqueItems<T>());
 	}
 
-	public virtual VValue<T> Prototype(VValue<T> from)
-	{
-		_default = from._default;
-
-		foreach (VConstraint<T> constraint in from._constraints)
-		{
-			_constraints.Add(constraint);
-		}
-
-		return this;
-	}
-
 	public VValue<T> AddConstraint(VConstraint<T> constraint)
 	{
 		_constraints.Add(constraint);
@@ -181,17 +215,10 @@ public partial class VValue<T> : VValue
 		return this;
 	}
 
-	public VValue<T> NotNull()
-	{
-		NullAllowed = false;
-		return this;
-	}
 
-	public virtual VValue<T> ChangeEventsEnabled(bool changeEventsState = true)
-	{
-		ChangeEventsState = changeEventsState;
-		return this;
-	}
+	/*******************
+	*  Validate methods  *
+	*******************/
 
 	public virtual T ValidateValue(T value)
 	{
@@ -226,6 +253,11 @@ public partial class VValue<T> : VValue
 				: base(info, context) { }
 	}
 
+
+	/*******************
+	*  Merge methods  *
+	*******************/
+	
 	// provide method to merge collections
 	public override void MergeCollection(VValue mergeFromVV)
 	{
@@ -257,3 +289,16 @@ public partial class VValue<T> : VValue
 	}
 }
 
+public class VValueObjectPoolHandler : ObjectPoolHandler<VValue>
+{
+	public override VValue OnReturn(VValue instance)
+	{
+		instance.Reset();
+		return instance;
+	}
+	public override VValue OnTake(VValue instance)
+	{
+		instance.Init();
+		return instance;
+	}
+}

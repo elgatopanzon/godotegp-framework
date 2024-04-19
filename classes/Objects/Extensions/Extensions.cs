@@ -206,6 +206,12 @@ public static partial class ObjectPoolServiceObjectExtensions
 	{
 		return ServiceRegistry.Get<ObjectPoolService>().Get<T>();
 	}
+
+	// allow creating instance of T using any object
+	public static T CreateInstance<T>(this object obj) where T : class
+	{
+		return ServiceRegistry.Get<ObjectPoolService>().Get<T>();
+	}
 }
 
 public static partial class NodeManagerObjectExtension

@@ -14,11 +14,10 @@ public partial class VNative<T> : VValue<T> where T : VObject
 		return this;
 	}
 
-	public override VNative<T> Reset()
+	public override void Reset()
 	{
-		LoggerManager.LogDebug("Resetting value");
-
-		return Default(_default);
+		_value = _default;
+		base.Reset();
 	}
 
 	public override VNative<T> ChangeEventsEnabled(bool changeEventsState = true)
