@@ -8,6 +8,7 @@ using System.ComponentModel;
 using GodotEGP.Service;
 using GodotEGP.Logging;
 
+using GodotEGP.Config;
 using GodotEGP.Resource;
 using GodotEGP.Scripting;
 using GodotEGP.Chainables;
@@ -304,6 +305,26 @@ static public partial class ConfigManagerDirectoryExtensions
 	static public T SetDirectory<T>(this T o, string directory) where T : ConfigManagerDirectory
 	{
 		o.Directory = directory;
+		return o;
+	}
+}
+
+public partial class ConfigManagerSave : Event
+{
+	public ConfigObject ConfigObject { get; set; }
+}
+public partial class ConfigManagerSaveCompleted : ConfigManagerSave
+{
+}
+public partial class ConfigManagerSaveError : ConfigManagerSave
+{
+}
+
+static public partial class ConfigManagerSaveExtensions
+{
+	static public T SetConfigObject<T>(this T o, ConfigObject configObject) where T : ConfigManagerSave
+	{
+		o.ConfigObject = configObject;
 		return o;
 	}
 }

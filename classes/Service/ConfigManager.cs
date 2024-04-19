@@ -159,6 +159,9 @@ public partial class ConfigManager : Service
         		vo.MergeFrom(obj.RawValue as VObject);
         		// LoggerManager.LogDebug("Merged config object", "", "obj", vo);
         	}
+
+			// set the data endpoint
+        	GetConfigObjectInstance(type).DataEndpoint = obj.DataEndpoint;
     	}
 	}
 
@@ -217,10 +220,19 @@ public partial class ConfigManager : Service
 
 		configObject.DataEndpoint = dataEndpoint;
 		configObject.Save();
+
+		configObject.SubscribeOwner<DataOperationComplete>(_On_SaveConfigCompleted, isHighPriority:true, oneshot:true);
+		configObject.SubscribeOwner<DataOperationError>(_On_SaveConfigError, isHighPriority:true, oneshot:true);
 	}
 
-	public IDataEndpoint GetDefaultSaveEndpoint(Type configInstanceType, string configName = "Config.json")
+	public IDataEndpoint GetDefaultSaveEndpoint(Type configInstanceType, string configName = null)
 	{
+		// return last used endpoint if no config name is provided
+		if (configName == null)
+		{
+			return GetConfigObjectInstance(configInstanceType).DataEndpoint;
+		}
+
 		return new FileEndpoint(Path.Combine(OS.GetUserDataDir(), _configBaseDir, configInstanceType.Namespace+"."+configInstanceType.Name, configName));
 	}
 
@@ -310,4 +322,16 @@ public partial class ConfigManager : Service
         this.Emit<ConfigManagerDirectoryError>();
     }
 
+	private void _On_SaveConfigCompleted(DataOperationComplete e)
+	{
+        LoggerManager.LogError("Config save completed", "", "object", e.Owner.GetType());
+
+        this.Emit<ConfigManagerSaveCompleted>((ee) => ee.SetConfigObject((ConfigObject) e.Owner));
+	}
+	private void _On_SaveConfigError(DataOperationError e)
+	{
+        LoggerManager.LogError("Config save failed", "", "error", e.Exception);
+
+        this.Emit<ConfigManagerSaveError>((ee) => ee.Exception = e.Exception);
+	}
 }
