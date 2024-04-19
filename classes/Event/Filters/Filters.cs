@@ -6,41 +6,81 @@ using System;
 using GodotEGP.Event.Events;
 using GodotEGP.Logging;
 using GodotEGP.Objects.Extensions;
+using GodotEGP.Objects.ObjectPool;
 
 public partial class EventFilter : IEventFilter
 {
-	public bool Match(IEvent matchEvent)
+	public bool Enabled { get; set; } = true;
+	public virtual bool Match(IEvent matchEvent)
 	{
 		return true;
 	}
+
+	public virtual void Init(params object[] p) 
+	{
+		Enabled = true;
+	}
+	public virtual void Reset()
+	{
+		Enabled = false;
+	}
 }
 
-public partial class OwnerObjectFilter : IEventFilter
+public partial class OwnerObjectFilter : EventFilter, IEventFilter
 {
 	private object _matchObject;
 
 	public OwnerObjectFilter(object matchObject)
 	{
-		_matchObject = matchObject;
+		Init(matchObject);
 	}
 
-	public bool Match(IEvent matchEvent)
+	public void Init(object matchObject)
+	{
+		_matchObject = matchObject;
+	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0]);
+		base.Init(p);
+	}
+	public override void Reset()
+	{
+		_matchObject = null;
+		base.Reset();
+	}
+
+	public override bool Match(IEvent matchEvent)
 	{
 		// LoggerManager.LogDebug("match result", "", "result", matchEvent.Owner.Equals(_matchObject));
 		return matchEvent.Owner.Equals(_matchObject);
 	}
 }
 
-public partial class SignalTypeFilter : IEventFilter
+public partial class SignalTypeFilter : EventFilter, IEventFilter
 {
 	private string _matchSignal;
 
 	public SignalTypeFilter(string matchSignal)
 	{
+		Init(matchSignal);
+	}
+	public void Init(string matchSignal)
+	{
 		_matchSignal = matchSignal;
 	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0]);
+		base.Init(p);
+	}
+	public override void Reset()
+	{
+		_matchSignal = null;
+		base.Reset();
+	}
 
-	public bool Match(IEvent matchEvent)
+	public override bool Match(IEvent matchEvent)
 	{
 		if (matchEvent.TryCast(out Events.GodotSignal e))
 		{
@@ -53,38 +93,50 @@ public partial class SignalTypeFilter : IEventFilter
 	}
 }
 
-public partial class ObjectTypeFilter : IEventFilter
+public partial class ObjectTypeFilter : EventFilter, IEventFilter
 {
-	private Type _matchType;
+	protected Type _matchType;
 
 	public ObjectTypeFilter(Type matchType)
 	{
-		_matchType = matchType;
+		Init(matchType);
 	}
 
-	public bool Match(IEvent matchEvent)
+	public void Init(Type matchType)
+	{
+		_matchType = matchType;
+	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0]);
+		base.Init(p);
+	}
+	public override void Reset()
+	{
+		_matchType = null;
+		base.Reset();
+	}
+
+	public override bool Match(IEvent matchEvent)
 	{
 		return matchEvent.GetType().IsSubclassOf(_matchType) || matchEvent.GetType() == _matchType;
 	}
 }
 
-public partial class OwnerObjectTypeFilter : IEventFilter
+public partial class OwnerObjectTypeFilter : ObjectTypeFilter, IEventFilter
 {
-	private Type _matchType;
-
-	public OwnerObjectTypeFilter(Type matchType)
+	public OwnerObjectTypeFilter(Type matchType) : base(matchType)
 	{
-		_matchType = matchType;
 	}
 
-	public bool Match(IEvent matchEvent)
+	public override bool Match(IEvent matchEvent)
 	{
 		return (matchEvent.Owner.GetType().IsSubclassOf(_matchType) || matchEvent.Owner.GetType().Equals(_matchType));
 	}
 }
 
 // inputmanager event filters
-public partial class InputStateActionFilter : IEventFilter
+public partial class InputStateActionFilter : EventFilter, IEventFilter
 {
 	public enum State {
 		Any = 0,
@@ -102,12 +154,24 @@ public partial class InputStateActionFilter : IEventFilter
 		_state = state;
 	}
 
-	public InputStateActionFilter(StringName action)
+	public void Init(StringName action, State state)
 	{
 		_action = action;
+		_state = state;
+	}
+	public override void Init(params object[] p)
+	{
+		Init(p[0], p[0]);
+		base.Init(p);
+	}
+	public override void Reset()
+	{
+		_action = null;
+		_state = State.Any;
+		base.Reset();
 	}
 
-	public bool Match(IEvent matchEvent)
+	public override bool Match(IEvent matchEvent)
 	{
 		if (matchEvent is InputStateChanged e)
 		{
@@ -133,5 +197,20 @@ public partial class InputStateActionFilter : IEventFilter
 		}
 
 		return false;
+	}
+}
+
+
+public class EventFilterObjectPoolHandler : ObjectPoolHandler<EventFilter>
+{
+	public override EventFilter OnReturn(EventFilter instance)
+	{
+		instance.Reset();
+		return instance;
+	}
+	public override EventFilter OnTake(EventFilter instance, params object[] p)
+	{
+		instance.Init(p);
+		return instance;
 	}
 }
