@@ -3,12 +3,13 @@ namespace GodotEGP.Objects.ObjectPool;
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 
 using GodotEGP.Logging;
 
 public partial class ObjectPool<T> where T: class
 {
-	private Stack<T> _objects;
+	private ConcurrentStack<T> _objects;
 	private int _capacityInitial;
 	private int _capacityMax;
 
@@ -17,7 +18,7 @@ public partial class ObjectPool<T> where T: class
 		_capacityMax = capacityMax;
 		_capacityInitial = capacityInitial;
 
-		_objects = new Stack<T>(capacityMax);
+		_objects = new ConcurrentStack<T>();
 
 		for (int i = 0; i < capacityInitial; i++)
 		{
@@ -27,16 +28,12 @@ public partial class ObjectPool<T> where T: class
 
 	public T Get()
 	{
-		if (_objects.Count > 0)
+		if (_objects.TryPop(out T obj))
 		{
-			// LoggerManager.LogDebug("Using instance from pool", typeof(T).Name);
-
-			return _objects.Pop();
+			return obj;
 		}
 		else
 		{
-			// LoggerManager.LogDebug("Creating new instance", typeof(T).Name);
-
 			return (T) Activator.CreateInstance(typeof(T));
 		}
 	}
@@ -44,9 +41,11 @@ public partial class ObjectPool<T> where T: class
 	public void Return(T obj)
 	{
 		if (_objects.Count < _capacityMax)
+		{
 			// LoggerManager.LogDebug("Returning instance", typeof(T).Name);
 
 			_objects.Push(obj);
+		}
 	}
 }
 
