@@ -24,6 +24,10 @@ public partial class VConstraint<T> : IPoolableObject
 	{
 		Enabled = false;
 	}
+	public virtual void Dispose()
+	{
+		Reset();
+	}
 }
 
 public partial class UniqueItems<T> : VConstraint<T>

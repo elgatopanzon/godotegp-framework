@@ -13,7 +13,9 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial interface IPoolableObjectResetable
+using System;
+
+public partial interface IPoolableObjectResetable : IDisposable
 {
 	public void Reset();
 }

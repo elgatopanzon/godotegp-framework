@@ -46,6 +46,17 @@ public partial class VObject : IPoolableObject
 		}
 	}
 
+	public virtual void Dispose()
+	{
+		for (int i = 0; i < Properties.Count; i++)
+		{
+			Properties[i].ReturnInstance();
+			Properties[i] = null;
+		}
+
+		Properties = null;
+	}
+
 
 	/*********************************
 	*  Property management methods  *

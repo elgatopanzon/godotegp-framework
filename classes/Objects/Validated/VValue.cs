@@ -20,6 +20,7 @@ public abstract partial class VValue : Validated.IVValue, IPoolableObject
 
 	public abstract void Reset();
 	public abstract void Init(params object[] p);
+	public abstract void Dispose();
 
 	public abstract void MergeCollection(VValue mergeFromVV);
 
@@ -95,6 +96,15 @@ public partial class VValue<T> : VValue
 	{
 	}
 
+	public override void Dispose()
+	{
+		Reset();
+
+		if (_value.GetType().IsClass && !_value.GetType().IsPrimitive)
+		{
+			_value.ReturnInstance();
+		}
+	}
 
 	/*******************************
 	*  VValue management methods  *

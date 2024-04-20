@@ -24,6 +24,10 @@ public partial class EventFilter : IEventFilter
 	{
 		Enabled = false;
 	}
+	public virtual void Dispose()
+	{
+		Reset();
+	}
 }
 
 public partial class OwnerObjectFilter : EventFilter, IEventFilter

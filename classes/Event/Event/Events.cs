@@ -36,6 +36,10 @@ public partial class Event : IEvent, IPoolableObject
 		Data = null;
 		Exception = null;
 	}
+	public virtual void Dispose()
+	{
+		Reset();
+	}
 }
 
 public class EventObjectPoolHandler : ObjectPoolHandler<Event>

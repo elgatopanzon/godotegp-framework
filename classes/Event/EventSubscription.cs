@@ -7,6 +7,7 @@ using Godot;
 using GodotEGP.Event.Events;
 using GodotEGP.Event.Filters;
 using GodotEGP.Objects.ObjectPool;
+using GodotEGP.Objects.Extensions;
 
 public partial class EventSubscription<T> : IPoolableObject, IEventSubscription<Event> where T : Event
 {
@@ -68,7 +69,14 @@ public partial class EventSubscription<T> : IPoolableObject, IEventSubscription<
 
     	Group = null;
 
-    	// TODO: return filter objects to pool
-    	EventFilters = null;
+    	foreach (var filter in EventFilters)
+    	{
+    		filter.ReturnInstance();
+    	}
+    }
+
+    public void Dispose()
+    {
+    	Reset();
     }
 }
