@@ -12,6 +12,19 @@ public partial class ObjectPool<T> where T: class
 	private ConcurrentStack<T> _objects;
 	private int _capacityInitial;
 	private int _capacityMax;
+	
+	private int _poolHitCount;
+	public int PoolHitCount
+	{
+		get { return _poolHitCount; }
+		set { _poolHitCount = value; }
+	}
+	private int _poolMissCount;
+	public int PoolMissCount
+	{
+		get { return _poolMissCount; }
+		set { _poolMissCount = value; }
+	}
 
 	public ObjectPool(int capacityInitial = 0, int capacityMax = 100)
 	{
@@ -30,10 +43,14 @@ public partial class ObjectPool<T> where T: class
 	{
 		if (_objects.TryPop(out T obj))
 		{
+			_poolHitCount++;
+
 			return obj;
 		}
 		else
 		{
+			_poolMissCount++;
+
 			return (T) Activator.CreateInstance(typeof(T), p);
 		}
 	}
