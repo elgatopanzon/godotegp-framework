@@ -51,7 +51,14 @@ public partial class ObjectPool<T> where T: class
 		{
 			_poolMissCount++;
 
-			return (T) Activator.CreateInstance(typeof(T), p);
+			if (p.Length > 0)
+			{
+				return (T) Activator.CreateInstance(typeof(T), p);
+			}
+			else
+			{
+				return (T) Activator.CreateInstance(typeof(T));
+			}
 		}
 	}
 
