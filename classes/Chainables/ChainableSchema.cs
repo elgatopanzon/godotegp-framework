@@ -24,7 +24,7 @@ public partial class ChainableSchema
 	// create a ChainableSchema object from the given IChainable
 	public static ChainableSchema BuildFromObject(IChainable chainable)
 	{
-		var schema = new ChainableSchema();
+		var schema = chainable.CreateInstance<ChainableSchema>();
 
 		// set the input and output schema
 		schema.Input = ChainableSchemaDefinition.BuildInputSchema(chainable);

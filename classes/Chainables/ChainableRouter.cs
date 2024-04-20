@@ -24,9 +24,37 @@ public partial class ChainableRouter : ChainableBranch
 
 	public ChainableRouter(Dictionary<string, IChainable> routes = null)
 	{
+		InitChainable(routes);
+	}
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		Routes = null;
+		RouteKey = null;
+
+		base.Reset();
+	}
+
+	public override void Init(params object[] p)
+	{
+		RouteKey = "key";
+		Routes = new();
+
+		InitChainable((p != null && p.Length >= 1) ? p[0] : null);
+	}
+	
+	public virtual void InitChainable(Dictionary<string, IChainable> routes = null)
+	{
 		if (routes != null)
 			Routes = routes;
+
+		base.InitChainable();
 	}
+
 
 	public ChainableRouter Route(string name, IChainable chain)
 	{

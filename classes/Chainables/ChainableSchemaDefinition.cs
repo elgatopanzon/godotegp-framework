@@ -37,7 +37,7 @@ public partial class ChainableSchemaDefinition
 
 	public static ChainableSchemaDefinition BuildDefinition(IChainable chainable, bool output = false)
 	{
-		var def = new ChainableSchemaDefinition();
+		var def = chainable.CreateInstance<ChainableSchemaDefinition>();
 
 		def.Name = (output == false) ? $"{chainable.Name}Input" : $"{chainable.Name}Output";
 

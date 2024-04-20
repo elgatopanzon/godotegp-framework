@@ -63,6 +63,30 @@ public partial class ChainableRetry : ChainableFallback
 		}
 	}
 
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		_retries = 0;
+		WaitTimeSec = 1;
+
+		base.Reset();
+	}
+
+	public override void Init(params object[] p)
+	{
+		InitChainable((p != null && p.Length >= 1) ? p[0] : null);
+	}
+	
+	public void InitChainable()
+	{
+
+		base.InitChainable();
+	}
+
 	public void CreateFallbacksForRetry()
 	{
 		if (Target != null && (Fallbacks == null || Fallbacks.Count == 0))

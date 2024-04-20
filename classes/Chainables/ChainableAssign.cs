@@ -23,6 +23,25 @@ public partial class ChainableAssign : Chainable, IChainable, IChainableAssign
 {
 	public Dictionary<string, object> AssignedOutputs { get; set; } = new();
 
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		AssignedOutputs = null;
+		base.Reset();
+	}
+	
+	public override void InitChainable(object? input = null)
+	{
+		AssignedOutputs = new();
+		base.InitChainable(input);
+	}
+
+
+
 	public async Task<Dictionary<string, object>> Run(Dictionary<string, object> input = null)
 	{
 		return (Dictionary<string, object>) await base.Run(input);
@@ -87,7 +106,7 @@ public partial class ChainableAssign : Chainable, IChainable, IChainableAssign
 
 	public ChainableValueGetter ValueGetter(string key)
 	{
-		var c = new ChainableValueGetter();
+		var c = this.CreateInstance<ChainableValueGetter>();
 
 		c = c.Param("Key", key);
 
@@ -101,6 +120,12 @@ public partial class ChainableValueGetter : ChainableAssign
 {
 	// the dictionary key
 	public string Key { get; set; }
+
+	public override void Reset()
+	{
+		Key = null;
+		base.Reset();
+	}
 
 	public async override Task<object> _Process()
 	{

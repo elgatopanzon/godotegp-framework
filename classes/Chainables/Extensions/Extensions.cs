@@ -41,14 +41,15 @@ public static partial class ChainableExtensions
 	{
 		var newChainable = chainable.Clone();
 
-		newChainable.Config.Merge(new ChainableConfig() {
-			Tags = (tags == null) ? new() : tags,
-			Metadata = (metadata == null) ? new() : metadata,
-			RunName = runName,
-			MaxConcurrency = maxConcurrency,
-			ConfigurableParams = (configurableParams == null) ? new() : configurableParams,
-			Params = (runParams == null) ? new() : runParams,
-			}, mergeCollections:mergeCollections);
+		var config = chainable.CreateInstance<ChainableConfig>();
+		config.Tags = (tags == null) ? new() : tags;
+		config.Metadata = (metadata == null) ? new() : metadata;
+		config.RunName = runName;
+		config.MaxConcurrency = maxConcurrency;
+		config.ConfigurableParams = (configurableParams == null) ? new() : configurableParams;
+		config.Params = (runParams == null) ? new() : runParams;
+
+		newChainable.Config.Merge(config, mergeCollections:mergeCollections);
 
 		return (T) newChainable;
 	}
@@ -111,7 +112,9 @@ public static partial class ChainableExtensions
 		var clone = (T) chainable.Clone();
 
 		clone.Stack.Add(chainable);
-		clone.Stack.Add(new ChainableValueGetter() { Key = key });
+		var valueGetter = chainable.CreateInstance<ChainableValueGetter>();
+		valueGetter.Key = key;
+		clone.Stack.Add(valueGetter);
 
 		return clone;
 	}
@@ -121,7 +124,7 @@ public static partial class ChainableExtensions
 		var clone = (T) chainable.Clone();
 
 		clone.Stack.Add(chainable);
-		clone.Stack.Add(new ChainablePick(keys));
+		clone.Stack.Add(chainable.CreateInstance<ChainablePick>(keys));
 
 		return clone;
 	}
@@ -136,10 +139,9 @@ public static partial class ChainableExtensions
 
 		// if we're not dealing with a ChainableFallback, wrap the current
 		// chainable into one
-		var withFallback = new ChainableFallback() {
-			Chainable = chainable,
-			Fallbacks = new() { fallback },
-		};
+		var withFallback = chainable.CreateInstance<ChainableFallback>();
+		withFallback.Chainable = chainable;
+		withFallback.Fallbacks = new() { fallback };
 
 		// clone config from original chainable
 		withFallback.Config = chainable.Config.Clone();
@@ -157,10 +159,9 @@ public static partial class ChainableExtensions
 
 		// if we're not dealing with a ChainableFallback, wrap the current
 		// chainable into one
-		var withFallback = new ChainableRetry() {
-			Chainable = chainable,
-		 	MaxRetries = maxRetries
-		};
+		var withFallback = chainable.CreateInstance<ChainableRetry>();
+		withFallback.Chainable = chainable;
+		withFallback.MaxRetries = maxRetries;
 
 		// clone config from original chainable
 		withFallback.Config = chainable.Config.Clone();

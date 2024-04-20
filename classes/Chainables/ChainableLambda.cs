@@ -15,6 +15,7 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -25,20 +26,57 @@ public partial class ChainableLambda : ChainablePassthrough
 
 	public ChainableLambda(Func<object, Task<object>> lambda)
 	{
-		Lambda = lambda;
+		InitChainable(lambda);
 	}
 
 	public ChainableLambda(Func<object, object> lambda)
 	{
+		InitChainable(lambda);
+	}
+
+	public ChainableLambda()
+	{
+		base.InitChainable();
+	}
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		Lambda = null;
+		base.Reset();
+	}
+	
+	public override void Init(params object[] p)
+	{
+		InitChainable((p != null && p.Length >= 1) ? p[0] : null);
+	}
+
+	public void InitChainable(Func<object, Task<object>> lambda)
+	{
+		Lambda = lambda;
+
+		base.InitChainable();
+	}
+
+	public void InitChainable(Func<object, object> lambda)
+	{
 		Lambda = async (x) => {
 			return lambda(x);
 		};
+
+		base.InitChainable();
 	}
+
 
 	public static ChainableLambda FromMethod(object method)
 	{
-		var chainable = new ChainableLambda(null);
-		chainable.Target = new ChainableLambdaDynamic(method);
+		var chainable = method.CreateInstance<ChainableLambda>(null);
+		var lambda = method.CreateInstance<ChainableLambdaDynamic>();
+		lambda.MethodObject = method;
+		chainable.Target = lambda;
 
 		return chainable;
 	}
@@ -65,31 +103,45 @@ public partial class ChainableLambda : ChainablePassthrough
 
 public partial class ChainableLambda<T1, T2> : ChainableLambda
 {
-	public ChainableLambda(Func<T1, Task<T2>> lambda) : base(async (x) => {
-			return (T2) await lambda((T1) x);
-		})
+	public ChainableLambda(Func<T1, Task<T2>> lambda) : base(null)
 	{
+		InitChainable(async (x) => {
+			return (T2) await lambda((T1) x);
+		});
 	}
 
-	public ChainableLambda(Func<T1, T2> lambda) : base((x) => {
-			return (T2) lambda((T1) x);
-		})
+	public ChainableLambda(Func<T1, T2> lambda) : base(null)
 	{
+		InitChainable((x) => {
+			return (T2) lambda((T1) x);
+		});
+	}
+
+	public ChainableLambda() : base(null)
+	{
+		InitChainable();
 	}
 
 	public static ChainableLambda<T1, T2> FromMethod(Func<T1, T2> method)
 	{
-		return new ChainableLambda<T1, T2>(async (x) => {
-			return method(x);
+		var chainableLambda = method.CreateInstance<ChainableLambda<T1, T2>>(null);
+		chainableLambda.InitChainable(async (x) => {
+			return method((T1) x);
     	});
+
+    	return chainableLambda;
 	}
 
 	public static ChainableLambda<T1, T2> FromMethodAsync(Func<T1, Task<T2>> method)
 	{
-		return new ChainableLambda<T1, T2>(async (x) => {
-			return await method(x);
+		var chainableLambda = method.CreateInstance<ChainableLambda<T1, T2>>(null);
+		chainableLambda.InitChainable(async (x) => {
+			return await method((T1) x);
     	});
+
+    	return chainableLambda;
 	}
+
 }
 
 public partial class ChainableLambdaDynamic : ChainablePassthrough
@@ -98,12 +150,39 @@ public partial class ChainableLambdaDynamic : ChainablePassthrough
 
 	public ChainableLambdaDynamic(object method)
 	{
-		MethodObject = method;
+		InitChainable(method);
+	}
+	public ChainableLambdaDynamic()
+	{
+	}
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		MethodObject = null;
+		base.Reset();
+	}
+	
+	public override void Init(params object[] p)
+	{
+		InitChainable((p != null && p.Length >= 1) ? p[0] : null);
+	}
+
+	public override void InitChainable(object methodObject)
+	{
+		if (methodObject != null)
+		{
+			MethodObject = methodObject;
+		}
+
+		base.InitChainable();
 	}
 
 	public async override Task<object> _Process()
 	{
-
 		var methodInfo = ((dynamic) MethodObject).Method;
 		List<object> methodParams = new();
 

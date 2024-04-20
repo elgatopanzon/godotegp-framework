@@ -202,9 +202,9 @@ public static partial class ObjectPoolServiceObjectExtensions
 		ServiceRegistry.Get<ObjectPoolService>().Return((dynamic) obj);
 	}
 
-	public static T CreateInstance<T>(this T obj) where T : class
+	public static T CreateInstance<T>(this T obj, params object[] p) where T : class
 	{
-		return ServiceRegistry.Get<ObjectPoolService>().Get<T>();
+		return ServiceRegistry.Get<ObjectPoolService>().Get<T>(p);
 	}
 
 	// allow creating instance of T using any object

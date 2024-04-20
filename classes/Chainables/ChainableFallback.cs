@@ -29,6 +29,41 @@ public partial class ChainableFallback : ChainablePassthrough
 
 	public ChainableFallback(string exceptionKey = null, List<Type> fallbackExceptions = null, List<IChainable> fallbacks = null, IChainable chainable = null)
 	{
+		Init(exceptionKey, fallbackExceptions, fallbacks, chainable);
+	}
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		ExceptionKey = "Exceptions";
+		FallbackExceptions = new() { typeof(Exception) };
+		Fallbacks = null;
+		FallbackStack = null;
+		Chainable = null;
+
+		base.Reset();
+	}
+
+	public override void Init(params object[] p)
+	{
+		ExceptionKey = "Exceptions";
+		FallbackExceptions = new() { typeof(Exception) };
+		Fallbacks = new();
+		FallbackStack = new();
+
+		InitChainable(
+			(string) ((p.Length >= 1) ? p[0] : null),
+			(List<Type>) ((p.Length >= 2) ? p[1] : null),
+			(List<IChainable>) ((p.Length >= 3) ? p[2] : null),
+			(IChainable) ((p.Length >= 4) ? p[3] : null)
+				);
+	}
+	
+	public virtual void InitChainable(string exceptionKey = null, List<Type> fallbackExceptions = null, List<IChainable> fallbacks = null, IChainable chainable = null)
+	{
 		if (exceptionKey != null)
 			ExceptionKey = exceptionKey;
 		if (fallbackExceptions != null)
@@ -38,6 +73,12 @@ public partial class ChainableFallback : ChainablePassthrough
 		if (chainable != null)
 			Chainable = chainable;
 
+		base.InitChainable();
+	}
+
+	public override void Dispose()
+	{
+		Reset();
 	}
 
 	public async Task<object> Run(object? input = null)

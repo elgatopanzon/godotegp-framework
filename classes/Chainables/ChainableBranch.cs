@@ -22,15 +22,38 @@ public partial class ChainableBranch : ChainablePassthrough
 {
 	public List<(Func<object, bool> Condition, IChainable Chain)> Branches { get; set; } = new();
 
-	public ChainableBranch(List<(Func<object, bool> Condition, IChainable Chain)> branches = null, IChainable defaultBranch = null)
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		Branches = null;
+		base.Reset();
+	}
+	
+	public override void InitChainable(object? input = null)
+	{
+		Branches = new();
+		base.InitChainable(input);
+	}
+
+	public void InitChainable(List<(Func<object, bool> Condition, IChainable Chain)> branches = null, IChainable defaultBranch = null)
 	{
 		// set the dynamic target to the default, or to a new passthrough
 		if (defaultBranch == null)
-			Target = new ChainablePassthrough();
+			Target = this.CreateInstance<ChainablePassthrough>();
 		else
 			Target = defaultBranch;
 
 		Branches = branches;
+
+		base.InitChainable();
+	}
+
+	public ChainableBranch(List<(Func<object, bool> Condition, IChainable Chain)> branches = null, IChainable defaultBranch = null)
+	{
+		InitChainable(branches, defaultBranch);
 	}
 
 	public ChainableBranch Branch(IChainable conditionChain, IChainable chain)
@@ -50,14 +73,14 @@ public partial class ChainableBranch : ChainablePassthrough
 
 	public ChainableBranch Branch(Func<object, bool> condition, Func<object, object> lambda)
 	{
-		Branches.Add((condition, new ChainableLambda(lambda)));
+		Branches.Add((condition, this.CreateInstance<ChainableLambda>(lambda)));
 
 		return this;
 	}
 
 	public ChainableBranch Branch<T1, T2>(Func<object, bool> condition, Func<T1, T2> lambda)
 	{
-		Branches.Add((condition, new ChainableLambda<T1, T2>(lambda)));
+		Branches.Add((condition, this.CreateInstance<ChainableLambda<T1, T2>>(lambda)));
 
 		return this;
 	}
@@ -71,14 +94,14 @@ public partial class ChainableBranch : ChainablePassthrough
 
 	public ChainableBranch Default(Func<object, object> lambda)
 	{
-		Target = new ChainableLambda(lambda);
+		Target = this.CreateInstance<ChainableLambda>(lambda);
 
 		return this;
 	}
 
 	public ChainableBranch Default<T1, T2>(Func<T1, T2> lambda)
 	{
-		Target = new ChainableLambda<T1, T2>(lambda);
+		Target = this.CreateInstance<ChainableLambda<T1, T2>>(lambda);
 
 		return this;
 	}

@@ -9,6 +9,7 @@ namespace GodotEGP.Chainables;
 using Godot;
 using GodotEGP.Objects.Extensions;
 using GodotEGP.Objects.Validated;
+using GodotEGP.Objects.ObjectPool;
 using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
@@ -30,7 +31,7 @@ public enum ExecutionMode
 	Stream = 2,
 }
 
-public partial class Chainable : IChainable
+public partial class Chainable : IChainable, IPoolableObject
 {
 	private string _name;
 	public string Name {
@@ -136,9 +137,74 @@ public partial class Chainable : IChainable
 
 	public Chainable(object? input = null)
 	{
-		Input = input;
+		Init(input);
 	}
 
+	public Chainable()
+	{
+		Init();
+	}
+
+	
+	/*************************
+	*  Object pool methods  *
+	*************************/
+
+	public virtual void Init(params object[] p)
+	{
+		if (p.Length >= 1)
+		{
+			InitChainable(p[0]);
+		}		
+	}
+	public virtual void InitChainable(object? input = null)
+	{
+		Stack = new();
+		_streamBuffer = new();
+		_chainableBuffer = new();
+
+		Input = input;
+	}
+	public virtual void ResetChainable()
+	{
+		// reset operational values
+		Error = null;
+		RunWithConfig = (!IsStack);
+
+		// reset stream buffer objects
+		_bufferedStream = false;
+		_streamBuffer = null;
+		_chainableBuffer = null;
+
+		// reset input/output objects
+		Input = null;
+		Output = null;
+		StackInput = null;
+		StackOutput = null;
+	}
+	public virtual void Reset()
+	{
+		ResetChainable();
+
+		if (IsStack)
+		{
+			foreach (var chainable in Stack)
+			{
+				chainable.ReturnInstance();
+			}
+
+			Stack = null;
+		}
+
+		_name = null;
+		_schema = null;
+		Config.Reset();
+		Config = null;
+	}
+	public virtual void Dispose()
+	{
+		Reset();
+	}
 
 	/****************************
 	*  chain stacking methods  *
@@ -146,7 +212,7 @@ public partial class Chainable : IChainable
 
 	public static Chainable operator |(IChainable a, Chainable b)
 	{
-		var stack = new Chainable();
+		var stack = ObjectPoolServiceObjectExtensions.CreateInstance<Chainable>(null);
 		stack.RunWithConfig = false;
 
 		foreach (var chainable in new List<IChainable>() { a, b })
@@ -175,7 +241,7 @@ public partial class Chainable : IChainable
 	public static IChainable operator |(Chainable a, Dictionary<string, object> b)
 	{
 		// create the chainable from the dictionary
-		var chainableAssign = new ChainableAssign();
+		var chainableAssign = ObjectPoolServiceObjectExtensions.CreateInstance<ChainableAssign>(null);
 
 		LoggerManager.LogDebug("Creating ChainableAssign from dictionary");
 
@@ -1031,29 +1097,11 @@ public partial class Chainable : IChainable
 		clone.Stack = new(this.Stack);
 
 		// reset temp object values
-		clone.Reset();
+		clone.ResetChainable();
 
 		LoggerManager.LogDebug("Created clone of object", "", "objectType", clone.GetType());
 
 		return clone;
-	}
-
-	public void Reset()
-	{
-		// reset operational values
-		Error = null;
-		RunWithConfig = (!IsStack);
-
-		// reset stream buffer objects
-		_bufferedStream = false;
-		_streamBuffer = new();
-		_chainableBuffer = new();
-
-		// reset input/output objects
-		Input = null;
-		Output = null;
-		StackInput = null;
-		StackOutput = null;
 	}
 
 	public async Task<object> TryGetChainableResult(object mightBeAChainable, object input)
@@ -1197,4 +1245,18 @@ public partial class Chainable : IChainable
 		this.Emit<EventChainableStreamOutput>((e) => e.Output = output);
 	}
 	
+}
+
+public class ChainableObjectPoolHandler : ObjectPoolHandler<Chainable>
+{
+	public override Chainable OnReturn(Chainable instance)
+	{
+		instance.Reset();
+		return instance;
+	}
+	public override Chainable OnTake(Chainable instance, params object[] p)
+	{
+		instance.Init(p);
+		return instance;
+	}
 }

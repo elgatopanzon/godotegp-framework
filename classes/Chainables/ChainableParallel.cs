@@ -30,10 +30,46 @@ public partial class ChainableParallel : ChainablePassthrough
 
 	public ChainableParallel(Dictionary<string, IChainable> parallelStack = null)
 	{
+		InitChainable(parallelStack);
+	}
+
+	/************************
+	*  Object pool methods  *
+	************************/
+
+	public override void Reset()
+	{
+		ParallelStack = null;
+		ParallelOutput = null;
+		Processing = null;
+		Finished = null;
+		_tcs = null;
+
+		base.Reset();
+	}
+
+	public override void Init(params object[] p)
+	{
+		InitChainable((p != null && p.Length >= 1) ? p[0] : null);
+	}
+	
+	public void InitChainable(Dictionary<string, IChainable> parallelStack = null)
+	{
 		if (parallelStack != null)
 		{
 			ParallelStack = parallelStack;
 		}
+		else
+		{
+			ParallelStack = new();
+		}
+
+		ParallelOutput = new();
+		Processing = new();
+		Finished = new();
+		_tcs = new();
+
+		base.InitChainable();
 	}
 
 	public async override Task<object> _Process()

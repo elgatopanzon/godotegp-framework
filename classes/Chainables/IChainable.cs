@@ -73,7 +73,7 @@ public interface IChainable
 
 	public bool RunWithConfig { get; set; }
 	public IChainable Clone();
-	public void Reset();
+	public void ResetChainable();
 }
 
 public interface IChainableInput {};
