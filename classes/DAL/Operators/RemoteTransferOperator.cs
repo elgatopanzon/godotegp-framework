@@ -4,7 +4,7 @@
  * @created     : Friday Feb 02, 2024 12:30:46 CST
  */
 
-namespace GodotEGP.DAL.Operator;
+namespace GodotEGP.DAL.Operators;
 
 using Godot;
 using System;

@@ -5,7 +5,7 @@ using System.ComponentModel;
 using GodotEGP.Threading;
 using GodotEGP.Logging;
 using GodotEGP.Event.Events;
-using GodotEGP.DAL.Operator;
+using GodotEGP.DAL.Operators;
 using GodotEGP.Objects.Extensions;
 
 public abstract partial class DataOperation : BackgroundJob, IDataOperation

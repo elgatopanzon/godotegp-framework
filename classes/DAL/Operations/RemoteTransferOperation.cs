@@ -6,7 +6,7 @@
 
 namespace GodotEGP.DAL.Operations;
 
-using GodotEGP.DAL.Operator;
+using GodotEGP.DAL.Operators;
 using GodotEGP.DAL.Endpoints;
 
 using GodotEGP.Logging;

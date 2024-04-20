@@ -1,4 +1,4 @@
-namespace GodotEGP.DAL.Operator;
+namespace GodotEGP.DAL.Operators;
 
 using GodotEGP.DAL.Endpoints;
 

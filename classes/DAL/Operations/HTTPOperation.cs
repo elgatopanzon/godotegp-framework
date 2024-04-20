@@ -1,7 +1,7 @@
 namespace GodotEGP.DAL.Operations;
 
 using GodotEGP.Logging;
-using GodotEGP.DAL.Operator;
+using GodotEGP.DAL.Operators;
 using GodotEGP.DAL.Endpoints;
 
 // operation class for File operators

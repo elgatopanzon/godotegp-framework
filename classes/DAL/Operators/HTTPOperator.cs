@@ -1,4 +1,4 @@
-namespace GodotEGP.DAL.Operator;
+namespace GodotEGP.DAL.Operators;
 
 using System.ComponentModel;
 using System.IO;
