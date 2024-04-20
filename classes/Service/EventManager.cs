@@ -53,6 +53,8 @@ public partial class EventManager : Service
 
 	public bool Unsubscribe(IEventSubscription<Event> eventSubscription)
 	{
+		List<IEventSubscription<Event>> returnObjects = new();
+
 		lock (_eventSubscriptionsLock) {
 			if (_eventSubscriptions.TryGetValue(eventSubscription.EventType, out List<IEventSubscription<Event>> subList))
 			{
@@ -65,8 +67,14 @@ public partial class EventManager : Service
 					}
 				);
 
+				returnObjects.Add(eventSubscription);
 				return subList.Remove(eventSubscription);
 			}
+		}
+
+		foreach (var sub in returnObjects)
+		{
+			sub.ReturnInstance();
 		}
 
 		return false;
