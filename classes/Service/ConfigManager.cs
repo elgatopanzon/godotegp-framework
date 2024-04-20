@@ -23,6 +23,8 @@ public partial class ConfigManager : Service
 		set { _configBaseDir= value; }
 	}
 
+	public bool UseGlobalConfig { get; set; } = true;
+
 	private List<String> _configDataDirs { get; set; }
 
 	private Dictionary<Type, Config.ConfigObject> _configObjects = new Dictionary<Type, Config.ConfigObject>();
@@ -187,7 +189,7 @@ public partial class ConfigManager : Service
 	{
 		if(!_configObjects.TryGetValue(configInstanceType, out Config.ConfigObject obj))
 		{
-			LoggerManager.LogDebug("Creating config file object", "", "objType", configInstanceType.Name);
+			LoggerManager.LogDebug("Creating config file object", "", "objType", configInstanceType.FullName);
 
 			obj = Config.ConfigObject.Create(configInstanceType.ToString());
 			RegisterConfigObjectInstance(configInstanceType, obj);
@@ -250,7 +252,7 @@ public partial class ConfigManager : Service
 	public override void _OnServiceReady()
 	{
 		// create instance of GlobalConfig if config doesn't exist already
-		if (!_serviceReadyInitial)
+		if (!_serviceReadyInitial && UseGlobalConfig)
 		{
 			if (!_configObjects.TryGetValue(typeof(GlobalConfig), out var obj))
 			{
