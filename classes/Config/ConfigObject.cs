@@ -99,7 +99,10 @@ public partial class ConfigObject<T> : ConfigObject where T : VObject, new()
 				// LoggerManager.LogDebug("Config object merged with loaded object", "", "configObj", RawValue);
 
 				// overwrite created object's values with loaded object
-				RawValue = resultObj.ResultObject;
+				if (resultObj.ResultObject is T)
+				{
+					RawValue = resultObj.ResultObject;
+				}
 
 				_loading = false;
 
