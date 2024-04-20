@@ -364,6 +364,14 @@ public class SaveDataLoadError : SaveDataEvent
 {
 	
 }
+public class SaveDataSaveComplete : SaveDataEvent
+{
+	
+}
+public class SaveDataSaveError : SaveDataEvent
+{
+	
+}
 public class SaveDataCopyComplete : SaveDataEvent
 {
 	

@@ -355,8 +355,8 @@ public partial class SaveDataManager : Service
 			sd.UpdateDateSaved();
 		}
 
-		obj.SubscribeOwner<DataOperationComplete>(_On_SaveDataSave_Complete, oneshot: true);
-		obj.SubscribeOwner<DataOperationError>(_On_SaveDataSave_Error, oneshot: true);
+		obj.SubscribeOwner<DataOperationComplete>(_On_SaveDataSave_Complete, isHighPriority:true, oneshot: true);
+		obj.SubscribeOwner<DataOperationError>(_On_SaveDataSave_Error, isHighPriority:true, oneshot: true);
 
 		obj.Save();
 	}
@@ -425,14 +425,16 @@ public partial class SaveDataManager : Service
 			// }
 
 			var obj = Get(fromName);
-			var objNew = Create<GameSaveFile>(toName, saveCreated: false);
+			var objNew = (ConfigObject) Activator.CreateInstance(obj.GetType());
+			Register(toName, objNew);
 
-			// only works with GameSaveFile for now
 			if (obj.RawValue is SaveDataBase sd && objNew.RawValue is SaveDataBase sdn)
 			{
 				sdn.MergeFrom(sd);
 				sdn.Name = toName;
 				sdn.Loaded = false;
+				objNew.DataEndpoint = new FileEndpoint(OS.GetUserDataDir()+"/"+_saveBaseDir+"/"+objNew.RawValue.ToString()+"/"+toName+".json");
+				objNew.Name = toName;
 			}
 
 			if (saveCopy)
@@ -441,7 +443,7 @@ public partial class SaveDataManager : Service
 			}
 
 			this.Emit<SaveDataCopyComplete>((ee) => {
-					ee.SetName(objNew.Name);
+					ee.SetName(fromName);
 					ee.SetSaveData(Get(toName));
 				});
 
@@ -486,18 +488,6 @@ public partial class SaveDataManager : Service
 
 	public void Move(string fromName, string toName, bool replace = true)
 	{
-		try
-		{
-			Copy(fromName, toName, replace);
-		}
-		catch (System.Exception ex)
-		{
-			this.Emit<SaveDataMoveError>((e) => {
-				e.SetName(toName);
-				e.SetException(ex);
-				});
-		}
-
 		this.SubscribeOwner<SaveDataCopyComplete>((e) => {
 			if (e is SaveDataCopyComplete ec)
 			{
@@ -515,7 +505,7 @@ public partial class SaveDataManager : Service
 						});
 				}
 			}
-			});
+			}, isHighPriority:true, oneshot:true);
 		this.SubscribeOwner<SaveDataCopyError>((e) => {
 			if (e is SaveDataCopyError ec)
 			{
@@ -526,7 +516,20 @@ public partial class SaveDataManager : Service
 						en.SetException(ec.RunWorkerCompletedEventArgs.Error);
 					});
 			}
-			});
+			}, isHighPriority:true, oneshot:true);
+
+		try
+		{
+			Copy(fromName, toName, replace);
+		}
+		catch (System.Exception ex)
+		{
+			this.Emit<SaveDataMoveError>((e) => {
+				e.SetName(toName);
+				e.SetException(ex);
+				});
+		}
+
 	}
 
 	public void Remove(string saveName)
@@ -683,6 +686,11 @@ public partial class SaveDataManager : Service
 		if (e is DataOperationComplete ee)
 		{
 			LoggerManager.LogDebug("Save data object saved", "", "saveName", (e.Owner as Config.ConfigObject).Name);
+
+			this.Emit<SaveDataSaveComplete>((eee) => {
+				eee.SetSaveData(e.Owner as ConfigObject);
+				eee.SetName((e.Owner as Config.ConfigObject).Name);
+			});
 		}
 	}
 	public void _On_SaveDataSave_Error(IEvent e)
@@ -690,6 +698,12 @@ public partial class SaveDataManager : Service
 		if (e is DataOperationError ee)
 		{
 			LoggerManager.LogDebug("Save data object save failed", "", "saveName", (e.Owner as Config.ConfigObject).Name);
+
+			this.Emit<SaveDataSaveError>((eee) => {
+				eee.SetException(ee.Exception);
+				eee.SetSaveData(e.Owner as ConfigObject);
+				eee.SetName((e.Owner as Config.ConfigObject).Name);
+			});
 		}
 	}
 
