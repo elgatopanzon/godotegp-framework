@@ -63,6 +63,12 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		_array = new T[maxSize];
 		_indexToDataMap = new int[maxSize];
 		_dataToIndexMap = new int[maxSize];
+
+		for (int i = 0; i < maxSize; i++)
+		{
+			_indexToDataMap[i] = -1;
+			_dataToIndexMap[i] = -1;
+		}
 	}
 
 	public T Get(int index)
@@ -262,8 +268,8 @@ public partial class PackedArrayDictBacked<T> : IEnumerable, IEnumerator
 		_dataToIndexMap[_dataToIndexMap[index]] = _dataToIndexMap[lastElementIndex];
 
 		// invalidate the old index mappings
-		_indexToDataMap[index] = -1;
-		_dataToIndexMap[lastElementIndex] = -1;
+		_indexToDataMap.Remove(index);
+		_dataToIndexMap.Remove(lastElementIndex);
 
 		// decrease array size
 		_currentSize--;
@@ -331,7 +337,7 @@ public partial class PackedArrayDictBacked<T> : IEnumerable, IEnumerator
     public IEnumerable<T> OrderedArray
     {
 		get {
-			return _dataToIndexMap.Values.Where((x) => x >= 0).OrderBy(x => x).Select<int, T>((x) => {
+			return _dataToIndexMap.Values.OrderBy(x => x).Select<int, T>((x) => {
 				return _array[_indexToDataMap[x]];
 			});
 		}
