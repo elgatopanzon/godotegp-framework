@@ -15,7 +15,7 @@ using GodotEGP.Config;
 
 using GodotEGP.ECS.Exceptions;
 
-public partial class ComponentArray<T>
+public partial class ComponentArray<T> : IComponentArray where T : notnull
 {
 	private PackedArray<T> _array;
 	public PackedArray<T> Array
@@ -57,6 +57,19 @@ public partial class ComponentArray<T>
 		}
 
 		return _array.Get(entityId);
+	}
+
+	public bool HasComponent(int entityId)
+	{
+		return _array.ContainsIndex(entityId);
+	}
+
+	public void DestroyComponents(int entityId)
+	{
+		if (HasComponent(entityId))
+		{
+			RemoveComponent(entityId);
+		}
 	}
 }
 
