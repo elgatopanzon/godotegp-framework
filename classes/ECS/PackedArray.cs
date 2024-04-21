@@ -115,6 +115,11 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		_currentSize--;
 	}
 
+	public bool ContainsIndex(int index)
+	{
+		return _indexToDataMap[index] != -1;
+	}
+
 	IEnumerator IEnumerable.GetEnumerator()
     {
        return (IEnumerator) GetEnumerator();
