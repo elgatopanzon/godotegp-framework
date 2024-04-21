@@ -45,8 +45,8 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 	}
 
 	// array of index mappings to underlying array indexes
-	private Dictionary<int, int> _indexToDataMap;
-	private Dictionary<int, int> _dataToIndexMap;
+	private int[] _indexToDataMap;
+	private int[] _dataToIndexMap;
 
 	// allow accessing indexes like regular array
 	public T this[int index] {
@@ -61,14 +61,8 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 
 		// init the data array, and the map arrays
 		_array = new T[maxSize];
-		_indexToDataMap = new(maxSize);
-		_dataToIndexMap = new(maxSize);
-
-		for (int i = 0; i < maxSize; i++)
-		{
-			_indexToDataMap[i] = -1;
-			_dataToIndexMap[i] = -1;
-		}
+		_indexToDataMap = new int[maxSize];
+		_dataToIndexMap = new int[maxSize];
 	}
 
 	public T Get(int index)
@@ -171,13 +165,13 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 
     public void SetOrderedIndexMap()
     {
-        _enumeratorOrderedIndexMap = _dataToIndexMap.Values.OrderBy(x => x).ToArray();
+        _enumeratorOrderedIndexMap = _dataToIndexMap.OrderBy(x => x).ToArray();
     }
 
     public IEnumerable<T> OrderedArray
     {
 		get {
-			return _dataToIndexMap.Values.Where((x) => x >= 0).OrderBy(x => x).Select<int, T>((x) => {
+			return _dataToIndexMap.Where((x) => x >= 0).OrderBy(x => x).Select<int, T>((x) => {
 				return _array[_indexToDataMap[x]];
 			});
 		}
