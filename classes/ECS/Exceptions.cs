@@ -47,3 +47,25 @@ public class ComponentNotFoundException : Exception
 		System.Runtime.Serialization.StreamingContext context)
 			: base(info, context) { }
 }
+
+public class ComponentNotRegisteredException : Exception
+{
+	public ComponentNotRegisteredException() { }
+	public ComponentNotRegisteredException(string message) : base(message) { }
+	public ComponentNotRegisteredException(string message, Exception inner) : base(message, inner) { }
+	protected ComponentNotRegisteredException(
+		System.Runtime.Serialization.SerializationInfo info,
+		System.Runtime.Serialization.StreamingContext context)
+			: base(info, context) { }
+}
+
+public class ComponentAlreadyRegisteredException : Exception
+{
+	public ComponentAlreadyRegisteredException() { }
+	public ComponentAlreadyRegisteredException(string message) : base(message) { }
+	public ComponentAlreadyRegisteredException(string message, Exception inner) : base(message, inner) { }
+	protected ComponentAlreadyRegisteredException(
+		System.Runtime.Serialization.SerializationInfo info,
+		System.Runtime.Serialization.StreamingContext context)
+			: base(info, context) { }
+}
