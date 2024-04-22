@@ -14,7 +14,6 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -66,7 +65,7 @@ public partial class SystemManager
 		_systemArchetypes[systemType] = archetype;
 	}
 
-	public void EraseEntity(int entityId)
+	public void DestroyEntity(int entityId)
 	{
 		foreach (SystemBase system in _systems.Values)
 		{
@@ -96,6 +95,6 @@ public partial class SystemManager
 
 	public bool ArchetypeMatches(BitArray archetype1, BitArray archetype2)
 	{
-		return ((BitArray)archetype1.Clone()).And(archetype2).OfType<bool>().All(e => !e) == archetype2.OfType<bool>().All(e => e);
+		return !(((BitArray)archetype1.Clone()).And(archetype2).HasAnySet()) == archetype2.HasAllSet();
 	}
 }
