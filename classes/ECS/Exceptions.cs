@@ -69,3 +69,25 @@ public class ComponentAlreadyRegisteredException : Exception
 		System.Runtime.Serialization.StreamingContext context)
 			: base(info, context) { }
 }
+
+public class SystemNotRegisteredException : Exception
+{
+	public SystemNotRegisteredException() { }
+	public SystemNotRegisteredException(string message) : base(message) { }
+	public SystemNotRegisteredException(string message, Exception inner) : base(message, inner) { }
+	protected SystemNotRegisteredException(
+		System.Runtime.Serialization.SerializationInfo info,
+		System.Runtime.Serialization.StreamingContext context)
+			: base(info, context) { }
+}
+
+public class SystemAlreadyRegisteredException : Exception
+{
+	public SystemAlreadyRegisteredException() { }
+	public SystemAlreadyRegisteredException(string message) : base(message) { }
+	public SystemAlreadyRegisteredException(string message, Exception inner) : base(message, inner) { }
+	protected SystemAlreadyRegisteredException(
+		System.Runtime.Serialization.SerializationInfo info,
+		System.Runtime.Serialization.StreamingContext context)
+			: base(info, context) { }
+}
