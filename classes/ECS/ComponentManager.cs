@@ -98,7 +98,7 @@ public partial class ComponentManager
 		return GetComponentArray<T>().GetComponent(entityId);
 	}
 
-	public void DestroyAllComponents(int entityId)
+	public void DestroyEntityComponents(int entityId)
 	{
 		// loop over all component arrays and remove the components for this
 		// entity id if they have it
