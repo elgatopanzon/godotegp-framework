@@ -76,6 +76,11 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		int dataIndex = _indexToDataMap[index];
 		return _array[dataIndex];
 	}
+	public ref T GetRef(int index)
+	{
+		int dataIndex = _indexToDataMap[index];
+		return ref _array[dataIndex];
+	}
 
 	// add value and grow array size
 	public void Add(T value)

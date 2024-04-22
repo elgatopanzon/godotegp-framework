@@ -49,14 +49,14 @@ public partial class ComponentArray<T> : IComponentArray where T : notnull
 		_array.RemoveAt(entityId);
 	}
 
-	public T GetComponent(int entityId)
+	public ref T GetComponent(int entityId)
 	{
 		if (!_array.ContainsIndex(entityId))
 		{
 			throw new ComponentNotFoundException($"Entity does not contain component.");
 		}
 
-		return _array.Get(entityId);
+		return ref _array.GetRef(entityId);
 	}
 
 	public bool HasComponent(int entityId)

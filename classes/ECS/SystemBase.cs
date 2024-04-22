@@ -18,7 +18,7 @@ using System.Collections.Generic;
 public partial class SystemBase
 {
 	// sorted set of entity IDs this system processes
-	private SortedSet<int> _entities;
+	protected SortedSet<int> _entities;
 	public SortedSet<int> Entities
 	{
 		get {
@@ -26,9 +26,17 @@ public partial class SystemBase
 		}
 	}
 
+	// instance of ECS class to accessing by systems
+	protected ECS _ecs;
+
 	public SystemBase()
 	{
 		_entities = new();
+	}
+
+	public void SetECS(ECS ecs)
+	{
+		_ecs = ecs;
 	}
 
 	public void EraseEntity(int entityId)
@@ -39,5 +47,10 @@ public partial class SystemBase
 	public void AddEntity(int entityId)
 	{
 		_entities.Add(entityId);
+	}
+
+	public virtual void _Process(double deltaTime)
+	{
+		
 	}
 }

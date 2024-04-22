@@ -24,21 +24,25 @@ public partial class SystemManager
 	// max number of systems
 	private int _maxSystems;
 
+	// max number of components, used for system archetypes
+	private int _maxComponents;
+
 	// dictionary of registered systems by type
 	private Dictionary<Type, SystemBase> _systems;
 
 	// dictionary of system archetypes as bitarray
 	private Dictionary<Type, BitArray> _systemArchetypes;
 
-	public SystemManager(int maxSystems = 32)
+	public SystemManager(int maxSystems = 32, int maxComponents = 32)
 	{
 		_maxSystems = maxSystems;
+		_maxComponents = maxComponents;
 
 		_systems = new(maxSystems);
 		_systemArchetypes = new(maxSystems);
 	}
 
-	public SystemBase RegisterSystem<T>() where T : SystemBase, new()
+	public SystemBase RegisterSystem<T>(ECS ecs) where T : SystemBase, new()
 	{
 		Type systemType = typeof(T);
 
@@ -46,6 +50,9 @@ public partial class SystemManager
 		{
 			// create new instance of system
 			_systems[systemType] = new T();
+			_systems[systemType].SetECS(ecs);
+
+			_systemArchetypes[systemType] = new BitArray(_maxComponents);
 
 			return _systems[systemType];
 		}
@@ -63,6 +70,18 @@ public partial class SystemManager
 		}
 
 		_systemArchetypes[systemType] = archetype;
+	}
+
+	public BitArray GetSystemArchetype<T>() where T : SystemBase
+	{
+		Type systemType = typeof(T);
+
+		if (!_systems.ContainsKey(systemType))
+		{
+			throw new SystemNotRegisteredException($"The system is not registered.");
+		}
+
+		return _systemArchetypes[systemType];
 	}
 
 	public void DestroyEntity(int entityId)

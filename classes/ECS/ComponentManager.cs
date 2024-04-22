@@ -93,9 +93,9 @@ public partial class ComponentManager
 		GetComponentArray<T>().RemoveComponent(entityId);
 	}
 
-	public T GetComponent<T>(int entityId) where T : notnull
+	public ref T GetComponent<T>(int entityId) where T : notnull
 	{
-		return GetComponentArray<T>().GetComponent(entityId);
+		return ref GetComponentArray<T>().GetComponent(entityId);
 	}
 
 	public void DestroyEntityComponents(int entityId)

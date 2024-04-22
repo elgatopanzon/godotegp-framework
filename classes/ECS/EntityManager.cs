@@ -45,13 +45,13 @@ public partial class EntityManager
 
 		// init the Archetypes bit array
 		_entityArchetypes = new BitArray[maxEntities];
-		for (int entityId = 0; entityId < maxEntities; entityId++)
+		for (int entityId = maxEntities - 1; entityId >= 0; entityId--)
 		{
     		_entityArchetypes[entityId] = new BitArray(maxComponents);
 		}
 
 		// add all available entities to the queue
-		for (int entityId = 0; entityId < _maxEntities; entityId++)
+		for (int entityId = maxEntities - 1; entityId >= 0; entityId--)
 		{
 			_availableEntities.Push(entityId);
 		}
