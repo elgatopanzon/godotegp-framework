@@ -44,7 +44,7 @@ public partial class EntityManager
 		_availableEntities = new(maxEntities);
 
 		// init the Archetypes bit array
-		_entityArchetypes = new BitArray[maxComponents];
+		_entityArchetypes = new BitArray[maxEntities];
 		for (int entityId = 0; entityId < maxEntities; entityId++)
 		{
     		_entityArchetypes[entityId] = new BitArray(maxComponents);
