@@ -4,7 +4,7 @@
  * @created     : Saturday Apr 20, 2024 19:31:01 CST
  */
 
-namespace GodotEGP.ECS;
+namespace GodotEGP.Collections;
 
 using Godot;
 using GodotEGP.Objects.Extensions;

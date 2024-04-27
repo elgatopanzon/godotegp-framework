@@ -12,6 +12,7 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
+using GodotEGP.Collections;
 
 using GodotEGP.ECS.Exceptions;
 
