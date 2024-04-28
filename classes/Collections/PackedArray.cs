@@ -22,6 +22,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 {
 	// max size the array can be
 	private int _maxSize;
+	const double GoldenRatio = 1.61803398874989484820458683436;
 
 	// current size of the array
 	private int _currentSize;
@@ -107,7 +108,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		// resize the array to double size once it's full
 		if (_currentSize >= _maxSize)
 		{
-			Resize(_maxSize * 2);
+			Resize(Convert.ToInt32(_maxSize * GoldenRatio));
 			ClearDataIndexes(_currentSize);
 		}
 
