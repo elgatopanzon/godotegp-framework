@@ -55,7 +55,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		}
 	}
 
-	public PackedArray(int maxSize = 0)
+	public PackedArray(int maxSize = 1)
 	{
 		_maxSize = maxSize;
 
@@ -64,7 +64,12 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		_indexToDataMap = new int[maxSize];
 		_dataToIndexMap = new int[maxSize];
 
-		for (int i = 0; i < maxSize; i++)
+		ClearDataIndexes();
+	}
+
+	public void ClearDataIndexes(int startFrom = 0)
+	{
+		for (int i = startFrom; i < _maxSize; i++)
 		{
 			_indexToDataMap[i] = -1;
 			_dataToIndexMap[i] = -1;
@@ -88,8 +93,24 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		Insert(_currentSize, value);
 	}
 
+	public void Resize(int newSize)
+	{
+		System.Array.Resize<T>(ref _array, newSize);
+		System.Array.Resize<int>(ref _indexToDataMap, newSize);
+		System.Array.Resize<int>(ref _dataToIndexMap, newSize);
+
+		_maxSize = newSize;
+	}
+
 	public void Insert(int index, T value)
 	{
+		// resize the array to double size once it's full
+		if (_currentSize >= _maxSize)
+		{
+			Resize(_maxSize * 2);
+			ClearDataIndexes(_currentSize);
+		}
+
 		// add data to the end of the array at current size
 		_array[_currentSize] = value;
 
