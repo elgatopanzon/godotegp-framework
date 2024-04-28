@@ -142,6 +142,17 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		_currentSize--;
 	}
 
+	public void Remove(T value)
+	{
+		for (int i = 0; i < _maxSize; i++)
+		{
+			if (_array[i].Equals(value))
+			{
+				RemoveAt(_dataToIndexMap[i]);
+			}
+		}
+	}
+
 	public bool ContainsIndex(int index)
 	{
 		return _indexToDataMap[index] != -1;
