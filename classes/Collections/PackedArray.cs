@@ -353,3 +353,153 @@ public partial class PackedArrayDictBacked<T> : IEnumerable, IEnumerator
 		}
     }
 }
+
+public partial class PackedArrayDictionary<T> : IEnumerable, IEnumerator
+{
+	// max size the array can be
+	private int _maxSize;
+
+	// current size of the array
+	private int _currentSize;
+	public int Length {
+		get {
+			return _currentSize;
+		}
+	}
+	public int Count {
+		get {
+			return Length;
+		}
+	}
+
+	// private array of T
+	private Dictionary<int, T> _dict;
+	public IEnumerable<T> Array {
+		get {
+			return _dict.Values;
+		}
+	}
+
+	// allow accessing indexes like regular array
+	public T this[int index] {
+		get {
+			return Get(index);
+		}
+	}
+
+	public PackedArrayDictionary(int maxSize = 0)
+	{
+		_maxSize = maxSize;
+
+		// init the data array, and the map arrays
+		_dict = new(maxSize);
+	}
+
+	public T Get(int index)
+	{
+		return _dict[index];
+	}
+	public ref T GetRef(int index)
+	{
+		return ref _dict.Values.ToArray()[index];
+	}
+
+	// add value and grow array size
+	public void Add(T value)
+	{
+		Insert(_currentSize, value);
+	}
+
+	public void Insert(int index, T value)
+	{
+		// add data to the end of the array at current size
+		_dict[_currentSize] = value;
+
+		// increment current size
+		_currentSize++;
+	}
+
+	// remove and keep array packed
+	public void RemoveAt(int index)
+	{
+		// move the end element to the deleted element's position
+		_dict.Remove(index);
+
+		// decrease array size
+		_currentSize--;
+	}
+
+	public bool ContainsIndex(int index)
+	{
+		return _dict.ContainsKey(index);
+	}
+
+	IEnumerator IEnumerable.GetEnumerator()
+    {
+       return (IEnumerator) GetEnumerator();
+    }
+
+    public PackedArrayDictionary<T> GetEnumerator()
+    {
+        return this;
+    }
+
+	// Enumerators are positioned before the first element
+    // until the first MoveNext() call.
+    int _enumeratorPosition = -1;
+    int[] _enumeratorOrderedIndexMap;
+
+    public bool MoveNext()
+    {
+        _enumeratorPosition++;
+        return (_enumeratorPosition < _currentSize);
+    }
+
+    public void Reset()
+    {
+        _enumeratorPosition = -1;
+        SetOrderedIndexMap();
+    }
+
+    object IEnumerator.Current
+    {
+        get
+        {
+            return Current;
+        }
+    }
+
+    public T Current
+    {
+        get
+        {
+            try
+            {
+        		if (_enumeratorOrderedIndexMap == null)
+        		{
+        			SetOrderedIndexMap();
+        		}
+                return _dict[_enumeratorPosition];
+            }
+            catch (IndexOutOfRangeException)
+            {
+                throw new InvalidOperationException();
+            }
+        }
+    }
+
+    public void SetOrderedIndexMap()
+    {
+        // _enumeratorOrderedIndexMap = _dataToIndexMap.OrderBy(x => x).ToArray();
+    }
+
+    public IEnumerable<T> OrderedArray
+    {
+		get {
+			// return _dataToIndexMap.Where((x) => x >= 0).OrderBy(x => x).Select<int, T>((x) => {
+			// 	return _array[_indexToDataMap[x]];
+			// });
+			return _dict.Values;
+		}
+    }
+}
