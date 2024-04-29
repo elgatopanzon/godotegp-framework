@@ -158,6 +158,11 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		return _indexToDataMap[index] != -1;
 	}
 
+	public bool Contains(T value)
+	{
+		return (System.Array.IndexOf(_array, value) != -1);
+	}
+
 	IEnumerator IEnumerable.GetEnumerator()
     {
        return (IEnumerator) GetEnumerator();
