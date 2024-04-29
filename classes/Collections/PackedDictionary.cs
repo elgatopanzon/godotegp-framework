@@ -53,8 +53,8 @@ public partial class PackedDictionary<TKey, TValue>
 	{
 		_maxSize = maxSize;
 
-		_keys = new(32);
-		_values = new(32);
+		_keys = new();
+		_values = new();
 	}
 
 	public TValue Get(TKey key)
