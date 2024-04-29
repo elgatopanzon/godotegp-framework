@@ -44,6 +44,9 @@ public partial class PackedDictionary<TKey, TValue>
 		get {
 			return Get(key);
 		}
+		set {
+			Insert(key, value);
+		}
 	}
 
 	public PackedDictionary(int maxSize = 0)
@@ -75,11 +78,17 @@ public partial class PackedDictionary<TKey, TValue>
 
 	public void Insert(TKey key, TValue value)
 	{
-		// add the key and value to the backing arrays
-		_keys.Insert(_currentSize, key);
-		_values.Insert(_currentSize, value);
+		int keyIndex = GetIndex(key);
 
-		_currentSize++;
+		if (keyIndex == -1)
+		{
+			keyIndex = _currentSize;
+			_currentSize++;
+		}
+
+		// add the key and value to the backing arrays
+		_keys.Insert(keyIndex, key);
+		_values.Insert(keyIndex, value);
 	}
 
 	public void Remove(TKey key)
@@ -93,5 +102,24 @@ public partial class PackedDictionary<TKey, TValue>
 		_currentSize--;
 	}
 
+	public bool ContainsKey(TKey key)
+	{
+		return (GetIndex(key) != -1);
+	}
+
+	public bool TryGetValueRef(TKey key, out TValue value)
+	{
+		value = default(TValue);
+
+		int foundIndex = GetIndex(key);
+
+		if (foundIndex != -1)
+		{
+			value = _values[foundIndex];
+			return true;
+		}
+
+		return false;
+	}
 }
 
