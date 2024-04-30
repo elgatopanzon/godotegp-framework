@@ -47,7 +47,7 @@ public partial class ComponentManager
 
 	public ComponentTypeId CreateComponentArray<T>(Entity componentTypeId) where T : IComponent
 	{
-		if (!_componentArrays.TryGetValueRef(componentTypeId, out IComponentArray componentArray))
+		if (!_componentArrays.ContainsKey(componentTypeId))
 		{
 			// create a new component array for this component type
 			_componentArrays[componentTypeId] = new ComponentArray<T>();
@@ -59,8 +59,9 @@ public partial class ComponentManager
 	public ComponentTypeId CreateComponentArray<T>() where T : IComponent
 	{
 		Type componentType = typeof(T);
+		ulong componentTypeId;
 
-		if (!_componentTypeIds.TryGetValueRef(componentType, out ComponentTypeId componentTypeId))
+		if (!_componentTypeIds.ContainsKey(componentType))
 		{
 			// create an entity ID for this component type
 			// and take the first half uint as the id
@@ -74,6 +75,10 @@ public partial class ComponentManager
 			// create a new component array for this component type
 			_componentArrays[componentTypeId] = new ComponentArray<T>();
 		}
+		else
+		{
+			componentTypeId = _componentTypeIds[componentType];
+		}
 
 		return componentTypeId;
 	}
@@ -83,10 +88,11 @@ public partial class ComponentManager
 		where TT : IComponent
 	{
 		Type componentType = typeof(EcsRelation<T, TT>);
+		ulong componentTypeId;
 
 		LoggerManager.LogDebug("Creating component pair array", "", "pair", $"{typeof(T).Name}, {typeof(TT).Name}");
 
-		if (!_componentTypeIds.TryGetValueRef(componentType, out ComponentTypeId componentTypeId))
+		if (!_componentTypeIds.ContainsKey(componentType))
 		{
 			ComponentTypeId typeLeftId = CreateComponentArray<T>();
 			ComponentTypeId typeRightId = CreateComponentArray<TT>();
@@ -101,6 +107,10 @@ public partial class ComponentManager
 			LoggerManager.LogDebug("Pair component type id", "", "pairTypeId", GetComponentType<EcsRelation<T, TT>>());
 
 			componentTypeId = pairEntityId;
+		}
+		else
+		{
+			componentTypeId = _componentTypeIds[componentType];
 		}
 
 		return componentTypeId;
@@ -163,7 +173,7 @@ public partial class ComponentManager
 		LoggerManager.LogDebug("Pair relation pair id", "", "id", relationPairId);
 
 		// if the array for this pair doesn't exist, create it
-		if (!_componentArrays.TryGetValueRef(relationPairId, out IComponentArray componentArray))
+		if (!_componentArrays.ContainsKey(relationPairId))
 		{
 			CreateComponentArray<T>(relationPairId);
 		}
