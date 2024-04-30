@@ -22,7 +22,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 {
 	// max size the array can be
 	private int _maxSize;
-	const double GoldenRatio = 1.61803398874989484820458683436;
+	private double _growMultiplier;
 
 	// current size of the array
 	private int _currentSize;
@@ -59,9 +59,10 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		}
 	}
 
-	public PackedArray(int maxSize = 1)
+	public PackedArray(int maxSize = 1, double growMultiplier = 1.61803398874989484820458683436)
 	{
 		_maxSize = maxSize;
+		_growMultiplier = growMultiplier;
 
 		// init the data array, and the map arrays
 		_array = new T[maxSize];
@@ -111,7 +112,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		// resize the array to double size once it's full
 		if (_currentSize >= _maxSize)
 		{
-			Resize(Convert.ToInt32(_maxSize * GoldenRatio));
+			Resize(Convert.ToInt32(_maxSize * _growMultiplier));
 			ClearDataIndexes(_currentSize);
 		}
 
