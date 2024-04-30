@@ -54,6 +54,9 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		get {
 			return Get(index);
 		}
+		set {
+			Insert(index, value);
+		}
 	}
 
 	public PackedArray(int maxSize = 1)
