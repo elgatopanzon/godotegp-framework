@@ -209,7 +209,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 			// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
 			// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
 
-			RemoveAt(_indexToDataMap[index]);
+			RemoveAt(index);
 		}
 
 		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
@@ -232,7 +232,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		{
 			if (_array[i].Equals(value))
 			{
-				return i;
+				return _indexToDataMap[i];
 			}
 		}
 
