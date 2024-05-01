@@ -74,14 +74,14 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		_dataToIndexMap = new int[maxSize];
 		_indexToDataMap = new int[maxSize];
 
-		LoggerManager.LogDebug("Init packed array", typeof(T).Name, "size", maxSize);
+		// LoggerManager.LogDebug("Init packed array", typeof(T).Name, "size", maxSize);
 
 		ClearDataIndexes();
 	}
 
 	public void ClearDataIndexes(int startFrom = 0)
 	{
-		LoggerManager.LogDebug("Clearing data indexes", typeof(T).Name);
+		// LoggerManager.LogDebug("Clearing data indexes", typeof(T).Name);
 
 		for (int i = startFrom; i < _maxSize; i++)
 		{
@@ -104,7 +104,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 	// add value and grow array size
 	public void Add(T value)
 	{
-		LoggerManager.LogDebug("Appending value", typeof(T).Name, _currentSize.ToString(), value);
+		// LoggerManager.LogDebug("Appending value", typeof(T).Name, _currentSize.ToString(), value);
 
 		Insert(_currentSize, value);
 	}
@@ -115,7 +115,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		System.Array.Resize<int>(ref _dataToIndexMap, newSize);
 		System.Array.Resize<int>(ref _indexToDataMap, newSize);
 
-		LoggerManager.LogDebug("Resizing array", typeof(T).Name, "size", $"{_maxSize} => {newSize}");
+		// LoggerManager.LogDebug("Resizing array", typeof(T).Name, "size", $"{_maxSize} => {newSize}");
 
 		_maxSize = newSize;
 	}
@@ -129,7 +129,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 			ClearDataIndexes(_currentSize);
 		}
 
-		LoggerManager.LogDebug("Inserting value", typeof(T).Name, index.ToString(), value);
+		// LoggerManager.LogDebug("Inserting value", typeof(T).Name, index.ToString(), value);
 
 		// add data to the end of the array at current size
 		_array[_currentSize] = value;
@@ -138,30 +138,30 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		_dataToIndexMap[index] = _currentSize;
 		_indexToDataMap[_currentSize] = index;
 
-		LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
-		LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
+		// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
+		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
 		
 		// increment current size
 		_currentSize++;
 
-		LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
+		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
 	}
 
 	// remove and keep array packed
 	public void RemoveAt(int index)
 	{
-		LoggerManager.LogDebug("Removing index", typeof(T).Name, "index", index);
+		// LoggerManager.LogDebug("Removing index", typeof(T).Name, "index", index);
 
 		// move the end element to the deleted element's position
 		int lastElementIndex = _currentSize - 1;
 		int removedElementIndex = _dataToIndexMap[index];
 
-		LoggerManager.LogDebug("Last element index", typeof(T).Name, "lastElementIndex", lastElementIndex);
-		LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
-		LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
-		LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
-		LoggerManager.LogDebug("_dataToIndexMap[index]", typeof(T).Name, "_dataToIndexMap[index]", _indexToDataMap[index]);
-		LoggerManager.LogDebug("_array[lastElementIndex]", typeof(T).Name, "_array[lastElementIndex]", _array[lastElementIndex]);
+		// LoggerManager.LogDebug("Last element index", typeof(T).Name, "lastElementIndex", lastElementIndex);
+		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
+		// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
+		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
+		// LoggerManager.LogDebug("_dataToIndexMap[index]", typeof(T).Name, "_dataToIndexMap[index]", _indexToDataMap[index]);
+		// LoggerManager.LogDebug("_array[lastElementIndex]", typeof(T).Name, "_array[lastElementIndex]", _array[lastElementIndex]);
 
 		_array[removedElementIndex] = _array[lastElementIndex];
 
@@ -187,33 +187,33 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		// decrease array size
 		_currentSize--;
 
-		LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
-		LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
-
-		LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
-		LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
+		// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
+		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
+        //
+		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
+		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
 	}
 
 	public void Remove(T value)
 	{
-		LoggerManager.LogDebug("Removing value", typeof(T).Name, "value", value);
+		// LoggerManager.LogDebug("Removing value", typeof(T).Name, "value", value);
 
 		int index = IndexOf(value);
 
 		if (index != -1)
 		{
-			LoggerManager.LogDebug("Found value at real index", typeof(T).Name, "index", index);
-			LoggerManager.LogDebug("Found value indexToData", typeof(T).Name, "indexToData", _indexToDataMap[index]);
-			LoggerManager.LogDebug("Found value dataToIndex", typeof(T).Name, "dataToIndex", _dataToIndexMap[index]);
-
-			LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
-			LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
+			// LoggerManager.LogDebug("Found value at real index", typeof(T).Name, "index", index);
+			// LoggerManager.LogDebug("Found value indexToData", typeof(T).Name, "indexToData", _indexToDataMap[index]);
+			// LoggerManager.LogDebug("Found value dataToIndex", typeof(T).Name, "dataToIndex", _dataToIndexMap[index]);
+            //
+			// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
+			// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
 
 			RemoveAt(_indexToDataMap[index]);
 		}
 
-		LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
-		LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
+		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
+		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
 	}
 
 	public bool ContainsIndex(int index)
