@@ -70,7 +70,7 @@ public partial class PackedDictionary<TKey, TValue>
 
 	public int GetIndex(TKey key)
 	{
-		return System.Array.IndexOf(_keys.Array, key);
+		return _keys.IndexOf(key);
 	}
 
 	public void Add(TKey key, TValue value)
@@ -97,11 +97,14 @@ public partial class PackedDictionary<TKey, TValue>
 	{
 		int keyIndex = GetIndex(key);
 
-		// remove the key and value from the backing store
-		_keys.RemoveAt(keyIndex);
-		_values.RemoveAt(keyIndex);
+		if (keyIndex != -1)
+		{
+			// remove the key and value from the backing store
+			_keys.RemoveAt(keyIndex);
+			_values.RemoveAt(keyIndex);
 
-		_currentSize--;
+			_currentSize--;
+		}
 	}
 
 	public bool ContainsKey(TKey key)
