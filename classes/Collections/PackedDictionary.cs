@@ -109,7 +109,7 @@ public partial class PackedDictionary<TKey, TValue>
 		return (GetIndex(key) != -1);
 	}
 
-	public bool TryGetValueRef(TKey key, out TValue value)
+	public bool TryGetValue(TKey key, out TValue value)
 	{
 		value = default(TValue);
 
