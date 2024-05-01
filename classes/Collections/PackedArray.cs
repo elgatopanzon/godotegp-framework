@@ -44,6 +44,11 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 			return _array;
 		}
 	}
+	public ReadOnlySpan<T> Span {
+		get {
+			return _array.AsSpan().Slice(0, _currentSize);
+		}
+	}
 
 	// array of index mappings to underlying array indexes
 	private int[] _dataToIndexMap;
@@ -279,7 +284,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
         		{
         			SetOrderedIndexMap();
         		}
-                return _array[_dataToIndexMap[_enumeratorOrderedIndexMap[_enumeratorPosition]]];
+                return Span[_dataToIndexMap[_enumeratorOrderedIndexMap[_enumeratorPosition]]];
             }
             catch (IndexOutOfRangeException)
             {
@@ -297,7 +302,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
     {
 		get {
 			return _indexToDataMap.Where((x) => x >= 0).OrderBy(x => x).Select<int, T>((x) => {
-				return _array[_dataToIndexMap[x]];
+				return Span[_dataToIndexMap[x]];
 			});
 		}
     }
