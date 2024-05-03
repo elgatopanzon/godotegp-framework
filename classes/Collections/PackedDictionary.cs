@@ -40,6 +40,16 @@ public partial class PackedDictionary<TKey, TValue>
 			return _values.Array;
 		}
 	}
+	public ReadOnlySpan<TKey> KeysSpan {
+		get {
+			return _keys.Span;
+		}
+	}
+	public ReadOnlySpan<TValue> ValuesSpan {
+		get {
+			return _values.Span;
+		}
+	}
 
 	// allow accessing indexes like regular dictionary
 	public TValue this[TKey key] {
