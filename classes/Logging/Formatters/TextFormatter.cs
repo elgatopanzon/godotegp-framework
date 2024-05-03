@@ -174,7 +174,7 @@ public partial class TextFormatter : ILogFormatter
 
 	public virtual string FormatDataStrings(string dataName, string dataJson)
 	{
-        return $"{dataName}={dataJson}".Replace("\n", "");
+        return $"{dataName}={(dataJson.StartsWith("{") || dataJson.StartsWith("[") ? "\n" : "")}{dataJson}";
 	}
 
 	public virtual string FormatDataTraceString(string dataString, Logging.Message loggerMessage)
