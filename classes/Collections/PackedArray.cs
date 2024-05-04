@@ -18,7 +18,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public partial class PackedArray<T> : IEnumerable, IEnumerator
+public partial class PackedArray<T>
 {
 	// max size the array can be
 	private int _maxSize;
@@ -239,66 +239,67 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		return -1;
 	}
 
-	IEnumerator IEnumerable.GetEnumerator()
-    {
-       return (IEnumerator) GetEnumerator();
-    }
+	// IEnumerator IEnumerable.GetEnumerator()
+    // {
+    //    return (IEnumerator) GetEnumerator();
+    // }
+    //
+    // public PackedArray<T> GetEnumerator()
+    // {
+    //     return this;
+    // }
+    //
+	// // Enumerators are positioned before the first element
+    // // until the first MoveNext() call.
+    // int _enumeratorPosition = -1;
+    // int[] _enumeratorOrderedIndexMap;
+    //
+    // public bool MoveNext()
+    // {
+    //     _enumeratorPosition++;
+    //     return (_enumeratorPosition < _currentSize);
+    // }
+    //
+    // public void Reset()
+    // {
+    //     _enumeratorPosition = -1;
+    //     SetOrderedIndexMap();
+    // }
+    //
+    // object IEnumerator.Current
+    // {
+    //     get
+    //     {
+    //         return Current;
+    //     }
+    // }
+    //
+    // public T Current
+    // {
+    //     get
+    //     {
+    //         try
+    //         {
+    //     		if (_enumeratorOrderedIndexMap == null)
+    //     		{
+    //     			SetOrderedIndexMap();
+    //     		}
+    //             return Span[_dataToIndexMap[_enumeratorOrderedIndexMap[_enumeratorPosition]]];
+    //         }
+    //         catch (IndexOutOfRangeException)
+    //         {
+    //             throw new InvalidOperationException();
+    //         }
+    //     }
+    // }
+    //
+    // public void SetOrderedIndexMap()
+    // {
+    //     _enumeratorOrderedIndexMap = _indexToDataMap.OrderBy(x => x).ToArray();
+    // }
+    //
 
-    public PackedArray<T> GetEnumerator()
-    {
-        return this;
-    }
-
-	// Enumerators are positioned before the first element
-    // until the first MoveNext() call.
-    int _enumeratorPosition = -1;
-    int[] _enumeratorOrderedIndexMap;
-
-    public bool MoveNext()
-    {
-        _enumeratorPosition++;
-        return (_enumeratorPosition < _currentSize);
-    }
-
-    public void Reset()
-    {
-        _enumeratorPosition = -1;
-        SetOrderedIndexMap();
-    }
-
-    object IEnumerator.Current
-    {
-        get
-        {
-            return Current;
-        }
-    }
-
-    public T Current
-    {
-        get
-        {
-            try
-            {
-        		if (_enumeratorOrderedIndexMap == null)
-        		{
-        			SetOrderedIndexMap();
-        		}
-                return Span[_dataToIndexMap[_enumeratorOrderedIndexMap[_enumeratorPosition]]];
-            }
-            catch (IndexOutOfRangeException)
-            {
-                throw new InvalidOperationException();
-            }
-        }
-    }
-
-    public void SetOrderedIndexMap()
-    {
-        _enumeratorOrderedIndexMap = _indexToDataMap.OrderBy(x => x).ToArray();
-    }
-
-    public IEnumerable<T> OrderedArray
+    internal IEnumerable<T> OrderedArray
     {
 		get {
 			return _indexToDataMap.Where((x) => x >= 0).OrderBy(x => x).Select<int, T>((x) => {

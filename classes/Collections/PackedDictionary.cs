@@ -197,7 +197,7 @@ public partial class PackedDictionaryBuckets<TKey, TValue>
 	{
 		PackedArray<T> joined = new PackedArray<T>(buckets.Array.Sum(a => a.Count));
 		int position = 0;
-		foreach (var a in buckets)
+		foreach (var a in buckets.Array)
 		{
 			Array.Copy(a.Array, 0, joined.Array, position, a.Count);
 			position += a.Count;
