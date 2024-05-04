@@ -64,7 +64,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		}
 	}
 
-	public PackedArray(int maxSize = 1, double growMultiplier = 1.61803398874989484820458683436)
+	public PackedArray(int maxSize = 0, double growMultiplier = 1.61803398874989484820458683436)
 	{
 		_maxSize = maxSize;
 		_growMultiplier = growMultiplier;
@@ -125,7 +125,7 @@ public partial class PackedArray<T> : IEnumerable, IEnumerator
 		// resize the array to double size once it's full
 		if (_currentSize >= _maxSize)
 		{
-			Resize(Convert.ToInt32(_maxSize * _growMultiplier));
+			Resize(Convert.ToInt32(Math.Max(1, _maxSize) * _growMultiplier));
 			ClearDataIndexes(_currentSize);
 		}
 
