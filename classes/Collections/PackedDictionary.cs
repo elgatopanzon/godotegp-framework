@@ -30,12 +30,12 @@ public partial class PackedDictionary<TKey, TValue>
 	private PackedArray<TValue> _values;
 
 	// expose Keys and Values properties
-	public TKey[] Keys {
+	public ArraySegment<TKey> Keys {
 		get {
 			return _keys.Array;
 		}
 	}
-	public TValue[] Values {
+	public ArraySegment<TValue> Values {
 		get {
 			return _values.Array;
 		}
@@ -195,15 +195,15 @@ public partial class PackedDictionaryBuckets<TKey, TValue>
 
 	public T[] JoinBuckets<T>(PackedArray<PackedArray<T>> buckets)
 	{
-		PackedArray<T> joined = new PackedArray<T>(buckets.Array.Sum(a => a.Count));
+		T[] joined = new T[buckets.Array.Sum(a => a.Count)];
 		int position = 0;
 		foreach (var a in buckets.Array)
 		{
-			Array.Copy(a.Array, 0, joined.Array, position, a.Count);
+			Array.Copy(a.Array.ToArray(), 0, joined, position, a.Count);
 			position += a.Count;
 		}
 
-		return joined.Array;
+		return joined;
 	}
 
 	public TValue Get(TKey key)
@@ -222,7 +222,7 @@ public partial class PackedDictionaryBuckets<TKey, TValue>
 
 	public int GetIndex(TKey key, int bucket)
 	{
-		return System.Array.IndexOf(_keys[bucket].Array, key);
+		return System.Array.IndexOf(_keys[bucket].RawArray, key);
 	}
 
 	public int GetBucket(TKey key)

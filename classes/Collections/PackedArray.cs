@@ -39,9 +39,14 @@ public partial class PackedArray<T>
 
 	// private array of T
 	private T[] _array;
-	public T[] Array {
+	internal T[] RawArray {
 		get {
 			return _array;
+		}
+	}
+	public ArraySegment<T> Array {
+		get {
+			return new ArraySegment<T>(_array, 0, _currentSize);
 		}
 	}
 	public ReadOnlySpan<T> Span {
