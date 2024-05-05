@@ -587,26 +587,18 @@ public partial class ECS : Service
 		// match all entities against any of the valid filter archetypes
 		PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes = _entityManager.GetArchetypes();
 
+		// holds a list of non matching entities to remove at the end
 		PackedArray<Entity> nonMatchingEntities = new();
 
+		// loop over all entities and build a results list
 		foreach (Entity entity in entityArchetypes.KeysSpan)
 		{
-			if (entityArchetypes.TryGetValue(entity, out PackedArray<Entity> entitiesArchetypes))
+			// match the entity against the query
+			bool queryMatch = QueryMatchEntity(entity, entityArchetypes, query, result, nonMatchingEntities);
+
+			if (queryMatch)
 			{
-				// for the sake of this on-demand query it's better performance
-				// to stop processing empty entities
-				if (entitiesArchetypes.Count == 0)
-				{
-					continue;
-				}
-
-				bool queryMatch = QueryMatchFilters(entity, query, entitiesArchetypes, result, nonMatchingEntities);
-
-				// add if not added to non matching entities
-				if (queryMatch)
-				{
-					result.AddEntity(entity);
-				}
+				result.AddEntity(entity);
 			}
 		}
 
@@ -617,6 +609,24 @@ public partial class ECS : Service
 		}
 
 		return result;
+	}
+
+	public bool QueryMatchEntity(Entity entity, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, ECSv3.Queries.Query query, QueryResult result, PackedArray<Entity> nonMatchingEntities)
+	{
+		if (entityArchetypes.TryGetValue(entity, out PackedArray<Entity> entitiesArchetypes))
+		{
+			// for the sake of this on-demand query it's better performance
+			// to stop processing empty entities
+			if (entitiesArchetypes.Count == 0)
+			{
+				return false;
+			}
+
+			return QueryMatchFilters(entity, query, entitiesArchetypes, result, nonMatchingEntities);
+		}
+
+		// query match failed, because entity has no archetype
+		return false;
 	}
 
 	// match a query against filters with passed down state
