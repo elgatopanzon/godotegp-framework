@@ -587,31 +587,28 @@ public partial class ECS : Service
 		// match all entities against any of the valid filter archetypes
 		PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes = _entityManager.GetArchetypes();
 
-		// holds a list of non matching entities to remove at the end
-		PackedArray<Entity> nonMatchingEntities = new();
-
 		// loop over all entities and build a results list
 		foreach (Entity entity in entityArchetypes.KeysSpan)
 		{
 			// match the entity against the query
-			bool queryMatch = QueryMatchEntity(entity, entityArchetypes, query, result, nonMatchingEntities);
+			bool queryMatch = QueryMatchEntity(entity, entityArchetypes, query);
 
 			if (queryMatch)
 			{
 				result.AddEntity(entity);
 			}
 		}
-
-		// remove all non-matching entities
-		foreach (Entity entityRemove in nonMatchingEntities.Array)
-		{
-			result.Entities.Remove(entityRemove);
-		}
+        //
+		// // remove all non-matching entities
+		// foreach (Entity entityRemove in nonMatchingEntities.Array)
+		// {
+		// 	result.Entities.Remove(entityRemove);
+		// }
 
 		return result;
 	}
 
-	public bool QueryMatchEntity(Entity entity, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, ECSv3.Queries.Query query, QueryResult result, PackedArray<Entity> nonMatchingEntities)
+	public bool QueryMatchEntity(Entity entity, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, ECSv3.Queries.Query query)
 	{
 		if (entityArchetypes.TryGetValue(entity, out PackedArray<Entity> entitiesArchetypes))
 		{
@@ -622,7 +619,7 @@ public partial class ECS : Service
 				return false;
 			}
 
-			return QueryMatchFilters(entity, query, entitiesArchetypes, result, nonMatchingEntities);
+			return QueryMatchFilters(entity, query, entitiesArchetypes);
 		}
 
 		// query match failed, because entity has no archetype
@@ -630,15 +627,16 @@ public partial class ECS : Service
 	}
 
 	// match a query against filters with passed down state
-	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes, QueryResult result, PackedArray<Entity> nonMatchingEntities)
+	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes)
 	{
 		LoggerManager.LogDebug($"Matching {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.Array);
 
 		int matchCount = 0;
-		bool match = query.ArchetypeFilters.Array.Where((filter) => {
+		foreach (var filter in query.ArchetypeFilters.Array)
+		{
 			LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
-			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, result, nonMatchingEntities);
+			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, out bool nonMatchingEntity);
 
 			if (matched)
 			{
@@ -647,17 +645,23 @@ public partial class ECS : Service
 				matchCount++;
 			}
 
-			return false;
-		}).Any();
+			// if the entity is a non-matching entity, stop the query
+			if (nonMatchingEntity)
+			{
+				return false;
+			}
+		}
 
+		// it's considered a match if we match at least 1 filter
 		return (matchCount > 0);
 	}
 
 	// match individual filters of a query
-	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, QueryResult result, PackedArray<Entity> nonMatchingEntities)
+	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
 	{
 		// match based on the operator type
 		bool matched = false;
+		nonMatchingEntity = false;
 
 		// do an archetype comparison if there's no scoped query
 		if (filter.ScopedQueries.Count == 0)
@@ -671,7 +675,8 @@ public partial class ECS : Service
 			if (filter.OperatorType == FilterMatchType.Not && matched)
 			{
 				LoggerManager.LogDebug("Not filter matched (real)");
-				nonMatchingEntities.Add(entity);
+
+				nonMatchingEntity = true;
 			}
 
 			// if the match method is reverse (where the match result is true
@@ -681,6 +686,8 @@ public partial class ECS : Service
 			{
 				LoggerManager.LogDebug("Not-only query match");
 				matched = true;
+
+				nonMatchingEntity = false;
 			}
 
 		}
@@ -693,7 +700,7 @@ public partial class ECS : Service
 			bool match = false;
 			foreach (var q in filter.ScopedQueries.Array)
 			{
-				match = QueryMatchFilters(entity, q, entitiesArchetypes, result, nonMatchingEntities);
+				match = QueryMatchFilters(entity, q, entitiesArchetypes);
 
 				if (match)
 				{
