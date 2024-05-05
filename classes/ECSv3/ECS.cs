@@ -668,8 +668,35 @@ public partial class ECS : Service
 		{
 			LoggerManager.LogDebug($"Matching against archetype filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
 
-			matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
+			// match filter by archetype intersect
+			if (filter.MatchMethod == FilterMatchMethod.MatchArchetypes || filter.MatchMethod == FilterMatchMethod.MatchArchetypesReverse)
+			{
+				matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
+			}
 
+			// match filter by specific matching entity ID
+			else if (filter.MatchMethod == FilterMatchMethod.MatchEntity)
+			{
+				LoggerManager.LogDebug("Match type entity id", "", "operatorType", filter.OperatorType);
+
+				// is and is not match types
+				if (filter.OperatorType == FilterMatchType.Is && entity == filter.Filter.Entity)
+				{
+					matched = true;
+					return true;
+				}
+
+				if (filter.OperatorType == FilterMatchType.IsNot && entity == filter.Filter.Entity)
+				{
+					matched = false;
+					nonMatchingEntity = true;
+					return false;
+				}
+				else
+				{
+					return false;
+				}
+			}
 
 		}
 		// recursively check matches with scoped queries

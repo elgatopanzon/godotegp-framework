@@ -128,7 +128,7 @@ public partial class IsQueryFilter : QueryFilterBase
 	public override FilterMatchType MatchType
 	{
 		get {
-			return FilterMatchType.And;
+			return FilterMatchType.Is;
 		}
 	}
 	public override FilterMatchMethod MatchMethod
@@ -149,7 +149,7 @@ public partial class IsNotQueryFilter : QueryFilterBase
 	public override FilterMatchType MatchType
 	{
 		get {
-			return FilterMatchType.And;
+			return FilterMatchType.IsNot;
 		}
 	}
 	public override FilterMatchMethod MatchMethod
