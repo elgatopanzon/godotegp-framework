@@ -582,9 +582,6 @@ public partial class ECS : Service
 	{
 		QueryResult result = new();
 
-		// build the query's archetypes
-		QueryFiltersToArchetypes(query);
-
 		LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
 
 		// match all entities against any of the valid filter archetypes
@@ -631,19 +628,11 @@ public partial class ECS : Service
 		bool match = query.ArchetypeFilters.Array.Where((filter) => {
 			LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
-			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, result, nonMatchingEntities, out FilterMatchType matchType);
+			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, result, nonMatchingEntities);
 
 			if (matched)
 			{
-				LoggerManager.LogDebug($"Filter matched type {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "matchType", matchType);
-
-				// add to non matching entities since we want to exclude
-				// it
-				// if (matchType == FilterMatchType.Not)
-				// {
-				// 	LoggerManager.LogDebug("Adding non-matched entity", "", "entity", EntityHandle(entity));
-				// 	nonMatchingEntities.Add(entity);
-				// }
+				LoggerManager.LogDebug($"Filter matched type {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "matchType", filter.OperatorType);
 
 				matchCount++;
 			}
@@ -655,7 +644,7 @@ public partial class ECS : Service
 	}
 
 	// match individual filters of a query
-	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, QueryResult result, PackedArray<Entity> nonMatchingEntities, out FilterMatchType matchType)
+	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, QueryResult result, PackedArray<Entity> nonMatchingEntities)
 	{
 		// match based on the operator type
 		bool matched = false;
@@ -716,137 +705,6 @@ public partial class ECS : Service
 
 		LoggerManager.LogDebug("Filter match result", "", "matched", matched);
 
-		matchType = filter.OperatorType;
-
 		return matched;
-	}
-
-	// build a query into a set of valid archetypes or valid scoped queries
-	public void QueryFiltersToArchetypes(ECSv3.Queries.Query query)
-	{
-		// create the initial archetype filter
-		query.ArchetypeFilters = new();
-		QueryArchetypeFilter archetypeFilter = new();
-		if (query.Filters.Count > 0)
-		{
-			archetypeFilter.Filter = query.Filters[0];
-		}
-
-		// // loop over filters and build the archetypeFilter object
-		// foreach (var filter in query.Filters.Array)
-		// {
-        //
-		// 	// add scoped queries
-		// 	if (filter.Query != null)
-		// 	{
-		// 		LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
-        //
-		// 		// build this filter's queries
-		// 		QueryFiltersToArchetypes(filter.Query);
-        //
-		// 		LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
-		// 		archetypeFilter.ScopedQueries.Add(filter.Query);
-		// 	}
-		// 	else
-		// 	{
-		// 		archetypeFilter.Archetypes.Add(filter.Entity);
-		// 	}
-        //
-		// 	// cycle to next filter
-		// 	if (filter.TriggerFilterEnd)
-		// 	{
-		// 		LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString(), "filter", filter);
-        //
-		// 		archetypeFilter.OperatorType = filter.MatchType;
-		// 		archetypeFilter.MatchMethod = filter.MatchMethod;
-        //
-		// 		query.ArchetypeFilters.Add(archetypeFilter);
-        //
-		// 		archetypeFilter = new();
-		// 		archetypeFilter.OperatorType = filter.MatchType;
-		// 		archetypeFilter.MatchMethod = filter.MatchMethod;
-		// 	}
-		// }
-
-
-		// // create the initial archetype filter
-		// QueryArchetypeFilter archetypeFilter = new();
-		// query.ArchetypeFilters = new();
-        
-        bool isNotOnlyQuery = true;
-        foreach (var filter in query.Filters.Array)
-        {
-        	if (filter.MatchType != FilterMatchType.Not)
-        	{
-        		isNotOnlyQuery = false;
-        	}
-        }
-
-		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.Array);
-
-		for (int i = 0; i < query.Filters.Count; i++)
-		{
-			IQueryFilter filter = query.Filters[i];
-
-			LoggerManager.LogDebug("Query filter", query.GetHashCode().ToString(), "filter", filter);
-
-			// if trigger end is set, we end this archetype and create a new one
-			if (filter.TriggerFilterEnd)
-			{
-				LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString(), "filter", filter);
-
-				if (archetypeFilter.HasBuiltFilters)
-				{
-					query.ArchetypeFilters.Add(archetypeFilter);
-				}
-
-				archetypeFilter = new();
-				archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, filter, isNotOnlyQuery);
-			}
-
-			// insert built scoped queries here
-			if (filter.Query != null)
-			{
-				LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
-
-				// build this filter's queries
-				QueryFiltersToArchetypes(filter.Query);
-
-				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
-				archetypeFilter.ScopedQueries.Add(filter.Query);
-			}
-
-
-			// only add the entity to the archetypes if it's not part of a
-			// scoped query
-			if (filter.Query == null)
-			{
-				archetypeFilter.Archetypes.Add(filter.Entity);
-			}
-		}
-
-		if (archetypeFilter.HasBuiltFilters)
-		{
-			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, query.Filters[query.Filters.Count - 1], isNotOnlyQuery);
-
-			query.ArchetypeFilters.Add(archetypeFilter);
-		}
-
-		LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
-	}
-
-	public QueryArchetypeFilter SetQueryArchetypeFilterProperties(QueryArchetypeFilter archetypeFilter, IQueryFilter filter, bool isNotOnlyQuery)
-	{
-		archetypeFilter.OperatorType = filter.MatchType;
-		archetypeFilter.MatchMethod = filter.MatchMethod;
-		archetypeFilter.Filter = filter;
-
-		if (isNotOnlyQuery)
-		{
-			LoggerManager.LogDebug("Setting as not-only query");
-			archetypeFilter.MatchMethod = FilterMatchMethod.MatchArchetypesReverse;
-		}
-
-		return archetypeFilter;
 	}
 }

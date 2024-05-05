@@ -34,9 +34,98 @@ public partial class QueryBuilder
 	}
 
 	// build the query object
+	public Query BuildQuery(Query query)
+	{
+		// create the initial archetype filter
+		query.ArchetypeFilters = new();
+		QueryArchetypeFilter archetypeFilter = new();
+		if (query.Filters.Count > 0)
+		{
+			archetypeFilter.Filter = query.Filters[0];
+		}
+        
+        bool isNotOnlyQuery = true;
+        foreach (var filter in query.Filters.Array)
+        {
+        	if (filter.MatchType != FilterMatchType.Not)
+        	{
+        		isNotOnlyQuery = false;
+        	}
+        }
+
+		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.Array);
+
+		for (int i = 0; i < query.Filters.Count; i++)
+		{
+			IQueryFilter filter = query.Filters[i];
+
+			LoggerManager.LogDebug("Query filter", query.GetHashCode().ToString(), "filter", filter);
+
+			// if trigger end is set, we end this archetype and create a new one
+			if (filter.TriggerFilterEnd)
+			{
+				LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString(), "filter", filter);
+
+				if (archetypeFilter.HasBuiltFilters)
+				{
+					query.ArchetypeFilters.Add(archetypeFilter);
+				}
+
+				archetypeFilter = new();
+				archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, filter, isNotOnlyQuery);
+			}
+
+			// insert built scoped queries here
+			if (filter.Query != null)
+			{
+				LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
+
+				// build this filter's queries
+				BuildQuery(filter.Query);
+
+				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
+				archetypeFilter.ScopedQueries.Add(filter.Query);
+			}
+
+
+			// only add the entity to the archetypes if it's not part of a
+			// scoped query
+			if (filter.Query == null)
+			{
+				archetypeFilter.Archetypes.Add(filter.Entity);
+			}
+		}
+
+		if (archetypeFilter.HasBuiltFilters)
+		{
+			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, query.Filters[query.Filters.Count - 1], isNotOnlyQuery);
+
+			query.ArchetypeFilters.Add(archetypeFilter);
+		}
+
+		LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
+
+		return query;
+	}
+
+	public QueryArchetypeFilter SetQueryArchetypeFilterProperties(QueryArchetypeFilter archetypeFilter, IQueryFilter filter, bool isNotOnlyQuery)
+	{
+		archetypeFilter.OperatorType = filter.MatchType;
+		archetypeFilter.MatchMethod = filter.MatchMethod;
+		archetypeFilter.Filter = filter;
+
+		if (isNotOnlyQuery)
+		{
+			LoggerManager.LogDebug("Setting as not-only query");
+			archetypeFilter.MatchMethod = FilterMatchMethod.MatchArchetypesReverse;
+		}
+
+		return archetypeFilter;
+	}
+
 	public Query Build()
 	{
-		// TODO: build something?
+		BuildQuery(_query);
 		return _query;
 	}
 
