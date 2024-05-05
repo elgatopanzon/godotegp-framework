@@ -639,10 +639,11 @@ public partial class ECS : Service
 
 				// add to non matching entities since we want to exclude
 				// it
-				if (matchType == FilterMatchType.Not)
-				{
-					nonMatchingEntities.Add(entity);
-				}
+				// if (matchType == FilterMatchType.Not)
+				// {
+				// 	LoggerManager.LogDebug("Adding non-matched entity", "", "entity", EntityHandle(entity));
+				// 	nonMatchingEntities.Add(entity);
+				// }
 
 				matchCount++;
 			}
@@ -656,15 +657,33 @@ public partial class ECS : Service
 	// match individual filters of a query
 	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, QueryResult result, PackedArray<Entity> nonMatchingEntities, out FilterMatchType matchType)
 	{
-		LoggerManager.LogDebug($"Matching against filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
-
 		// match based on the operator type
 		bool matched = false;
 
 		// do an archetype comparison if there's no scoped query
 		if (filter.ScopedQueries.Count == 0)
 		{
+			LoggerManager.LogDebug($"Matching against archetype filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
+
 			matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
+
+			// specifically remove matched Not results when we don't want them
+			// to be included
+			if (filter.OperatorType == FilterMatchType.Not && matched)
+			{
+				LoggerManager.LogDebug("Not filter matched (real)");
+				nonMatchingEntities.Add(entity);
+			}
+
+			// if the match method is reverse (where the match result is true
+			// when there's NOT an archetype match, we must force the match
+			// result to true
+			if (filter.MatchMethod == FilterMatchMethod.MatchArchetypesReverse && !matched)
+			{
+				LoggerManager.LogDebug("Not-only query match");
+				matched = true;
+			}
+
 		}
 		// recursively check matches with scoped queries
 		else
@@ -683,10 +702,10 @@ public partial class ECS : Service
 				}
 			}
 
-			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), "matchCount", matchCount);
-
 			// matches when the match count matches scoped query count
 			matched = (matchCount == filter.ScopedQueries.Count);
+
+			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
 		}
 
 		if (matched)
@@ -694,6 +713,8 @@ public partial class ECS : Service
 			LoggerManager.LogDebug($"Matched {filter.OperatorType} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.Array);
 			LoggerManager.LogDebug($"Matched {filter.OperatorType} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.Array);
 		}
+
+		LoggerManager.LogDebug("Filter match result", "", "matched", matched);
 
 		matchType = filter.OperatorType;
 
@@ -704,8 +725,62 @@ public partial class ECS : Service
 	public void QueryFiltersToArchetypes(ECSv3.Queries.Query query)
 	{
 		// create the initial archetype filter
-		QueryArchetypeFilter archetypeFilter = new();
 		query.ArchetypeFilters = new();
+		QueryArchetypeFilter archetypeFilter = new();
+		if (query.Filters.Count > 0)
+		{
+			archetypeFilter.Filter = query.Filters[0];
+		}
+
+		// // loop over filters and build the archetypeFilter object
+		// foreach (var filter in query.Filters.Array)
+		// {
+        //
+		// 	// add scoped queries
+		// 	if (filter.Query != null)
+		// 	{
+		// 		LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
+        //
+		// 		// build this filter's queries
+		// 		QueryFiltersToArchetypes(filter.Query);
+        //
+		// 		LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
+		// 		archetypeFilter.ScopedQueries.Add(filter.Query);
+		// 	}
+		// 	else
+		// 	{
+		// 		archetypeFilter.Archetypes.Add(filter.Entity);
+		// 	}
+        //
+		// 	// cycle to next filter
+		// 	if (filter.TriggerFilterEnd)
+		// 	{
+		// 		LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString(), "filter", filter);
+        //
+		// 		archetypeFilter.OperatorType = filter.MatchType;
+		// 		archetypeFilter.MatchMethod = filter.MatchMethod;
+        //
+		// 		query.ArchetypeFilters.Add(archetypeFilter);
+        //
+		// 		archetypeFilter = new();
+		// 		archetypeFilter.OperatorType = filter.MatchType;
+		// 		archetypeFilter.MatchMethod = filter.MatchMethod;
+		// 	}
+		// }
+
+
+		// // create the initial archetype filter
+		// QueryArchetypeFilter archetypeFilter = new();
+		// query.ArchetypeFilters = new();
+        
+        bool isNotOnlyQuery = true;
+        foreach (var filter in query.Filters.Array)
+        {
+        	if (filter.MatchType != FilterMatchType.Not)
+        	{
+        		isNotOnlyQuery = false;
+        	}
+        }
 
 		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.Array);
 
@@ -716,14 +791,17 @@ public partial class ECS : Service
 			LoggerManager.LogDebug("Query filter", query.GetHashCode().ToString(), "filter", filter);
 
 			// if trigger end is set, we end this archetype and create a new one
-			if (filter.TriggerFilterEnd && (archetypeFilter.Archetypes.Count > 0 || archetypeFilter.ScopedQueries.Count > 0))
+			if (filter.TriggerFilterEnd)
 			{
 				LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString(), "filter", filter);
 
-				query.ArchetypeFilters.Add(archetypeFilter);
+				if (archetypeFilter.HasBuiltFilters)
+				{
+					query.ArchetypeFilters.Add(archetypeFilter);
+				}
+
 				archetypeFilter = new();
-				archetypeFilter.OperatorType = filter.MatchType;
-				archetypeFilter.MatchMethod = filter.MatchMethod;
+				archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, filter, isNotOnlyQuery);
 			}
 
 			// insert built scoped queries here
@@ -747,13 +825,28 @@ public partial class ECS : Service
 			}
 		}
 
-		if (archetypeFilter.Archetypes.Count > 0 || archetypeFilter.ScopedQueries.Count > 0)
+		if (archetypeFilter.HasBuiltFilters)
 		{
-			archetypeFilter.OperatorType = query.Filters[query.Filters.Count - 1].MatchType;
-			archetypeFilter.MatchMethod = query.Filters[query.Filters.Count - 1].MatchMethod;
+			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, query.Filters[query.Filters.Count - 1], isNotOnlyQuery);
+
 			query.ArchetypeFilters.Add(archetypeFilter);
 		}
 
 		LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
+	}
+
+	public QueryArchetypeFilter SetQueryArchetypeFilterProperties(QueryArchetypeFilter archetypeFilter, IQueryFilter filter, bool isNotOnlyQuery)
+	{
+		archetypeFilter.OperatorType = filter.MatchType;
+		archetypeFilter.MatchMethod = filter.MatchMethod;
+		archetypeFilter.Filter = filter;
+
+		if (isNotOnlyQuery)
+		{
+			LoggerManager.LogDebug("Setting as not-only query");
+			archetypeFilter.MatchMethod = FilterMatchMethod.MatchArchetypesReverse;
+		}
+
+		return archetypeFilter;
 	}
 }

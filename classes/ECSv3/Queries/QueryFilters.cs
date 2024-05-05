@@ -31,6 +31,7 @@ public enum FilterMatchMethod
 {
 	MatchArchetypes = 0,
 	MatchEntity = 1,
+	MatchArchetypesReverse = 2,
 }
 
 public partial class QueryFilterBase : IQueryFilter
