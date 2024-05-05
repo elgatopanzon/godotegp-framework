@@ -670,25 +670,6 @@ public partial class ECS : Service
 
 			matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
 
-			// specifically remove matched Not results when we don't want them
-			// to be included
-			if (filter.OperatorType == FilterMatchType.Not && matched)
-			{
-				LoggerManager.LogDebug("Not filter matched (real)");
-
-				nonMatchingEntity = true;
-			}
-
-			// if the match method is reverse (where the match result is true
-			// when there's NOT an archetype match, we must force the match
-			// result to true
-			if (filter.MatchMethod == FilterMatchMethod.MatchArchetypesReverse && !matched)
-			{
-				LoggerManager.LogDebug("Not-only query match");
-				matched = true;
-
-				nonMatchingEntity = false;
-			}
 
 		}
 		// recursively check matches with scoped queries
@@ -712,6 +693,26 @@ public partial class ECS : Service
 			matched = (matchCount == filter.ScopedQueries.Count);
 
 			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
+		}
+
+		// specifically remove matched Not results when we don't want them
+		// to be included
+		if (filter.OperatorType == FilterMatchType.Not && matched)
+		{
+			LoggerManager.LogDebug("Not filter matched (real)");
+
+			nonMatchingEntity = true;
+		}
+
+		// if the match method is reverse (where the match result is true
+		// when there's NOT an archetype match, we must force the match
+		// result to true
+		if (filter.MatchMethod == FilterMatchMethod.MatchArchetypesReverse && !matched)
+		{
+			LoggerManager.LogDebug("Not-only query match");
+			matched = true;
+
+			nonMatchingEntity = false;
 		}
 
 		if (matched)
