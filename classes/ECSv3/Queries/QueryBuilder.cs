@@ -39,10 +39,6 @@ public partial class QueryBuilder
 		// create the initial archetype filter
 		query.ArchetypeFilters = new();
 		QueryArchetypeFilter archetypeFilter = new();
-		if (query.Filters.Count > 0)
-		{
-			archetypeFilter.Filter = query.Filters[0];
-		}
         
         bool isNotOnlyQuery = false;
         int notFilterCount = 0;
@@ -52,8 +48,18 @@ public partial class QueryBuilder
         	{
         		notFilterCount++;
         	}
+        	// increase not count for non-matcher queries
+        	if (filter.Matcher == null)
+        	{
+        		notFilterCount++;
+        	}
         }
         isNotOnlyQuery = (notFilterCount == query.Filters.Count);
+
+		if (query.Filters.Count > 0)
+		{
+			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, query.Filters[0], isNotOnlyQuery);
+		}
 
 		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.Array);
 
@@ -66,16 +72,17 @@ public partial class QueryBuilder
 			// if trigger end is set, we end this archetype and create a new one
 			if (filter.TriggerFilterEnd)
 			{
-				LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString(), "filter", filter);
+				LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString());
 
-				if (archetypeFilter.HasBuiltFilters)
+				if (archetypeFilter.HasBuiltFilters && archetypeFilter.Filter.Matcher != null)
 				{
 					query.ArchetypeFilters.Add(archetypeFilter);
 				}
 
 				archetypeFilter = new();
-				archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, filter, isNotOnlyQuery);
+				continue;
 			}
+			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, filter, isNotOnlyQuery);
 
 			// insert built scoped queries here
 			if (filter.ScopedQuery != null)
@@ -92,7 +99,7 @@ public partial class QueryBuilder
 
 			// only add the entity to the archetypes if it's not part of a
 			// scoped query
-			if (filter.ScopedQuery == null)
+			if (filter.ScopedQuery == null && filter.Matcher != null)
 			{
 				archetypeFilter.Archetypes.Add(filter.Entity);
 			}
@@ -137,6 +144,17 @@ public partial class QueryBuilder
 	/*********************
 	*  Builder methods  *
 	*********************/
+
+	// and/or query filter scope seperators
+	public QueryBuilder Or()
+	{
+		// don't allow Or insertion on an empty query
+		if (_query.Filters.Count > 0)
+		{
+			_query.AddFilter(new QueryFilterOrTrigger() {});
+		}
+		return this;
+	}
 	
 	// has component or entity ID
 	public QueryBuilder Has(Entity entity)
@@ -150,64 +168,38 @@ public partial class QueryBuilder
 		return this;
 	}
 
-	// and has component or entity ID
-	public QueryBuilder And(Entity entity)
-	{
-		_query.AddFilter(new AndQueryFilter() { Entity = entity });
-		return this;
-	}
-	public QueryBuilder And(Query scopedQuery)
-	{
-		_query.AddFilter(new AndQueryFilter() { ScopedQuery = scopedQuery });
-		return this;
-	}
-
-	// or has component or entity ID
-	public QueryBuilder Or(Entity entity)
-	{
-		_query.AddFilter(new OrQueryFilter() { Entity = entity });
-		return this;
-	}
-	public QueryBuilder Or(Query scopedQuery)
-	{
-		_query.AddFilter(new OrQueryFilter() { ScopedQuery = scopedQuery });
-		return this;
-	}
-
-	// not have the component or entity ID
+	// does not have the component or entity ID
 	public QueryBuilder Not(Entity entity)
 	{
+		Or();
 		_query.AddFilter(new NotQueryFilter() { Entity = entity });
 		return this;
 	}
 	public QueryBuilder Not(Query scopedQuery)
 	{
+		Or();
 		_query.AddFilter(new NotQueryFilter() { ScopedQuery = scopedQuery });
 		return this;
 	}
 
-	// and not have the component or entity ID
-	public QueryBuilder AndNot(Entity entity)
-	{
-		_query.AddFilter(new AndNotQueryFilter() { Entity = entity });
-		return this;
-	}
-	public QueryBuilder AndNot(Query scopedQuery)
-	{
-		_query.AddFilter(new AndNotQueryFilter() { ScopedQuery = scopedQuery });
-		return this;
-	}
-
-	// is to match the entity to the entity in the query
+	// is a specific component or entity ID
 	public QueryBuilder Is(Entity entity)
 	{
 		_query.AddFilter(new IsQueryFilter() { Entity = entity });
 		return this;
 	}
-
+	// is not a specific component or entity ID
 	public QueryBuilder IsNot(Entity entity)
 	{
+		Or();
 		_query.AddFilter(new IsNotQueryFilter() { Entity = entity });
+		return this;
+	}
+
+	// component or entity name matches given name
+	public QueryBuilder NameIs(string name)
+	{
+		_query.AddFilter(new NameIsQueryFilter() { Name = name });
 		return this;
 	}
 }

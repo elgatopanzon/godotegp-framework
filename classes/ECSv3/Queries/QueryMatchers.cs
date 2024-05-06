@@ -15,11 +15,27 @@ using GodotEGP.Config;
 using GodotEGP.Collections;
 using System.Linq;
 
-public partial class QueryMatchArchetype : IQueryMatcher
+public partial class QueryMatchPassthrough : IQueryMatcher
+{
+	public virtual bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	{
+		nonMatchingEntity = false;
+		return true;
+	}
+
+	// default post-match is to pass through the pre match result
+	public virtual bool PostMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity)
+	{
+		nonMatchingEntity = false;
+		return preMatched;
+	}
+}
+
+public partial class QueryMatchArchetype : QueryMatchPassthrough
 {
 	// match the filter's achetypes with the provided entity archetype using an
 	// intersect
-	public virtual bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public override bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		bool matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
@@ -27,12 +43,6 @@ public partial class QueryMatchArchetype : IQueryMatcher
 		LoggerManager.LogDebug("PreMatch", "", core.EntityHandle(matchEntity).ToString(), matched);
 
 		return matched;
-	}
-
-	public virtual bool PostMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity)
-	{
-		nonMatchingEntity = false;
-		return preMatched;
 	}
 }
 
@@ -43,12 +53,6 @@ public partial class QueryMatchEntity : QueryMatchArchetype
 	{
 		nonMatchingEntity = false;
 		return filter.Filter.Entity == matchEntity;
-	}
-
-	public override bool PostMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity)
-	{
-		nonMatchingEntity = false;
-		return preMatched;
 	}
 }
 
@@ -82,6 +86,21 @@ public partial class QueryMatchNotArchetype : QueryMatchArchetype
 		{
 			nonMatchingEntity = true;
 			return true;
+		}
+
+		return false;
+	}
+}
+
+public partial class QueryMatchEntityName : QueryMatchArchetype
+{
+	// match the provided entity name with the filter's entity name
+	public override bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	{
+		nonMatchingEntity = false;
+		if (filter.Filter is NameIsQueryFilter nf)
+		{
+			return nf.Name == core.GetEntityName(matchEntity);
 		}
 
 		return false;
