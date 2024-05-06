@@ -19,7 +19,7 @@ public partial interface IQueryFilter
 {
 	public FilterMatchType MatchType { get; }
 	public Entity Entity { get; set; }
-	public Query Query { get; set; }
+	public Query ScopedQuery { get; set; }
 	public bool TriggerFilterEnd { get; set; }
 	public FilterMatchMethod MatchMethod { get; set; }
 }

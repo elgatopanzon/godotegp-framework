@@ -43,7 +43,7 @@ public partial class QueryFilterBase : IQueryFilter
 		}
 	}
 	public Entity Entity { get; set; }
-	public Query Query { get; set; }
+	public Query ScopedQuery { get; set; }
 	public virtual bool TriggerFilterEnd { get; set; }
 	public virtual FilterMatchMethod MatchMethod { get; set; }
 }

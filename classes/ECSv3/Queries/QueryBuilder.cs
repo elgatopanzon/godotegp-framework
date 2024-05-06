@@ -76,21 +76,21 @@ public partial class QueryBuilder
 			}
 
 			// insert built scoped queries here
-			if (filter.Query != null)
+			if (filter.ScopedQuery != null)
 			{
-				LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
+				LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
 
 				// build this filter's queries
-				BuildQuery(filter.Query);
+				BuildQuery(filter.ScopedQuery);
 
-				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.Query);
-				archetypeFilter.ScopedQueries.Add(filter.Query);
+				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
+				archetypeFilter.ScopedQueries.Add(filter.ScopedQuery);
 			}
 
 
 			// only add the entity to the archetypes if it's not part of a
 			// scoped query
-			if (filter.Query == null)
+			if (filter.ScopedQuery == null)
 			{
 				archetypeFilter.Archetypes.Add(filter.Entity);
 			}
@@ -146,7 +146,7 @@ public partial class QueryBuilder
 	}
 	public QueryBuilder Has(Query scopedQuery)
 	{
-		_query.AddFilter(new HasQueryFilter() { Query = scopedQuery });
+		_query.AddFilter(new HasQueryFilter() { ScopedQuery = scopedQuery });
 		return this;
 	}
 
@@ -158,7 +158,7 @@ public partial class QueryBuilder
 	}
 	public QueryBuilder And(Query scopedQuery)
 	{
-		_query.AddFilter(new AndQueryFilter() { Query = scopedQuery });
+		_query.AddFilter(new AndQueryFilter() { ScopedQuery = scopedQuery });
 		return this;
 	}
 
@@ -170,7 +170,7 @@ public partial class QueryBuilder
 	}
 	public QueryBuilder Or(Query scopedQuery)
 	{
-		_query.AddFilter(new OrQueryFilter() { Query = scopedQuery });
+		_query.AddFilter(new OrQueryFilter() { ScopedQuery = scopedQuery });
 		return this;
 	}
 
@@ -182,7 +182,7 @@ public partial class QueryBuilder
 	}
 	public QueryBuilder Not(Query scopedQuery)
 	{
-		_query.AddFilter(new NotQueryFilter() { Query = scopedQuery });
+		_query.AddFilter(new NotQueryFilter() { ScopedQuery = scopedQuery });
 		return this;
 	}
 
@@ -194,7 +194,7 @@ public partial class QueryBuilder
 	}
 	public QueryBuilder AndNot(Query scopedQuery)
 	{
-		_query.AddFilter(new AndNotQueryFilter() { Query = scopedQuery });
+		_query.AddFilter(new AndNotQueryFilter() { ScopedQuery = scopedQuery });
 		return this;
 	}
 
