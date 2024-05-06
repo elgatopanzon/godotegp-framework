@@ -25,7 +25,6 @@ public enum FilterMatchType
 	And = 0, // must include
 	Or = 1, // include either the previous or this one
 	Not = 2, // do not include
-	Optional = 3, // match if it does or doesn't
 	Is = 4, // trigger matching entity directly, not archetype
 	IsNot = 5, // trigger matching entity directly, not archetype
 }

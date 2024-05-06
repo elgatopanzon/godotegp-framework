@@ -44,14 +44,16 @@ public partial class QueryBuilder
 			archetypeFilter.Filter = query.Filters[0];
 		}
         
-        bool isNotOnlyQuery = true;
+        bool isNotOnlyQuery = false;
+        int notFilterCount = 0;
         foreach (var filter in query.Filters.Array)
         {
-        	if (filter.MatchType != FilterMatchType.Not)
+        	if (filter.MatchType == FilterMatchType.Not)
         	{
-        		isNotOnlyQuery = false;
+        		notFilterCount++;
         	}
         }
+        isNotOnlyQuery = (notFilterCount == query.Filters.Count);
 
 		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.Array);
 
