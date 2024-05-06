@@ -17,8 +17,8 @@ using GodotEGP.Collections;
 public partial interface IQueryMatcher
 {
 	// the pre-match method which does the required matching
-	public bool PreMatch(ECS core, Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity);
+	public bool PreMatch(Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity);
 
 	// post-match method to optionally do post-match actions
-	public bool PostMatch(ECS core, Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity);
+	public bool PostMatch(Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity);
 }

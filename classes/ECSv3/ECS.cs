@@ -586,12 +586,13 @@ public partial class ECS : Service
 
 		// match all entities against any of the valid filter archetypes
 		PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes = _entityManager.GetArchetypes();
+		PackedDictionary<string, Entity> entityNames = _entityManager.GetEntityNames();
 
 		// loop over all entities and build a results list
 		foreach (Entity entity in entityArchetypes.KeysSpan)
 		{
 			// match the entity against the query
-			bool queryMatch = QueryMatchEntity(entity, entityArchetypes, query);
+			bool queryMatch = QueryMatchEntity(entity, entityArchetypes, entityNames, query);
 
 			if (queryMatch)
 			{
@@ -608,7 +609,7 @@ public partial class ECS : Service
 		return result;
 	}
 
-	public bool QueryMatchEntity(Entity entity, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, ECSv3.Queries.Query query)
+	public bool QueryMatchEntity(Entity entity, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, ECSv3.Queries.Query query)
 	{
 		if (entityArchetypes.TryGetValue(entity, out PackedArray<Entity> entitiesArchetypes))
 		{
@@ -619,7 +620,7 @@ public partial class ECS : Service
 				return false;
 			}
 
-			return QueryMatchFilters(entity, query, entitiesArchetypes);
+			return QueryMatchFilters(entity, query, entitiesArchetypes, entityNames);
 		}
 
 		// query match failed, because entity has no archetype
@@ -627,7 +628,7 @@ public partial class ECS : Service
 	}
 
 	// match a query against filters with passed down state
-	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes)
+	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames)
 	{
 		LoggerManager.LogDebug($"Matching {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.Array);
 
@@ -636,7 +637,7 @@ public partial class ECS : Service
 		{
 			LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
-			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, out bool nonMatchingEntity);
+			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, entityNames, out bool nonMatchingEntity);
 
 			if (matched)
 			{
@@ -657,7 +658,7 @@ public partial class ECS : Service
 	}
 
 	// match individual filters of a query
-	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		// match based on the operator type
 		bool matched = false;
@@ -668,7 +669,7 @@ public partial class ECS : Service
 		{
 			LoggerManager.LogDebug($"Matching against archetype filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
 
-			matched = filter.Filter.Matcher.PreMatch(this, entity, filter, entitiesArchetypes, out bool nonMatchingEntityPre);
+			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetypes, entityNames, out bool nonMatchingEntityPre);
 		}
 		// recursively check matches with scoped queries
 		else
@@ -679,7 +680,7 @@ public partial class ECS : Service
 			bool match = false;
 			foreach (var q in filter.ScopedQueries.Array)
 			{
-				match = QueryMatchFilters(entity, q, entitiesArchetypes);
+				match = QueryMatchFilters(entity, q, entitiesArchetypes, entityNames);
 
 				if (match)
 				{
@@ -693,7 +694,7 @@ public partial class ECS : Service
 			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
 		}
 		
-		matched = filter.Filter.Matcher.PostMatch(this, entity, filter, entitiesArchetypes, matched, out bool nonMatchingEntityPost);
+		matched = filter.Filter.Matcher.PostMatch(entity, filter, entitiesArchetypes, entityNames, matched, out bool nonMatchingEntityPost);
 
 		nonMatchingEntity = nonMatchingEntityPost;
 

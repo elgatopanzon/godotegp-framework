@@ -64,6 +64,17 @@ public partial class EntityManager
 		return _entityArchetypes.Keys.AsSpan();
 	}
 
+	public PackedDictionary<string, Entity> GetEntityNames()
+	{
+		return _nameToEntityMap;
+	}
+
+	public PackedDictionary<Entity, PackedArray<Entity>> GetArchetypes()
+	{
+		return _entityArchetypes;
+	}
+
+
 	/**********************************
 	*  Entity ID management methods  *
 	**********************************/
@@ -227,11 +238,6 @@ public partial class EntityManager
 	{
 		_entityDisabledArchetypes[entity].Remove(id);
 		_entityArchetypes[entity].Add(id);
-	}
-
-	public PackedDictionary<Entity, PackedArray<Entity>> GetArchetypes()
-	{
-		return _entityArchetypes;
 	}
 
 	/********************************

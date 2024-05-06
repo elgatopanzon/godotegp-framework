@@ -17,14 +17,14 @@ using System.Linq;
 
 public partial class QueryMatchPassthrough : IQueryMatcher
 {
-	public virtual bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public virtual bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		return true;
 	}
 
 	// default post-match is to pass through the pre match result
-	public virtual bool PostMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity)
+	public virtual bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		return preMatched;
@@ -35,12 +35,12 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 {
 	// match the filter's achetypes with the provided entity archetype using an
 	// intersect
-	public override bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		bool matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
 
-		LoggerManager.LogDebug("PreMatch", "", core.EntityHandle(matchEntity).ToString(), matched);
+		LoggerManager.LogDebug("PreMatch", "", matchEntity.ToString(), matched);
 
 		return matched;
 	}
@@ -49,7 +49,7 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 public partial class QueryMatchEntity : QueryMatchArchetype
 {
 	// match the provided entity ID with the filter's entity ID
-	public override bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		return filter.Filter.Entity == matchEntity;
@@ -58,7 +58,7 @@ public partial class QueryMatchEntity : QueryMatchArchetype
 
 public partial class QueryMatchNotEntity : QueryMatchEntity
 {
-	public override bool PostMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity)
+	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		if (preMatched)
@@ -73,7 +73,7 @@ public partial class QueryMatchNotEntity : QueryMatchEntity
 
 public partial class QueryMatchNotArchetype : QueryMatchArchetype
 {
-	public override bool PostMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, bool preMatched, out bool nonMatchingEntity)
+	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
 	{
 
 		nonMatchingEntity = false;
@@ -95,12 +95,15 @@ public partial class QueryMatchNotArchetype : QueryMatchArchetype
 public partial class QueryMatchEntityName : QueryMatchArchetype
 {
 	// match the provided entity name with the filter's entity name
-	public override bool PreMatch(ECS core, Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		if (filter.Filter is NameIsQueryFilter nf)
 		{
-			return nf.Name == core.GetEntityName(matchEntity);
+			if (entityNames.TryGetValue(nf.Name, out Entity namedEntity))
+			{
+				return namedEntity == matchEntity;
+			}
 		}
 
 		return false;
