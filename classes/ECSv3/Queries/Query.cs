@@ -53,10 +53,8 @@ public partial class Query
 
 public partial class QueryArchetypeFilter
 {
-	public FilterMatchType OperatorType;
 	public PackedArray<Entity> Archetypes;
 	public PackedArray<Query> ScopedQueries;
-	public FilterMatchMethod MatchMethod { get; set; }
 	public IQueryFilter Filter { get; set; }
 
 	public bool HasBuiltFilters

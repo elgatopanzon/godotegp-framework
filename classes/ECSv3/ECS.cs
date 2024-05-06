@@ -640,7 +640,7 @@ public partial class ECS : Service
 
 			if (matched)
 			{
-				LoggerManager.LogDebug($"Filter matched type {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "matchType", filter.OperatorType);
+				LoggerManager.LogDebug($"Filter matched type {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "matcher", filter.Filter.Matcher.GetType().Name);
 
 				matchCount++;
 			}
@@ -668,36 +668,7 @@ public partial class ECS : Service
 		{
 			LoggerManager.LogDebug($"Matching against archetype filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
 
-			// match filter by archetype intersect
-			if (filter.MatchMethod == FilterMatchMethod.MatchArchetypes || filter.MatchMethod == FilterMatchMethod.MatchArchetypesReverse)
-			{
-				matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
-			}
-
-			// match filter by specific matching entity ID
-			else if (filter.MatchMethod == FilterMatchMethod.MatchEntity)
-			{
-				LoggerManager.LogDebug("Match type entity id", "", "operatorType", filter.OperatorType);
-
-				// is and is not match types
-				if (filter.OperatorType == FilterMatchType.Is && entity == filter.Filter.Entity)
-				{
-					matched = true;
-					return true;
-				}
-
-				if (filter.OperatorType == FilterMatchType.IsNot && entity == filter.Filter.Entity)
-				{
-					matched = false;
-					nonMatchingEntity = true;
-					return false;
-				}
-				else
-				{
-					return false;
-				}
-			}
-
+			matched = filter.Filter.Matcher.PreMatch(this, entity, filter, entitiesArchetypes, out bool nonMatchingEntityPre);
 		}
 		// recursively check matches with scoped queries
 		else
@@ -721,31 +692,15 @@ public partial class ECS : Service
 
 			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
 		}
+		
+		matched = filter.Filter.Matcher.PostMatch(this, entity, filter, entitiesArchetypes, matched, out bool nonMatchingEntityPost);
 
-		// specifically remove matched Not results when we don't want them
-		// to be included
-		if (filter.OperatorType == FilterMatchType.Not && matched)
-		{
-			LoggerManager.LogDebug("Not filter matched (real)");
-
-			nonMatchingEntity = true;
-		}
-
-		// if the match method is reverse (where the match result is true
-		// when there's NOT an archetype match, we must force the match
-		// result to true
-		if (filter.MatchMethod == FilterMatchMethod.MatchArchetypesReverse && !matched)
-		{
-			LoggerManager.LogDebug("Not-only query match");
-			matched = true;
-
-			nonMatchingEntity = false;
-		}
+		nonMatchingEntity = nonMatchingEntityPost;
 
 		if (matched)
 		{
-			LoggerManager.LogDebug($"Matched {filter.OperatorType} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.Array);
-			LoggerManager.LogDebug($"Matched {filter.OperatorType} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.Array);
+			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.Array);
+			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.Array);
 		}
 
 		LoggerManager.LogDebug("Filter match result", "", "matched", matched);

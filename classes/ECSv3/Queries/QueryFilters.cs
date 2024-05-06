@@ -12,10 +12,13 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
+using GodotEGP.Collections;
 
 using GodotEGP.ECSv3;
 using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Exceptions;
+
+using System.Linq;
 
 public enum FilterMatchType
 {
@@ -29,9 +32,8 @@ public enum FilterMatchType
 
 public enum FilterMatchMethod
 {
-	MatchArchetypes = 0,
-	MatchEntity = 1,
-	MatchArchetypesReverse = 2,
+	Match = 0,
+	MatchReverse = 1,
 }
 
 public partial class QueryFilterBase : IQueryFilter
@@ -46,6 +48,14 @@ public partial class QueryFilterBase : IQueryFilter
 	public Query ScopedQuery { get; set; }
 	public virtual bool TriggerFilterEnd { get; set; }
 	public virtual FilterMatchMethod MatchMethod { get; set; }
+
+	protected IQueryMatcher _matcher;
+	public virtual IQueryMatcher Matcher 
+	{ 
+		get {
+			return _matcher;
+		}
+	}
 }
 
 public partial class HasQueryFilter : QueryFilterBase
@@ -55,6 +65,11 @@ public partial class HasQueryFilter : QueryFilterBase
 		get {
 			return FilterMatchType.And;
 		}
+	}
+
+	public HasQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchArchetype();
 	}
 }
 
@@ -74,6 +89,11 @@ public partial class OrQueryFilter : QueryFilterBase
 			return true;
 		}
 	}
+
+	public OrQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchArchetype();
+	}
 }
 
 public partial class NotQueryFilter : QueryFilterBase
@@ -90,8 +110,13 @@ public partial class NotQueryFilter : QueryFilterBase
 			return true;
 		}
 	}
+
+	public NotQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchNotArchetype();
+	}
 }
-public partial class AndNotQueryFilter : QueryFilterBase
+public partial class AndNotQueryFilter : NotQueryFilter
 {
 	public override FilterMatchType MatchType
 	{
@@ -107,21 +132,21 @@ public partial class AndNotQueryFilter : QueryFilterBase
 	}
 }
 
-public partial class OptionallyQueryFilter : QueryFilterBase
-{
-	public override FilterMatchType MatchType
-	{
-		get {
-			return FilterMatchType.Optional;
-		}
-	}
-	public override bool TriggerFilterEnd
-	{
-		get {
-			return true;
-		}
-	}
-}
+// public partial class OptionallyQueryFilter : QueryFilterBase
+// {
+// 	public override FilterMatchType MatchType
+// 	{
+// 		get {
+// 			return FilterMatchType.Optional;
+// 		}
+// 	}
+// 	public override bool TriggerFilterEnd
+// 	{
+// 		get {
+// 			return true;
+// 		}
+// 	}
+// }
 
 public partial class IsQueryFilter : QueryFilterBase
 {
@@ -134,7 +159,7 @@ public partial class IsQueryFilter : QueryFilterBase
 	public override FilterMatchMethod MatchMethod
 	{
 		get {
-			return FilterMatchMethod.MatchEntity;
+			return FilterMatchMethod.Match;
 		}
 	}
 	public override bool TriggerFilterEnd
@@ -142,6 +167,11 @@ public partial class IsQueryFilter : QueryFilterBase
 		get {
 			return true;
 		}
+	}
+
+	public IsQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchEntity();
 	}
 }
 public partial class IsNotQueryFilter : QueryFilterBase
@@ -155,7 +185,7 @@ public partial class IsNotQueryFilter : QueryFilterBase
 	public override FilterMatchMethod MatchMethod
 	{
 		get {
-			return FilterMatchMethod.MatchEntity;
+			return FilterMatchMethod.Match;
 		}
 	}
 	public override bool TriggerFilterEnd
@@ -163,5 +193,10 @@ public partial class IsNotQueryFilter : QueryFilterBase
 		get {
 			return true;
 		}
+	}
+
+	public IsNotQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchNotEntity();
 	}
 }

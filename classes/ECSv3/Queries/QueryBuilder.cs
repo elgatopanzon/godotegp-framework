@@ -110,14 +110,12 @@ public partial class QueryBuilder
 
 	public QueryArchetypeFilter SetQueryArchetypeFilterProperties(QueryArchetypeFilter archetypeFilter, IQueryFilter filter, bool isNotOnlyQuery)
 	{
-		archetypeFilter.OperatorType = filter.MatchType;
-		archetypeFilter.MatchMethod = filter.MatchMethod;
 		archetypeFilter.Filter = filter;
 
 		if (isNotOnlyQuery)
 		{
 			LoggerManager.LogDebug("Setting as not-only query");
-			archetypeFilter.MatchMethod = FilterMatchMethod.MatchArchetypesReverse;
+			archetypeFilter.Filter.MatchMethod = FilterMatchMethod.MatchReverse;
 		}
 
 		return archetypeFilter;
