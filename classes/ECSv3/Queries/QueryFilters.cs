@@ -156,3 +156,14 @@ public partial class NotHasPairQueryFilter : HasPairQueryFilter
 		_matcher = (IQueryMatcher) new QueryMatchNotPairArchetype();
 	}
 }
+
+public partial class PairTargetHasQueryFilter : HasPairQueryFilter
+{
+	public bool MatchPairTarget { get; set; }
+
+	public PairTargetHasQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchPairTargetArchetype();
+		MatchPairTarget = true;
+	}
+}

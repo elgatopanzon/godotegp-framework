@@ -651,7 +651,7 @@ public partial class ECS : Service
 				return false;
 			}
 
-			return QueryMatchFilters(entity, query, entitiesArchetypes, entityNames);
+			return QueryMatchFilters(entity, query, entitiesArchetypes, entityArchetypes, entityNames);
 		}
 
 		// query match failed, because entity has no archetype
@@ -659,7 +659,7 @@ public partial class ECS : Service
 	}
 
 	// match a query against filters with passed down state
-	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames)
+	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames)
 	{
 		LoggerManager.LogDebug($"Matching {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.Array);
 
@@ -668,7 +668,7 @@ public partial class ECS : Service
 		{
 			LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
-			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, entityNames, out bool nonMatchingEntity);
+			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, entityArchetypes, entityNames, out bool nonMatchingEntity);
 
 			if (matched)
 			{
@@ -689,7 +689,7 @@ public partial class ECS : Service
 	}
 
 	// match individual filters of a query
-	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		// match based on the operator type
 		bool matched = false;
@@ -700,7 +700,7 @@ public partial class ECS : Service
 		{
 			LoggerManager.LogDebug($"Matching against archetype filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
 
-			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetypes, entityNames, out bool nonMatchingEntityPre);
+			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetypes, entityArchetypes, entityNames, out bool nonMatchingEntityPre);
 		}
 		// recursively check matches with scoped queries
 		else
@@ -711,7 +711,7 @@ public partial class ECS : Service
 			bool match = false;
 			foreach (var q in filter.ScopedQueries.Array)
 			{
-				match = QueryMatchFilters(entity, q, entitiesArchetypes, entityNames);
+				match = QueryMatchFilters(entity, q, entitiesArchetypes, entityArchetypes, entityNames);
 
 				if (match)
 				{
@@ -725,7 +725,7 @@ public partial class ECS : Service
 			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
 		}
 		
-		matched = filter.Filter.Matcher.PostMatch(entity, filter, entitiesArchetypes, entityNames, matched, out bool nonMatchingEntityPost);
+		matched = filter.Filter.Matcher.PostMatch(entity, filter, entitiesArchetypes, entityArchetypes, entityNames, matched, out bool nonMatchingEntityPost);
 
 		nonMatchingEntity = nonMatchingEntityPost;
 

@@ -283,6 +283,48 @@ public partial class QueryBuilder
 		return this;
 	}
 
+
+	// pair target has entity id
+	public QueryBuilder PairTargetHas(Entity sourceEntity, Entity targetEntity, Entity targetHasEntity)
+	{
+		_query.AddFilter(new PairTargetHasQueryFilter() { 
+				SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0),
+				TargetEntity = Entity.CreateFrom(targetEntity.Id, 0),
+				Entity = Entity.CreateFrom(targetHasEntity.Id, 0),
+			});
+		return this;
+	}
+	// pair target has entity id
+	public QueryBuilder PairSourceHas(Entity sourceEntity, Entity targetEntity, Entity targetHasEntity)
+	{
+		_query.AddFilter(new PairTargetHasQueryFilter() { 
+				SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0),
+				TargetEntity = Entity.CreateFrom(targetEntity.Id, 0),
+				Entity = Entity.CreateFrom(targetHasEntity.Id, 0),
+				MatchPairTarget = false,
+			});
+		return this;
+	}
+
+	public QueryBuilder PairOwnerHas(Entity sourceEntity, Entity targetEntity, Entity ownerHasEntity)
+	{
+		if (sourceEntity.Id == 0)
+		{
+			Has(Create().HasPairTarget(targetEntity).Build());
+		}
+		else if (targetEntity.Id == 0)
+		{
+			Has(Create().HasPairSource(sourceEntity).Build());
+		}
+		else
+		{
+			Has(Create().HasPair(sourceEntity, targetEntity).Build());
+		}
+		Has(Create().Has(ownerHasEntity).Build());
+		return this;
+	}
+
+
 	// access type methods to define access
 	public QueryBuilder Reads(Entity entity)
 	{
