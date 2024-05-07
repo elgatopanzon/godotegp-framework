@@ -174,6 +174,10 @@ public partial class ECS : Service
 		_entityManager.EnableArchetype(entity, id);
 	}
 
+	public PackedArray<Entity> GetEntityArchetype(Entity entity)
+	{
+		return _entityManager.GetArchetype(entity);
+	}
 
 	/***********************
 	*  Entity ID methods  *

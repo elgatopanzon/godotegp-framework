@@ -39,15 +39,49 @@ public partial class Query
 		}
 	}
 
+	// an archetype for read and write access
+	private PackedArray<Entity> _readArchetype;
+	private PackedArray<Entity> _writeArchetype;
+
+	public PackedArray<Entity> ReadsEntities
+	{
+		get {
+			return _readArchetype;
+		}
+	}
+	public PackedArray<Entity> WritesEntities
+	{
+		get {
+			return _writeArchetype;
+		}
+	}
+
 	public Query()
 	{
 		_filters = new();
 		_archetypeFilters = new();
+
+		_readArchetype = new();
+		_writeArchetype = new();
 	}
 
 	public void AddFilter(IQueryFilter filter)
 	{
 		_filters.Add(filter);
+	}
+
+	public void AddReadAccess(Entity entity)
+	{
+		_readArchetype.Add(entity);
+	}
+	public void AddWriteAccess(Entity entity)
+	{
+		_writeArchetype.Add(entity);
+	}
+	public void AddReadWriteAccess(Entity entity)
+	{
+		AddReadAccess(entity);
+		AddWriteAccess(entity);
 	}
 }
 

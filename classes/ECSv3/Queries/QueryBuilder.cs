@@ -12,10 +12,13 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
+using GodotEGP.Collections;
 
 using GodotEGP.ECSv3;
 using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Exceptions;
+
+using System;
 
 public partial class QueryBuilder
 {
@@ -155,6 +158,7 @@ public partial class QueryBuilder
 		}
 		return this;
 	}
+
 	
 	// has component or entity ID
 	public QueryBuilder Has(Entity entity)
@@ -200,6 +204,54 @@ public partial class QueryBuilder
 	public QueryBuilder NameIs(string name)
 	{
 		_query.AddFilter(new NameIsQueryFilter() { Name = name });
+		return this;
+	}
+
+	// add the archetypes as an and operation
+	public QueryBuilder InAnd(PackedArray<Entity> inArchetypes)
+	{
+		_in(inArchetypes, Has);
+		return this;
+	}
+	public QueryBuilder InOr(PackedArray<Entity> inArchetypes)
+	{
+		_in(inArchetypes, Has, true);
+		return this;
+	}
+	public QueryBuilder InNot(PackedArray<Entity> inArchetypes)
+	{
+		_in(inArchetypes, Not);
+		return this;
+	}
+	public QueryBuilder _in(PackedArray<Entity> inArchetypes, Func<Entity, QueryBuilder> action, bool isOr = false)
+	{
+		foreach (var entity in inArchetypes.Array)
+		{
+			action(entity);
+			if (isOr)
+			{
+				Or();
+			}
+		}
+		return this;
+	}
+
+
+
+	// access type methods to define access
+	public QueryBuilder Reads(Entity entity)
+	{
+		_query.AddReadAccess(entity);
+		return this;
+	}
+	public QueryBuilder Writes(Entity entity)
+	{
+		_query.AddWriteAccess(entity);
+		return this;
+	}
+	public QueryBuilder ReadWrites(Entity entity)
+	{
+		_query.AddReadWriteAccess(entity);
 		return this;
 	}
 }
