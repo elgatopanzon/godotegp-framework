@@ -28,6 +28,9 @@ public partial interface ITag : IComponent {}
 *  Components  *
 ****************/
 
+// component given to entities that represent components without data
+public partial struct EcsTag : ITag {}
+
 // component given to entities that represent components with data
 public partial struct EcsComponent : ITag {}
 

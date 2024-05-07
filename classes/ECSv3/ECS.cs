@@ -246,6 +246,10 @@ public partial class ECS : Service
 		{
 			Add<EcsComponent>(typeId);
 		}
+		else
+		{
+			Add<EcsTag>(typeId);
+		}
 
 		// set component entity name
 		_entityManager.SetEntityName(typeId, typeof(T).Name);
