@@ -38,7 +38,17 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
-		bool matched = (filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count() == filter.Archetypes.Count);
+
+		int matchCount = filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count();
+		bool matched = (matchCount == filter.Archetypes.Count);
+
+		// match a wildcard by making sure the entity has >= archetype count,
+		// and the archetype match was just 1 less than the filter archetype
+		// count
+		if (filter.Filter.Entity == 0 && matchCount == (filter.Archetypes.Count - 1) && entitiesArchetypes.Count >= filter.Archetypes.Count)
+		{
+			matched = true;
+		}
 
 		LoggerManager.LogDebug("PreMatch", "", matchEntity.ToString(), matched);
 
