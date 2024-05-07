@@ -73,13 +73,6 @@ public partial class QueryFilterOrTrigger : QueryFilterBase
 
 public partial class HasQueryFilter : QueryFilterBase
 {
-	public override FilterMatchType MatchType
-	{
-		get {
-			return FilterMatchType.And;
-		}
-	}
-
 	public HasQueryFilter()
 	{
 		_matcher = (IQueryMatcher) new QueryMatchArchetype();
@@ -133,5 +126,33 @@ public partial class NameMatchesQueryFilter : QueryFilterBase
 	public NameMatchesQueryFilter()
 	{
 		_matcher = (IQueryMatcher) new QueryMatchEntityNameRegex();
+	}
+}
+
+public partial class HasPairQueryFilter : QueryFilterBase
+{
+	// pair source entity (defaults to 0 (wildcard)
+	public Entity SourceEntity { get; set; }
+	// pair target entity (defaults to 0 (wildcard)
+	public Entity TargetEntity { get; set; }
+
+	public HasPairQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchPairArchetype();
+	}
+}
+
+public partial class NotHasPairQueryFilter : HasPairQueryFilter
+{
+	public override FilterMatchType MatchType
+	{
+		get {
+			return FilterMatchType.Not;
+		}
+	}
+
+	public NotHasPairQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchNotPairArchetype();
 	}
 }

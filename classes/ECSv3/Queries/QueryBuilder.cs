@@ -243,7 +243,45 @@ public partial class QueryBuilder
 		return this;
 	}
 
+	// has pair source entity id
+	public QueryBuilder HasPairSource(Entity sourceEntity)
+	{
+		_query.AddFilter(new HasPairQueryFilter() { SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0) });
+		return this;
+	}
+	// has pair target entity id
+	public QueryBuilder HasPairTarget(Entity targetEntity)
+	{
+		_query.AddFilter(new HasPairQueryFilter() { TargetEntity = Entity.CreateFrom(targetEntity.Id, 0) });
+		return this;
+	}
+	// has pair (basically match the full archetype, it's the same as Has())
+	public QueryBuilder HasPair(Entity sourceEntity, Entity targetEntity)
+	{
+		// create an entity from the 2 pair Ids
+		Has(Entity.CreateFrom(sourceEntity.Id, targetEntity.Id));
+		return this;
+	}
 
+	// not pair source entity id
+	public QueryBuilder NotPairSource(Entity sourceEntity)
+	{
+		_query.AddFilter(new NotHasPairQueryFilter() { SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0) });
+		return this;
+	}
+	// not pair target entity id
+	public QueryBuilder NotPairTarget(Entity targetEntity)
+	{
+		_query.AddFilter(new NotHasPairQueryFilter() { TargetEntity = Entity.CreateFrom(targetEntity.Id, 0) });
+		return this;
+	}
+	// not pair (basically match the full archetype, it's the same as Has())
+	public QueryBuilder NotPair(Entity sourceEntity, Entity targetEntity)
+	{
+		// create an entity from the 2 pair Ids
+		Not(Entity.CreateFrom(sourceEntity.Id, targetEntity.Id));
+		return this;
+	}
 
 	// access type methods to define access
 	public QueryBuilder Reads(Entity entity)

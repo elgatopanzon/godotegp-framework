@@ -140,3 +140,64 @@ public partial class QueryMatchEntityNameRegex : QueryMatchEntityName
 		return false;
 	}
 }
+
+public partial class QueryMatchPairArchetype : QueryMatchPassthrough
+{
+	// match the filter's id and pair id, since we're matching on a pair level
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	{
+		nonMatchingEntity = false;
+		bool matched = false;
+
+		if (filter.Filter is HasPairQueryFilter pf)
+		{
+			LoggerManager.LogDebug("Matching pair archetype", "", pf.Entity.ToString(), pf.Entity);
+
+			// match entity archetypes against pair
+			int matchCount = 0;
+			foreach (var archetype in entitiesArchetypes.Array)
+			{
+				// skip non-pairs
+				if (archetype.PairId == 0)
+				{
+					continue;
+				}
+
+				LoggerManager.LogDebug("Matching pair", "", "entityArchetype", archetype);
+				LoggerManager.LogDebug("Against pair", "", "filterArchetype", pf.Entity);
+
+				if ((archetype.Id == pf.SourceEntity.Id || pf.SourceEntity.Id == 0) && (archetype.PairId == pf.TargetEntity.Id || pf.TargetEntity.Id == 0))
+				{
+					matchCount++;
+				}
+			}
+
+			matched = (matchCount >= 1);
+		}
+
+		LoggerManager.LogDebug("PreMatch", "", matchEntity.ToString(), matched);
+
+		return matched;
+	}
+}
+
+public partial class QueryMatchNotPairArchetype : QueryMatchPairArchetype
+{
+	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
+	{
+
+		nonMatchingEntity = false;
+		if (filter.Filter.MatchMethod == FilterMatchMethod.MatchReverse && !preMatched)
+		{
+			preMatched = !preMatched;
+			return preMatched;
+		}
+		if (preMatched)
+		{
+			nonMatchingEntity = true;
+			return true;
+		}
+
+		return false;
+	}
+}
