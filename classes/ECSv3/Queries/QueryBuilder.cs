@@ -19,6 +19,7 @@ using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Exceptions;
 
 using System;
+using System.Text.RegularExpressions;
 
 public partial class QueryBuilder
 {
@@ -204,6 +205,12 @@ public partial class QueryBuilder
 	public QueryBuilder NameIs(string name)
 	{
 		_query.AddFilter(new NameIsQueryFilter() { Name = name });
+		return this;
+	}
+	// component or entity name matches given regex
+	public QueryBuilder NameMatches(Regex regex)
+	{
+		_query.AddFilter(new NameMatchesQueryFilter() { Regex = regex });
 		return this;
 	}
 

@@ -119,3 +119,24 @@ public partial class QueryMatchEntityName : QueryMatchArchetype
 		return false;
 	}
 }
+
+public partial class QueryMatchEntityNameRegex : QueryMatchEntityName
+{
+	// match the provided entity name with the filter's entity name
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	{
+		nonMatchingEntity = false;
+		if (filter.Filter is NameMatchesQueryFilter nf)
+		{
+			for (int i = 0; i < entityNames.Values.Count; i++)
+			{
+				if (entityNames.Values[i] == matchEntity)
+				{
+					return nf.Regex.IsMatch(entityNames.Keys[i]);
+				}
+			}
+		}
+
+		return false;
+	}
+}

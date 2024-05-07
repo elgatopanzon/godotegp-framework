@@ -18,7 +18,7 @@ using GodotEGP.ECSv3;
 using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Exceptions;
 
-using System.Linq;
+using System.Text.RegularExpressions;
 
 public enum FilterMatchType
 {
@@ -123,5 +123,15 @@ public partial class NameIsQueryFilter : QueryFilterBase
 	public NameIsQueryFilter()
 	{
 		_matcher = (IQueryMatcher) new QueryMatchEntityName();
+	}
+}
+
+public partial class NameMatchesQueryFilter : QueryFilterBase
+{
+	public Regex Regex { get; set; }
+
+	public NameMatchesQueryFilter()
+	{
+		_matcher = (IQueryMatcher) new QueryMatchEntityNameRegex();
 	}
 }
