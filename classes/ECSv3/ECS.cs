@@ -31,11 +31,34 @@ public partial class ECS : Service
 
 	private Entity _entity;
 
+	// default component IDs
+	public readonly Entity EcsWildcard;
+	public readonly Entity EcsTag;
+	public readonly Entity EcsComponent;
+	public readonly Entity EcsComponentConfig;
+	public readonly Entity EcsQuery;
+	public readonly Entity EcsReadOnlyQuery;
+	public readonly Entity EcsReadWriteQuery;
+	public readonly Entity EcsWriteQuery;
+	public readonly Entity EcsNoAccessQuery;
+
 	public ECS()
 	{
 		_entityManager = new();
 		_componentManager = new(_entityManager);
 
+		// register default components
+		EcsWildcard = RegisterComponent<EcsWildcard>();
+		EcsTag = RegisterComponent<EcsTag>();
+		EcsComponent = RegisterComponent<EcsComponent>();
+		EcsComponentConfig = RegisterComponent<EcsComponentConfig>();
+		EcsQuery = RegisterComponent<EcsQuery>();
+		EcsReadOnlyQuery = RegisterComponent<EcsReadOnlyQuery>();
+		EcsReadWriteQuery = RegisterComponent<EcsReadWriteQuery>();
+		EcsWriteQuery = RegisterComponent<EcsWriteQuery>();
+		EcsNoAccessQuery = RegisterComponent<EcsNoAccessQuery>();
+
+		// set the config
 		SetConfig(new ECSConfig());
 	}
 

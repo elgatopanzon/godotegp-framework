@@ -27,6 +27,8 @@ public partial interface ITag : IComponent {}
 /****************
 *  Components  *
 ****************/
+// component which means wildcard
+public partial struct EcsWildcard : ITag {}
 
 // component given to entities that represent components without data
 public partial struct EcsTag : ITag {}
