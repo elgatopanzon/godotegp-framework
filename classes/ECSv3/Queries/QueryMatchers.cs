@@ -202,7 +202,7 @@ public partial class QueryMatchNotPairArchetype : QueryMatchPairArchetype
 	}
 }
 
-public partial class QueryMatchPairTargetArchetype : QueryMatchArchetype
+public partial class QueryMatchPairEntityArchetype : QueryMatchArchetype
 {
 	// match the filter's id and pair id, since we're matching on a pair level
 	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, PackedArray<Entity> entityArchetype, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)

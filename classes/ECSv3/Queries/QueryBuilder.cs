@@ -294,15 +294,25 @@ public partial class QueryBuilder
 			});
 		return this;
 	}
-	// pair target has entity id
-	public QueryBuilder PairSourceHas(Entity sourceEntity, Entity targetEntity, Entity targetHasEntity)
+	// pair source has entity id
+	public QueryBuilder PairSourceHas(Entity sourceEntity, Entity targetEntity, Entity sourceHasEntity)
 	{
-		_query.AddFilter(new PairTargetHasQueryFilter() { 
+		_query.AddFilter(new PairSourceHasQueryFilter() { 
 				SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0),
 				TargetEntity = Entity.CreateFrom(targetEntity.Id, 0),
-				Entity = Entity.CreateFrom(targetHasEntity.Id, 0),
-				MatchPairTarget = false,
+				Entity = Entity.CreateFrom(sourceHasEntity.Id, 0),
 			});
+		return this;
+	}
+
+	public QueryBuilder NotPairTargetHas(Entity sourceEntity, Entity targetEntity, Entity targetHasEntity)
+	{
+		Not(Create().PairTargetHas(sourceEntity, targetEntity, targetHasEntity).Build());
+		return this;
+	}
+	public QueryBuilder NotPairSourceHas(Entity sourceEntity, Entity targetEntity, Entity sourceHasEntity)
+	{
+		Not(Create().PairSourceHas(sourceEntity, targetEntity, sourceHasEntity).Build());
 		return this;
 	}
 

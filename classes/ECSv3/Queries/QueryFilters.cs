@@ -163,7 +163,15 @@ public partial class PairTargetHasQueryFilter : HasPairQueryFilter
 
 	public PairTargetHasQueryFilter()
 	{
-		_matcher = (IQueryMatcher) new QueryMatchPairTargetArchetype();
+		_matcher = (IQueryMatcher) new QueryMatchPairEntityArchetype();
 		MatchPairTarget = true;
+	}
+}
+
+public partial class PairSourceHasQueryFilter : PairTargetHasQueryFilter
+{
+	public PairSourceHasQueryFilter()
+	{
+		MatchPairTarget = false;
 	}
 }
