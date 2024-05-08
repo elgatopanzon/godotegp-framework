@@ -171,6 +171,7 @@ public partial class LoggerManager : Service
 	/***********************************
 	*  Logging methods for LogLevels  *
 	***********************************/
+	[Conditional("DEBUG")]
 	public static void LogTrace( 
 			object logMessage, 
 			string logCustom = "", 
@@ -182,6 +183,7 @@ public partial class LoggerManager : Service
 	{
 		_Log(Message.LogLevel.Trace, logMessage.ToString(), logCustom, logDataName, logData, sourceFilename, sourceLineNumber);
 	}
+	[Conditional("DEBUG")]
 	public static void LogDebug( 
 			object logMessage, 
 			string logCustom = "", 
