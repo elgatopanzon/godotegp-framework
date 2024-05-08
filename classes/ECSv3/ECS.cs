@@ -28,6 +28,7 @@ public partial class ECS : Service
 
 	private EntityManager _entityManager;
 	private ComponentManager _componentManager;
+	private QueryManager _queryManager;
 
 	private Entity _entity;
 
@@ -46,6 +47,7 @@ public partial class ECS : Service
 	{
 		_entityManager = new();
 		_componentManager = new(_entityManager);
+		_queryManager = new(_entityManager);
 
 		// register default components
 		EcsWildcard = RegisterComponent<EcsWildcard>();
@@ -606,137 +608,42 @@ public partial class ECS : Service
 	/*******************
 	*  Query methods  *
 	*******************/
-	
-	// directly execute a query without any cache and return the resulting
-	// entities
-	public QueryResult Query(ECSv3.Queries.Query query)
+
+	// register a query object with an optional name
+	public EntityHandle RegisterQuery(Query query)
 	{
-		QueryResult result = new();
+		return RegisterQuery(query, "");
+	}
+	public EntityHandle RegisterQuery(Query query, string name)
+	{
+		// create/register the query
+		EntityHandle e = EntityHandle(_queryManager.RegisterQuery(query, name));
 
-		LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
+		// add query component
+		e.Add<EcsQuery>();
 
-		// match all entities against any of the valid filter archetypes
-		PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes = _entityManager.GetArchetypes();
-		PackedDictionary<string, Entity> entityNames = _entityManager.GetEntityNames();
-
-		// loop over all entities and build a results list
-		foreach (Entity entity in entityArchetypes.KeysSpan)
-		{
-			// match the entity against the query
-			bool queryMatch = QueryMatchEntity(entity, entityArchetypes, entityNames, query);
-
-			if (queryMatch)
-			{
-				result.AddEntity(entity);
-			}
-		}
-        //
-		// // remove all non-matching entities
-		// foreach (Entity entityRemove in nonMatchingEntities.Array)
-		// {
-		// 	result.Entities.Remove(entityRemove);
-		// }
-
-		return result;
+		return e;
 	}
 
-	public bool QueryMatchEntity(Entity entity, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, ECSv3.Queries.Query query)
+	// create a QueryBuilder object
+	public QueryBuilder CreateQuery()
 	{
-		if (entityArchetypes.TryGetValue(entity, out PackedArray<Entity> entitiesArchetypes))
-		{
-			// for the sake of this on-demand query it's better performance
-			// to stop processing empty entities
-			if (entitiesArchetypes.Count == 0)
-			{
-				return false;
-			}
-
-			return QueryMatchFilters(entity, query, entitiesArchetypes, entityArchetypes, entityNames);
-		}
-
-		// query match failed, because entity has no archetype
-		return false;
+		return QueryBuilder.Create(this);
 	}
 
-	// match a query against filters with passed down state
-	public bool QueryMatchFilters(Entity entity, Query query, PackedArray<Entity> entitiesArchetypes, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames)
+	// run an on-demand query
+	public QueryResult Query(Query query)
 	{
-		LoggerManager.LogDebug($"Matching {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.Array);
-
-		int matchCount = 0;
-		foreach (var filter in query.ArchetypeFilters.Array)
-		{
-			LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
-
-			bool matched = QueryMatchArchetypeFilter(entity, query, filter, entitiesArchetypes, entityArchetypes, entityNames, out bool nonMatchingEntity);
-
-			if (matched)
-			{
-				LoggerManager.LogDebug($"Filter matched type {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "matcher", filter.Filter.Matcher.GetType().Name);
-
-				matchCount++;
-			}
-
-			// if the entity is a non-matching entity, stop the query
-			if (nonMatchingEntity)
-			{
-				return false;
-			}
-		}
-
-		// it's considered a match if we match at least 1 filter
-		return (matchCount > 0);
+		return _queryManager.RunQuery(query);
 	}
-
-	// match individual filters of a query
-	public bool QueryMatchArchetypeFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	// run registered query by name
+	public QueryResult Query(string name)
 	{
-		// match based on the operator type
-		bool matched = false;
-		nonMatchingEntity = false;
-
-		// do an archetype comparison if there's no scoped query
-		if (filter.ScopedQueries.Count == 0)
-		{
-			LoggerManager.LogDebug($"Matching against archetype filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filter", filter);
-
-			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetypes, entityArchetypes, entityNames, out bool nonMatchingEntityPre);
-		}
-		// recursively check matches with scoped queries
-		else
-		{
-			LoggerManager.LogDebug($"Matching against scoped query {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQueries);
-
-			int matchCount = 0;
-			bool match = false;
-			foreach (var q in filter.ScopedQueries.Array)
-			{
-				match = QueryMatchFilters(entity, q, entitiesArchetypes, entityArchetypes, entityNames);
-
-				if (match)
-				{
-					matchCount++;
-				}
-			}
-
-			// matches when the match count matches scoped query count
-			matched = (matchCount == filter.ScopedQueries.Count);
-
-			LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
-		}
-		
-		matched = filter.Filter.Matcher.PostMatch(entity, filter, entitiesArchetypes, entityArchetypes, entityNames, matched, out bool nonMatchingEntityPost);
-
-		nonMatchingEntity = nonMatchingEntityPost;
-
-		if (matched)
-		{
-			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.Array);
-			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {EntityHandle(entity).ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.Array);
-		}
-
-		LoggerManager.LogDebug("Filter match result", "", "matched", matched);
-
-		return matched;
+		return _queryManager.RunQuery(name);
+	}
+	// run registered query by id
+	public QueryResult Query(Entity entity)
+	{
+		return _queryManager.RunQuery(entity);
 	}
 }

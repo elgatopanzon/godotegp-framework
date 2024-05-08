@@ -23,10 +23,12 @@ using System.Text.RegularExpressions;
 
 public partial class QueryBuilder
 {
+	private ECS _ecs;
 	private Query _query;
 
-	public QueryBuilder()
+	public QueryBuilder(ECS ecs = null)
 	{
+		_ecs = ecs;
 		Reset();
 	}
 
@@ -143,6 +145,10 @@ public partial class QueryBuilder
 	public static QueryBuilder Create()
 	{
 		return new QueryBuilder();
+	}
+	public static QueryBuilder Create(ECS ecs)
+	{
+		return new QueryBuilder(ecs);
 	}
 
 	/*********************
