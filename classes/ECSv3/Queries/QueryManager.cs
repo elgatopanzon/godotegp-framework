@@ -176,6 +176,13 @@ public partial class QueryManager
 		for (int i = 0; i < length; i++)
 		{
 			var queryTuple = queriesValues[i];
+
+			// skip non-live queries
+			if (!queryTuple.Query.IsLiveQuery)
+			{
+				continue;
+			}
+
 			bool existsInResults = queryTuple.Results.Entities.Contains(entity);
 
 			bool match = _matchEntity(entity, queryTuple.Query);

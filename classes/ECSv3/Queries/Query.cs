@@ -58,6 +58,9 @@ public partial class Query
 
 	public string Name { get; set; }
 
+	// a live query is included in the auto update results on entity changes
+	public bool IsLiveQuery { get; set; } = true;
+
 	public Query()
 	{
 		_filters = new();
