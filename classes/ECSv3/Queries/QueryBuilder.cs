@@ -151,6 +151,243 @@ public partial class QueryBuilder
 		return new QueryBuilder(ecs);
 	}
 
+
+	/**************************************
+	*  ECS core-backed builder methods   *
+	**************************************/
+	
+	// Has() methods
+	public QueryBuilder Has<T>() where T : IComponent
+	{
+		return Has(_ecs.Id<T>());
+	}
+	public QueryBuilder Has<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return Has(_ecs.Id<T, TT>());
+	}
+	public QueryBuilder Has<T>(Entity entity) where T : IComponent
+	{
+		return Has(_ecs.Id<T>(entity));
+	}
+	public QueryBuilder Has(Entity sourceEntity, Entity targetEntity)
+	{
+		return Has(_ecs.Id(sourceEntity, targetEntity));
+	}
+
+
+	// Not() methods
+	public QueryBuilder Not<T>() where T : IComponent
+	{
+		return Not(_ecs.Id<T>());
+	}
+	public QueryBuilder Not<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return Not(_ecs.Id<T, TT>());
+	}
+	public QueryBuilder Not<T>(Entity entity) where T : IComponent
+	{
+		return Not(_ecs.Id<T>(entity));
+	}
+	public QueryBuilder Not(Entity sourceEntity, Entity targetEntity)
+	{
+		return Not(_ecs.Id(sourceEntity, targetEntity));
+	}
+
+
+	// Is() methods
+	public QueryBuilder Is<T>() where T : IComponent
+	{
+		return Is(_ecs.Id<T>());
+	}
+	public QueryBuilder Is<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return Is(_ecs.Id<T, TT>());
+	}
+	public QueryBuilder Is<T>(Entity entity) where T : IComponent
+	{
+		return Is(_ecs.Id<T>(entity));
+	}
+	public QueryBuilder Is(Entity sourceEntity, Entity targetEntity)
+	{
+		return Is(_ecs.Id(sourceEntity, targetEntity));
+	}
+
+
+	// IsNot() methods
+	public QueryBuilder IsNot<T>() where T : IComponent
+	{
+		return IsNot(_ecs.Id<T>());
+	}
+	public QueryBuilder IsNot<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return IsNot(_ecs.Id<T, TT>());
+	}
+	public QueryBuilder IsNot<T>(Entity entity) where T : IComponent
+	{
+		return IsNot(_ecs.Id<T>(entity));
+	}
+	public QueryBuilder IsNot(Entity sourceEntity, Entity targetEntity)
+	{
+		return IsNot(_ecs.Id(sourceEntity, targetEntity));
+	}
+
+
+	// InAnd() methods
+	public QueryBuilder InAnd<T>() where T : IComponent
+	{
+		return InAnd(_ecs.GetEntityArchetype(_ecs.Id<T>()));
+	}
+	public QueryBuilder InAnd<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return InAnd(_ecs.GetEntityArchetype(_ecs.Id<T, TT>()));
+	}
+	public QueryBuilder InAnd<T>(Entity entity) where T : IComponent
+	{
+		return InAnd(_ecs.GetEntityArchetype(_ecs.Id<T>(entity)));
+	}
+	public QueryBuilder InAnd(Entity sourceEntity, Entity targetEntity)
+	{
+		return InAnd(_ecs.GetEntityArchetype(_ecs.Id(sourceEntity, targetEntity)));
+	}
+
+
+	// InOr() methods
+	public QueryBuilder InOr<T>() where T : IComponent
+	{
+		return InOr(_ecs.GetEntityArchetype(_ecs.Id<T>()));
+	}
+	public QueryBuilder InOr<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return InOr(_ecs.GetEntityArchetype(_ecs.Id<T, TT>()));
+	}
+	public QueryBuilder InOr<T>(Entity entity) where T : IComponent
+	{
+		return InOr(_ecs.GetEntityArchetype(_ecs.Id<T>(entity)));
+	}
+	public QueryBuilder InOr(Entity sourceEntity, Entity targetEntity)
+	{
+		return InOr(_ecs.GetEntityArchetype(_ecs.Id(sourceEntity, targetEntity)));
+	}
+
+
+	// InNot() methods
+	public QueryBuilder InNot<T>() where T : IComponent
+	{
+		return InNot(_ecs.GetEntityArchetype(_ecs.Id<T>()));
+	}
+	public QueryBuilder InNot<T, TT>() 
+		where T : IComponent
+		where TT : IComponent
+	{
+		return InNot(_ecs.GetEntityArchetype(_ecs.Id<T, TT>()));
+	}
+	public QueryBuilder InNot<T>(Entity entity) where T : IComponent
+	{
+		return InNot(_ecs.GetEntityArchetype(_ecs.Id<T>(entity)));
+	}
+	public QueryBuilder InNot(Entity sourceEntity, Entity targetEntity)
+	{
+		return InNot(_ecs.GetEntityArchetype(_ecs.Id(sourceEntity, targetEntity)));
+	}
+
+
+	// HasPairSource() methods
+	public QueryBuilder HasPairSource<TSource>() 
+		where TSource : IComponent
+	{
+		return HasPairSource(_ecs.Id<TSource>().Id);
+	}
+	// HasPairTarget() methods
+	public QueryBuilder HasPairTarget<TTarget>() 
+		where TTarget : IComponent
+	{
+		return HasPairTarget(_ecs.Id<TTarget>().Id);
+	}
+	// HasPair() methods
+	public QueryBuilder HasPair<TSource, TTarget>() 
+		where TSource : IComponent
+		where TTarget : IComponent
+	{
+		return HasPair(_ecs.Id<TSource>().Id, _ecs.Id<TTarget>().Id);
+	}
+
+
+	// NotPairSource() methods
+	public QueryBuilder NotPairSource<TSource>() 
+		where TSource : IComponent
+	{
+		return NotPairSource(_ecs.Id<TSource>().Id);
+	}
+	// HasPairTarget() methods
+	public QueryBuilder NotPairTarget<TTarget>() 
+		where TTarget : IComponent
+	{
+		return NotPairTarget(_ecs.Id<TTarget>().Id);
+	}
+	// HasPair() methods
+	public QueryBuilder NotPair<TSource, TTarget>() 
+		where TSource : IComponent
+		where TTarget : IComponent
+	{
+		return NotPair(_ecs.Id<TSource>().Id, _ecs.Id<TTarget>().Id);
+	}
+
+
+	// PairTargetHas() methods
+	public QueryBuilder PairTargetHas<TSource, TTarget, THas>()
+		where TSource : IComponent
+		where TTarget : IComponent
+		where THas : IComponent
+	{
+		return PairTargetHas(_ecs.Id<TSource>(), _ecs.Id<TTarget>(), _ecs.Id<THas>());
+	}
+	// PairSourceHas() methods
+	public QueryBuilder PairSourceHas<TSource, TTarget, THas>()
+		where TSource : IComponent
+		where TTarget : IComponent
+		where THas : IComponent
+	{
+		return PairSourceHas(_ecs.Id<TSource>(), _ecs.Id<TTarget>(), _ecs.Id<THas>());
+	}
+
+	// NotPairTargetHas() methods
+	public QueryBuilder NotPairTargetHas<TSource, TTarget, THas>()
+		where TSource : IComponent
+		where TTarget : IComponent
+		where THas : IComponent
+	{
+		return NotPairTargetHas(_ecs.Id<TSource>(), _ecs.Id<TTarget>(), _ecs.Id<THas>());
+	}
+	// NotPairSourceHas() methods
+	public QueryBuilder NotPairSourceHas<TSource, TTarget, THas>()
+		where TSource : IComponent
+		where TTarget : IComponent
+		where THas : IComponent
+	{
+		return NotPairSourceHas(_ecs.Id<TSource>(), _ecs.Id<TTarget>(), _ecs.Id<THas>());
+	}
+
+	// PairOwnerHas() methods
+	public QueryBuilder PairOwnerHas<TSource, TTarget, THas>()
+		where TSource : IComponent
+		where TTarget : IComponent
+		where THas : IComponent
+	{
+		return PairOwnerHas(_ecs.Id<TSource>(), _ecs.Id<TTarget>(), _ecs.Id<THas>());
+	}
+
 	/*********************
 	*  Builder methods  *
 	*********************/
@@ -296,7 +533,7 @@ public partial class QueryBuilder
 		_query.AddFilter(new PairTargetHasQueryFilter() { 
 				SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0),
 				TargetEntity = Entity.CreateFrom(targetEntity.Id, 0),
-				Entity = Entity.CreateFrom(targetHasEntity.Id, 0),
+				Entity = targetHasEntity,
 			});
 		return this;
 	}
@@ -306,7 +543,7 @@ public partial class QueryBuilder
 		_query.AddFilter(new PairSourceHasQueryFilter() { 
 				SourceEntity = Entity.CreateFrom(sourceEntity.Id, 0),
 				TargetEntity = Entity.CreateFrom(targetEntity.Id, 0),
-				Entity = Entity.CreateFrom(sourceHasEntity.Id, 0),
+				Entity = sourceHasEntity,
 			});
 		return this;
 	}
@@ -357,4 +594,5 @@ public partial class QueryBuilder
 		_query.AddReadWriteAccess(entity);
 		return this;
 	}
+
 }
