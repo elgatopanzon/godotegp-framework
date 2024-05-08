@@ -61,7 +61,7 @@ public partial class EntityManager
 
 	public Span<Entity> GetEntities()
 	{
-		return _entityArchetypes.Keys.AsSpan();
+		return _entityArchetypes.Keys;
 	}
 
 	public PackedDictionary<string, Entity> GetEntityNames()
@@ -200,20 +200,20 @@ public partial class EntityManager
 	public void AddArchetypeId(Entity entity, Entity id)
 	{
 		LoggerManager.LogDebug("Adding archetype id", "", entity.ToString(), id.RawId);
-		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].Array);
+		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].ArraySegment);
 
 		_entityArchetypes[entity].Add(id);
 
-		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].Array);
+		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].ArraySegment);
 	}
 	public void RemoveArchetypeId(Entity entity, Entity id)
 	{
 		LoggerManager.LogDebug("Removing archetype id", "", entity.ToString(), id.RawId);
-		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].Array);
+		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].ArraySegment);
 		
 		_entityArchetypes[entity].Remove(id);
 
-		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].Array);
+		LoggerManager.LogDebug("Archetype", "", entity.ToString(), _entityArchetypes[entity].ArraySegment);
 	}
 	public bool HasArchetypeId(Entity entity, Entity id)
 	{

@@ -126,11 +126,11 @@ public partial class QueryManager
 		// create a new result object
 		QueryResult result = new();
 
-		LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
+		LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
 
 		// match all entities against any of the valid filter archetypes
 		// loop over all entities and build a results list
-		foreach (Entity entity in _entityArchetypes.KeysSpan)
+		foreach (Entity entity in _entityArchetypes.Keys)
 		{
 			// match the entity against the query, adding to results on match
 			if (_matchEntity(entity, query))
@@ -162,10 +162,10 @@ public partial class QueryManager
 				return false;
 			}
 
-			LoggerManager.LogDebug($"Matching {entity.ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.Array);
+			LoggerManager.LogDebug($"Matching {entity.ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.ArraySegment);
 
 			int matchCount = 0;
-			foreach (var filter in query.ArchetypeFilters.Array)
+			foreach (var filter in query.ArchetypeFilters.Span)
 			{
 				LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
@@ -217,8 +217,8 @@ public partial class QueryManager
 
 		if (matched)
 		{
-			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.Array);
-			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.Array);
+			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.ArraySegment);
+			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.ArraySegment);
 		}
 
 		LoggerManager.LogDebug("Filter match result", "", "matched", matched);
@@ -232,7 +232,7 @@ public partial class QueryManager
 
 		int matchCount = 0;
 		bool match = false;
-		foreach (var q in scopedQueries.Array)
+		foreach (var q in scopedQueries.Span)
 		{
 			match = _matchEntity(entity, q);
 

@@ -13,6 +13,8 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Collections;
+
+using System;
 using System.Linq;
 
 public partial class QueryMatchPassthrough : IQueryMatcher
@@ -39,7 +41,7 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 	{
 		nonMatchingEntity = false;
 
-		int matchCount = filter.Archetypes.Array.Intersect(entitiesArchetypes.Array).Count();
+		int matchCount = filter.Archetypes.ArraySegment.Intersect(entitiesArchetypes.ArraySegment).Count();
 		bool matched = (matchCount == filter.Archetypes.Count);
 
 		// match a wildcard by making sure the entity has >= archetype count,
@@ -128,9 +130,11 @@ public partial class QueryMatchEntityNameRegex : QueryMatchEntityName
 		nonMatchingEntity = false;
 		if (filter.Filter is NameMatchesQueryFilter nf)
 		{
-			for (int i = 0; i < entityNames.Values.Count; i++)
+			Span<Entity> names = entityNames.Values;
+			int length = names.Length;
+			for (int i = 0; i < length; i++)
 			{
-				if (entityNames.Values[i] == matchEntity)
+				if (names[i] == matchEntity)
 				{
 					return nf.Regex.IsMatch(entityNames.Keys[i]);
 				}
@@ -155,7 +159,7 @@ public partial class QueryMatchPairArchetype : QueryMatchPassthrough
 
 			// match entity archetypes against pair
 			int matchCount = 0;
-			foreach (var archetype in entitiesArchetypes.Array)
+			foreach (var archetype in entitiesArchetypes.Span)
 			{
 				// skip non-pairs
 				if (archetype.PairId == 0)
@@ -231,10 +235,12 @@ public partial class QueryMatchPairEntityArchetype : QueryMatchArchetype
 				LoggerManager.LogDebug("Potential pair target match", "", "entity", matchEntity);
 
 				// search for potential pairs in other entity archetypes
-				for (int i = 0; i < entityArchetypes.Values.Count; i++)
+				Span<PackedArray<Entity>> archetypes = entityArchetypes.Values;
+				int length = archetypes.Length;
+				for (int i = 0; i < length; i++)
 				{
 					// attempt to match pair with source/target id
-					if (entityArchetypes.Values[i].Contains(targetPair))
+					if (archetypes[i].Contains(targetPair))
 					{
 						return true;
 					}

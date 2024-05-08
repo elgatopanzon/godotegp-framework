@@ -30,24 +30,34 @@ public partial class PackedDictionary<TKey, TValue>
 	private PackedArray<TValue> _values;
 
 	// expose Keys and Values properties
-	public ArraySegment<TKey> Keys {
-		get {
-			return _keys.Array;
-		}
-	}
-	public ArraySegment<TValue> Values {
-		get {
-			return _values.Array;
-		}
-	}
-	public ReadOnlySpan<TKey> KeysSpan {
+	public Span<TKey> Keys {
 		get {
 			return _keys.Span;
 		}
 	}
-	public ReadOnlySpan<TValue> ValuesSpan {
+	public Span<TValue> Values {
 		get {
 			return _values.Span;
+		}
+	}
+	public ReadOnlySpan<TKey> KeysSegment {
+		get {
+			return _keys.ArraySegment;
+		}
+	}
+	public ReadOnlySpan<TValue> ValuesSegment {
+		get {
+			return _values.ArraySegment;
+		}
+	}
+	public PackedArray<TKey> PKeys {
+		get {
+			return _keys;
+		}
+	}
+	public PackedArray<TValue> PValues {
+		get {
+			return _values;
 		}
 	}
 
@@ -195,11 +205,11 @@ public partial class PackedDictionaryBuckets<TKey, TValue>
 
 	public T[] JoinBuckets<T>(PackedArray<PackedArray<T>> buckets)
 	{
-		T[] joined = new T[buckets.Array.Sum(a => a.Count)];
+		T[] joined = new T[buckets.Span.ToArray().Sum(a => a.Count)];
 		int position = 0;
-		foreach (var a in buckets.Array)
+		foreach (var a in buckets.Span)
 		{
-			Array.Copy(a.Array.ToArray(), 0, joined, position, a.Count);
+			Array.Copy(a.Span.ToArray(), 0, joined, position, a.Count);
 			position += a.Count;
 		}
 

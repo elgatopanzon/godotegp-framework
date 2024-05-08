@@ -48,7 +48,7 @@ public partial class QueryBuilder
         
         bool isNotOnlyQuery = false;
         int notFilterCount = 0;
-        foreach (var filter in query.Filters.Array)
+        foreach (var filter in query.Filters.Span)
         {
         	if (filter.MatchType == FilterMatchType.Not)
         	{
@@ -67,7 +67,7 @@ public partial class QueryBuilder
 			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, query.Filters[0], isNotOnlyQuery);
 		}
 
-		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.Array);
+		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.ArraySegment);
 
 		for (int i = 0; i < query.Filters.Count; i++)
 		{
@@ -118,7 +118,7 @@ public partial class QueryBuilder
 			query.ArchetypeFilters.Add(archetypeFilter);
 		}
 
-		LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.Array);
+		LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
 
 		return query;
 	}
@@ -475,7 +475,7 @@ public partial class QueryBuilder
 	}
 	public QueryBuilder _in(PackedArray<Entity> inArchetypes, Func<Entity, QueryBuilder> action, bool isOr = false)
 	{
-		foreach (var entity in inArchetypes.Array)
+		foreach (var entity in inArchetypes.Span)
 		{
 			action(entity);
 			if (isOr)

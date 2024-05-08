@@ -44,14 +44,21 @@ public partial class PackedArray<T>
 			return _array;
 		}
 	}
-	public ArraySegment<T> Array {
-		get {
-			return new ArraySegment<T>(_array, 0, _currentSize);
-		}
-	}
-	public ReadOnlySpan<T> Span {
+	public Span<T> Span {
 		get {
 			return _array.AsSpan().Slice(0, _currentSize);
+		}
+	}
+
+	private ArraySegment<T> _arraySegment;
+	public ArraySegment<T> ArraySegment {
+		get {
+			if (_arraySegment == null)
+			{
+				_arraySegment = new ArraySegment<T>(_array, 0, _currentSize);
+			}
+
+			return _arraySegment;
 		}
 	}
 
@@ -148,6 +155,7 @@ public partial class PackedArray<T>
 		
 		// increment current size
 		_currentSize++;
+		_arraySegment = null;
 
 		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
 	}
@@ -191,6 +199,7 @@ public partial class PackedArray<T>
 
 		// decrease array size
 		_currentSize--;
+		_arraySegment = null;
 
 		// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
 		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
