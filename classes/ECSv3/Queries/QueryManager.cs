@@ -46,7 +46,7 @@ public partial class QueryManager
 	}
 
 	/************************
-	*  Query registration  *
+	*  Query management    *
 	************************/
 	
 	public Entity RegisterQuery(Query query)
@@ -75,6 +75,33 @@ public partial class QueryManager
 		return e;
 	}
 
+	public Query GetQuery(Entity entity)
+	{
+		if (_queries.TryGetValue(entity, out (Query Query, QueryResult Results) queryTuple))
+		{
+			return queryTuple.Query;
+		}
+
+		throw new ArgumentException($"No query matches '{entity}'.");
+	}
+	public Query GetQuery(string name)
+	{
+		return GetQuery(GetQueryEntity(name));
+	}
+
+	public string GetQueryName(Entity entity)
+	{
+		return GetQuery(entity).Name;
+	}
+	public Entity GetQueryEntity(string name)
+	{
+		if (_queryNameMap.TryGetValue(name, out Entity queryEntity))
+		{
+			return queryEntity;
+		}
+
+		throw new ArgumentException($"No query matches '{name}'.");
+	}
 
 	/***************************
 	*  Query results methods  *
@@ -95,13 +122,7 @@ public partial class QueryManager
 	// get saved query results for query by name
 	public QueryResult QueryResults(string name)
 	{
-		// try and get the entity beloning to the name, 
-		if (_queryNameMap.TryGetValue(name, out Entity queryEntity))
-		{
-			return QueryResults(queryEntity);
-		}
-
-		throw new ArgumentException($"No query matches '{name}'.");
+		return QueryResults(GetQueryEntity(name));
 	}
 
 	/*************************************
@@ -111,25 +132,13 @@ public partial class QueryManager
 	// run a registered query on-demand by name
 	public QueryResult RunQuery(string name)
 	{
-		// try and get the entity beloning to the name, 
-		if (_queryNameMap.TryGetValue(name, out Entity queryEntity))
-		{
-			return RunRegisteredQuery(_queries[queryEntity].Query, queryEntity);
-		}
-
-		throw new ArgumentException($"No query matches '{name}'.");
+		return RunRegisteredQuery(GetQuery(name), GetQueryEntity(name));
 	}
 
 	// run a registered query on-demand by entity id
 	public QueryResult RunQuery(Entity entity)
 	{
-		// try and get the query object from the entity id 
-		if (_queries.TryGetValue(entity, out (Query Query, QueryResult Results) queryTuple))
-		{
-			return RunRegisteredQuery(queryTuple.Query, entity);
-		}
-
-		throw new ArgumentException($"No query matches entity {entity}.");
+		return RunRegisteredQuery(GetQuery(entity), entity);
 	}
 	
 	// execute an on-demand query and return the results
