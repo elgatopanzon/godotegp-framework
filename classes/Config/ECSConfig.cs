@@ -41,6 +41,14 @@ public partial class ECSConfig : VConfig
 		get { return _entityIdRangeCheckEnabled.Value; }
 		set { _entityIdRangeCheckEnabled.Value = value; }
 	}
+
+	internal readonly VValue<bool> _keepQueryResultsUpdated;
+
+	public bool KeepQueryResultsUpdated
+	{
+		get { return _keepQueryResultsUpdated.Value; }
+		set { _keepQueryResultsUpdated.Value = value; }
+	}
 	
 	public ECSConfig()
 	{
@@ -53,6 +61,10 @@ public partial class ECSConfig : VConfig
 		    .ChangeEventsEnabled();
 
 		_entityIdRangeCheckEnabled = AddValidatedValue<bool>(this)
+		    .Default(true)
+		    .ChangeEventsEnabled();
+
+		_keepQueryResultsUpdated = AddValidatedValue<bool>(this)
 		    .Default(true)
 		    .ChangeEventsEnabled();
 	}

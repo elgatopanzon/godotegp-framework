@@ -25,6 +25,12 @@ using System.Collections.Generic;
 public partial class ECS : Service
 {
 	private ECSConfig _config;
+	public ECSConfig Config
+	{
+		get {
+			return _config;
+		}
+	}
 
 	private EntityManager _entityManager;
 	private ComponentManager _componentManager;
@@ -118,6 +124,8 @@ public partial class ECS : Service
 
 		LoggerManager.LogDebug("Creating entity", e.ToString(), "name", name);
 
+		_updateQueryResults(e.Entity);
+
 		return e;
 	}
 
@@ -129,6 +137,14 @@ public partial class ECS : Service
 		}
 
 		return "";
+	}
+
+	public void SetEntityName(Entity entity, string name)
+	{
+		// set component entity name
+		_entityManager.SetEntityName(entity, name);
+
+		_updateQueryResults(entity);
 	}
 
 	public bool IsAlive(Entity entity, bool throwIfDead = false)
@@ -148,7 +164,7 @@ public partial class ECS : Service
 			LoggerManager.LogDebug("Destroying entity", new EntityHandle(entity, this).ToString());
 
 			_entityManager.Destroy(entity);
-			// _componentManager.DestroyEntityComponents(entity);
+			_componentManager.DestroyEntityComponents(entity);
 		}
 	}
 
@@ -177,8 +193,7 @@ public partial class ECS : Service
 			}
 		}
 
-		// TODO: update systems entity lists to reflect the new archetype change
-		// _systemManager.UpdateEntityArchetype(entity, entityArchetype);
+		_updateQueryResults(entity);
 	}
 
 	// get the entity archetype state
@@ -191,12 +206,16 @@ public partial class ECS : Service
 	public void DisableArchetype(Entity entity, Entity id)
 	{
 		_entityManager.DisableArchetype(entity, id);
+
+		_updateQueryResults(entity);
 	}
 
 	// enable an archetype id for an entity
 	public void EnableArchetype(Entity entity, Entity id)
 	{
 		_entityManager.EnableArchetype(entity, id);
+
+		_updateQueryResults(entity);
 	}
 
 	public PackedArray<Entity> GetEntityArchetype(Entity entity)
@@ -278,6 +297,8 @@ public partial class ECS : Service
 
 		// set component entity name
 		_entityManager.SetEntityName(typeId, typeof(T).Name);
+
+		_updateQueryResults(typeId);
 
 		// return an entity handle for this component
 		return EntityHandle(typeId);
@@ -645,5 +666,25 @@ public partial class ECS : Service
 	public QueryResult Query(Entity entity)
 	{
 		return _queryManager.RunQuery(entity);
+	}
+
+	// get query results by name
+	public QueryResult QueryResults(string name)
+	{
+		return _queryManager.QueryResults(name);
+	}
+	// get query results by id
+	public QueryResult QueryResults(Entity entity)
+	{
+		return _queryManager.QueryResults(entity);
+	}
+
+	// update query results for an entity
+	public void _updateQueryResults(Entity entity)
+	{
+		if ((_config != null && _config.KeepQueryResultsUpdated) || _config == null)
+		{
+			_queryManager.UpdateQueryResults(entity);
+		}
 	}
 }

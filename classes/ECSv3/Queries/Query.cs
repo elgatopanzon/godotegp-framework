@@ -56,6 +56,8 @@ public partial class Query
 		}
 	}
 
+	public string Name { get; set; }
+
 	public Query()
 	{
 		_filters = new();

@@ -68,6 +68,7 @@ public partial class QueryManager
 			if (name.Length > 0)
 			{
 				_queryNameMap.Add(name, e);
+				query.Name = name;
 			}
 		}
 
@@ -91,6 +92,17 @@ public partial class QueryManager
 		return RunQuery(entity);
 	}
 
+	// get saved query results for query by name
+	public QueryResult QueryResults(string name)
+	{
+		// try and get the entity beloning to the name, 
+		if (_queryNameMap.TryGetValue(name, out Entity queryEntity))
+		{
+			return QueryResults(queryEntity);
+		}
+
+		throw new ArgumentException($"No query matches '{name}'.");
+	}
 
 	/*************************************
 	*  Query execution & match methods  *
@@ -149,6 +161,39 @@ public partial class QueryManager
 		_queries[queryEntity] = (query, result);
 
 		return result;
+	}
+
+	// update registered query results for an entity by matching just the entity
+	// through all queries and adding/removing from results
+	public void UpdateQueryResults(Entity entity)
+	{
+		LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
+
+		// loop over all queries and match with the provided entity
+		Span<Entity> queriesKeys = _queries.Keys;
+		Span<(Query Query, QueryResult Results)> queriesValues = _queries.Values;
+		int length = queriesKeys.Length;
+		for (int i = 0; i < length; i++)
+		{
+			var queryTuple = queriesValues[i];
+			bool existsInResults = queryTuple.Results.Entities.Contains(entity);
+
+			bool match = _matchEntity(entity, queryTuple.Query);
+
+			// if it's not a match, attempt to remove from results
+			if (existsInResults && !match)
+			{
+				LoggerManager.LogDebug("Removing entity from query results", queryTuple.Query.Name, "entity", entity);
+				queryTuple.Results.Entities.Remove(entity);
+			}
+
+			// otherwise, attempt to add if it doesn't exist
+			else if (!existsInResults && match)
+			{
+				LoggerManager.LogDebug("Adding entity to query results", queryTuple.Query.Name, "entity", entity);
+				queryTuple.Results.Entities.Add(entity);
+			}
+		}
 	}
 
 	public bool _matchEntity(Entity entity, Query query)
