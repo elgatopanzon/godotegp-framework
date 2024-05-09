@@ -766,6 +766,15 @@ public partial class ECS : Service
 		return RegisterSystem<TSystem, TPhase>(name, queryId);
 	}
 
+	// register a system with query object
+	public EntityHandle RegisterSystem<TSystem, TPhase>(Query query)
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		string name = typeof(TSystem).Name;
+		return RegisterSystem<TSystem, TPhase>(name, query);
+	}
+
 	// register a query which automatically ignores disabled entities
 	public EntityHandle RegisterSystemQuery(Query query, string name)
 	{
