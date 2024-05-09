@@ -41,8 +41,5 @@ public partial class SystemInstance
 
 		// call the system update
 		System.Update(entity, index, this, core);
-
-		// set the last update time
-		LastUpdateTime = DateTime.Now;
 	}
 }
