@@ -112,6 +112,8 @@ public partial class SystemScheduler
 
 			LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
 		}
+
+		_processPhaseList.Reset();
 	}
 	
 	public void Run(Entity entity)
