@@ -25,14 +25,14 @@ public partial class QueryManager
 	private EntityManager _entityManager;
 
 	// reference to entity names and entity archetypes
-	PackedDictionary<Entity, PackedArray<Entity>> _entityArchetypes;
-	PackedDictionary<string, Entity> _entityNames;
+	Dictionary<Entity, PackedArray<Entity>> _entityArchetypes;
+	Dictionary<string, Entity> _entityNames;
 
 	// store query objects with result objects by their entity ID
-	PackedDictionary<Entity, (Query Query, QueryResult Results)> _queries;
+	Dictionary<Entity, (Query Query, QueryResult Results)> _queries;
 
 	// store query names mapping to query entities
-	PackedDictionary<string, Entity> _queryNameMap;
+	Dictionary<string, Entity> _queryNameMap;
 
 	public QueryManager(EntityManager entityManager)
 	{
@@ -179,12 +179,12 @@ public partial class QueryManager
 		LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
 
 		// loop over all queries and match with the provided entity
-		Span<Entity> queriesKeys = _queries.Keys;
-		Span<(Query Query, QueryResult Results)> queriesValues = _queries.Values;
-		int length = queriesKeys.Length;
-		for (int i = 0; i < length; i++)
+		var queriesKeys = _queries.Keys;
+		var queriesValues = _queries.Values;
+		int length = queriesKeys.Count;
+		foreach (var query in _queries)
 		{
-			var queryTuple = queriesValues[i];
+			var queryTuple = query.Value;
 
 			// skip non-live queries
 			if (!queryTuple.Query.IsLiveQuery)

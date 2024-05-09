@@ -17,6 +17,7 @@ using GodotEGP.ECSv3.Components;
 using GodotEGP.Collections;
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 using ComponentTypeId = Entity;
@@ -24,10 +25,10 @@ using ComponentTypeId = Entity;
 public partial class ComponentManager
 {
 	// component storage by component id 
-	private PackedDictionary<ComponentTypeId, IComponentArray> _componentArrays;
+	private Dictionary<ComponentTypeId, IComponentArray> _componentArrays;
 
 	// Type to componentId mapping
-	private PackedDictionary<Type, ComponentTypeId> _componentTypeIds;
+	private Dictionary<Type, ComponentTypeId> _componentTypeIds;
 
 	private EntityManager _entityManager;
 

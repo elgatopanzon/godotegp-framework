@@ -19,16 +19,17 @@ using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Systems;
 
 using System;
+using System.Collections.Generic;
 
 public partial class SystemManager
 {
 	private EntityManager _entityManager;
 
 	// stores System objects by their entity ID
-	private PackedDictionary<Entity, SystemInstance> _systems;
+	private Dictionary<Entity, SystemInstance> _systems;
 
 	// stores a map of system names to entity IDs
-	private PackedDictionary<string, Entity> _nameToSystemMap;
+	private Dictionary<string, Entity> _nameToSystemMap;
 
 	public SystemManager(EntityManager entityManager)
 	{
@@ -95,7 +96,7 @@ public partial class SystemManager
 	}
 
 	// get all system instances
-	public PackedDictionary<Entity, SystemInstance> GetSystems()
+	public Dictionary<Entity, SystemInstance> GetSystems()
 	{
 		return _systems;
 	}

@@ -20,6 +20,7 @@ using GodotEGP.ECSv3.Queries;
 using GodotEGP.ECSv3.Systems;
 
 using System;
+using System.Collections.Generic;
 
 public partial class SystemScheduler
 {
@@ -28,7 +29,7 @@ public partial class SystemScheduler
 	private QueryManager _queryManager;
 
 	// holds query IDs for phase entity IDs
-	private PackedDictionary<Entity, Entity> _phaseQueries;
+	private Dictionary<Entity, Entity> _phaseQueries;
 
 	// the global delta time
 	private double _deltaTime;

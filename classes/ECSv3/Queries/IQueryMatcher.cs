@@ -14,11 +14,13 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Collections;
 
+using System.Collections.Generic;
+
 public partial interface IQueryMatcher
 {
 	// the pre-match method which does the required matching
-	public bool PreMatch(Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, out bool nonMatchingEntity);
+	public bool PreMatch(Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, Dictionary<Entity, PackedArray<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity);
 
 	// post-match method to optionally do post-match actions
-	public bool PostMatch(Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, PackedDictionary<Entity, PackedArray<Entity>> entityArchetypes, PackedDictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity);
+	public bool PostMatch(Entity entity, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, Dictionary<Entity, PackedArray<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity);
 }

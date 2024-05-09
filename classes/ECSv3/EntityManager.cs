@@ -38,12 +38,12 @@ public partial class EntityManager
 	private uint _idRangeMax;
 
 	// archetypes for entity IDs, storing other entities
-	private PackedDictionary<Entity, PackedArray<Entity>> _entityArchetypes;
-	private PackedDictionary<Entity, PackedArray<Entity>> _entityDisabledArchetypes;
+	private Dictionary<Entity, PackedArray<Entity>> _entityArchetypes;
+	private Dictionary<Entity, PackedArray<Entity>> _entityDisabledArchetypes;
 
 	// entity name storage
-	private PackedDictionary<Entity, string> _entityToNameMap;
-	private PackedDictionary<string, Entity> _nameToEntityMap;
+	private Dictionary<Entity, string> _entityToNameMap;
+	private Dictionary<string, Entity> _nameToEntityMap;
 
 	public EntityManager()
 	{
@@ -59,17 +59,17 @@ public partial class EntityManager
 		_nameToEntityMap = new();
 	}
 
-	public Span<Entity> GetEntities()
+	public Dictionary<Entity, PackedArray<Entity>>.KeyCollection GetEntities()
 	{
 		return _entityArchetypes.Keys;
 	}
 
-	public PackedDictionary<string, Entity> GetEntityNames()
+	public Dictionary<string, Entity> GetEntityNames()
 	{
 		return _nameToEntityMap;
 	}
 
-	public PackedDictionary<Entity, PackedArray<Entity>> GetArchetypes()
+	public Dictionary<Entity, PackedArray<Entity>> GetArchetypes()
 	{
 		return _entityArchetypes;
 	}

@@ -16,11 +16,14 @@ using GodotEGP.Config;
 using GodotEGP.Collections;
 using GodotEGP.ECSv3.Components;
 
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
 public partial class ComponentArray<T> : IComponentArray where T : IComponent
 {
 	// backing data storage of components
-	private PackedDictionary<Entity, T> _data;
-	public PackedDictionary<Entity, T> Data
+	private Dictionary<Entity, T> _data;
+	public Dictionary<Entity, T> Data
 	{
 		get { return _data; }
 	}
@@ -34,7 +37,7 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 	{
 		// add the component to the data store
 		// it will be overwritten if it already exists
-		_data.Insert(entity, component);
+		_data.Add(entity, component);
 	}
 
 	public void RemoveComponent(Entity entity)
@@ -50,7 +53,7 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 
 	public ref T GetComponent(Entity entity)
 	{
-		return ref _data.GetRef(entity);
+		return ref CollectionsMarshal.GetValueRefOrAddDefault(_data, entity, out bool exists);
 	}
 
 	public void DestroyComponents(Entity entity)
