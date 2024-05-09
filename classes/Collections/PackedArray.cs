@@ -244,7 +244,7 @@ public partial class PackedArray<T>
 	{
 		for (int i = 0; i < _currentSize; i++)
 		{
-			if (_array[i].Equals(value))
+			if (EqualityComparer<T>.Default.Equals(_array[i], value))
 			{
 				return _indexToDataMap[i];
 			}
