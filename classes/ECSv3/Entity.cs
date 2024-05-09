@@ -13,6 +13,7 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
+using System;
 using System.Runtime.InteropServices;
 using System.Numerics;
 
@@ -20,7 +21,7 @@ using GodotEGP.ECSv3.Components;
 
 // entity struct holds the entity ID and a reference to the ECS core
 [StructLayout(LayoutKind.Explicit)]
-public struct Entity : IIncrementOperators<Entity>
+public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatable<ulong>
 {
 	// underlying ulong ID of this entity
 	[FieldOffset(0)]
@@ -52,6 +53,29 @@ public struct Entity : IIncrementOperators<Entity>
 	{
 		Id = id;
 		PairId = id2;
+	}
+
+	/**********************
+	*  Equality methods  *
+	**********************/
+
+	public override bool Equals(object? entity)
+	{
+		return ((Entity) entity).RawId == RawId; // 1400 fps
+		// Entity? v = entity as Entity?; 
+		// return v.Value.RawId == RawId; // 666 fps
+	}
+	public bool Equals(Entity entity)
+	{
+		return RawId == entity.RawId;
+	}
+	public bool Equals(ulong entity)
+	{
+		return RawId == entity;
+	}
+	public override int GetHashCode()
+	{
+		return RawId.GetHashCode();
 	}
 
 	public static Entity CreateFrom(ulong id)
