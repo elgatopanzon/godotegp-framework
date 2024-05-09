@@ -41,6 +41,9 @@ public partial struct EcsComponentConfig : IComponentData
 {
 }
 
+// attached to components or entities to mark them as disabled
+public partial struct EcsDisabled : ITag {}
+
 // query components
 // component attached to all query entities
 public partial struct EcsQuery : ITag {}
@@ -56,3 +59,20 @@ public partial struct EcsWriteQuery : ITag {}
 
 // indicates a query does not access any components
 public partial struct EcsNoAccessQuery : ITag {}
+
+// system components
+// main component attached to system entities
+public partial interface IEcsSystem : ITag {}
+public partial struct EcsSystem : IEcsSystem {}
+
+// system processing phase tag interface
+public partial interface IEcsProcessPhase : ITag {}
+
+// system processing phases
+public partial struct EcsProcessPhase : IEcsProcessPhase {}
+public partial struct OnStartupPhase : IEcsProcessPhase {}
+public partial struct PreLoadPhase : IEcsProcessPhase {}
+public partial struct PreUpdatePhase : IEcsProcessPhase {}
+public partial struct OnUpdatePhase : IEcsProcessPhase {}
+public partial struct PostUpdatePhase : IEcsProcessPhase {}
+public partial struct FinalPhase : IEcsProcessPhase {}

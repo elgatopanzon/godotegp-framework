@@ -17,6 +17,7 @@ using GodotEGP.Collections;
 using GodotEGP.ECSv3.Components;
 using GodotEGP.ECSv3.Exceptions;
 using GodotEGP.ECSv3.Queries;
+using GodotEGP.ECSv3.Systems;
 
 using System;
 using System.Linq;
@@ -35,39 +36,54 @@ public partial class ECS : Service
 	private EntityManager _entityManager;
 	private ComponentManager _componentManager;
 	private QueryManager _queryManager;
+	private SystemManager _systemManager;
+	private SystemScheduler _systemScheduler;
 
-	private Entity _entity;
+	public EntityManager EntityManager { get { return _entityManager; }}
+	public ComponentManager ComponentManager { get { return _componentManager; }}
+	public QueryManager QueryManager { get { return _queryManager; }}
+	public SystemManager SystemManager { get { return _systemManager; }}
+	public SystemScheduler SystemScheduler { get { return _systemScheduler; }}
+
 
 	// default component IDs
 	public readonly Entity EcsWildcard;
 	public readonly Entity EcsTag;
 	public readonly Entity EcsComponent;
 	public readonly Entity EcsComponentConfig;
+	public readonly Entity EcsDisabled;
 	public readonly Entity EcsQuery;
 	public readonly Entity EcsReadOnlyQuery;
 	public readonly Entity EcsReadWriteQuery;
 	public readonly Entity EcsWriteQuery;
 	public readonly Entity EcsNoAccessQuery;
+	public readonly Entity EcsSystem;
 
 	public ECS()
 	{
 		_entityManager = new();
 		_componentManager = new(_entityManager);
 		_queryManager = new(_entityManager);
+		_systemManager = new(_entityManager);
 
 		// register default components
 		EcsWildcard = RegisterComponent<EcsWildcard>();
 		EcsTag = RegisterComponent<EcsTag>();
 		EcsComponent = RegisterComponent<EcsComponent>();
 		EcsComponentConfig = RegisterComponent<EcsComponentConfig>();
+		EcsDisabled = RegisterComponent<EcsDisabled>();
 		EcsQuery = RegisterComponent<EcsQuery>();
 		EcsReadOnlyQuery = RegisterComponent<EcsReadOnlyQuery>();
 		EcsReadWriteQuery = RegisterComponent<EcsReadWriteQuery>();
 		EcsWriteQuery = RegisterComponent<EcsWriteQuery>();
 		EcsNoAccessQuery = RegisterComponent<EcsNoAccessQuery>();
+		EcsSystem = RegisterComponent<EcsSystem>();
 
 		// set the config
 		SetConfig(new ECSConfig());
+
+		// create system scheduler instance
+		_systemScheduler = new(this, _systemManager, _queryManager);
 	}
 
 
@@ -643,6 +659,9 @@ public partial class ECS : Service
 		// add query component
 		e.Add<EcsQuery>();
 
+		// run the query once to update the results
+		Query(e.Entity);
+
 		return e;
 	}
 
@@ -686,5 +705,81 @@ public partial class ECS : Service
 		{
 			_queryManager.UpdateQueryResults(entity);
 		}
+	}
+
+	/********************
+	*  System methods  *
+	********************/
+
+	// register a system with a provided name and query entity ID
+	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, Entity queryId)
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		EntityHandle e = EntityHandle(_systemManager.RegisterSystem<TSystem, TPhase>(name, queryId));
+
+		// add components to entity
+		e.Add<EcsSystem>();
+		Add(e.Entity, Id<TPhase>());
+
+		return e;
+	}
+	
+	// register a system with a default name and no attached query
+	public EntityHandle RegisterSystem<TSystem, TPhase>()
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		return RegisterSystem<TSystem, TPhase>(String.Empty, 0);
+	}
+
+	// register a system with a provided name, and no attached query
+	public EntityHandle RegisterSystem<TSystem, TPhase>(string name)
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		return RegisterSystem<TSystem, TPhase>(name, 0);
+	}
+
+	// register a system with a default name, and an attached query entity ID
+	public EntityHandle RegisterSystem<TSystem, TPhase>(Entity queryId)
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		return RegisterSystem<TSystem, TPhase>(String.Empty, queryId);
+	}
+
+	// register a system with a provided name and query name
+	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, string queryName)
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		return RegisterSystem<TSystem, TPhase>(name, _queryManager.GetQueryEntity(queryName));
+	}
+
+	// register a system with a provided name and query object
+	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, Query query)
+		where TSystem : ISystem, new()
+		where TPhase : IEcsProcessPhase
+	{
+		EntityHandle queryId = RegisterSystemQuery(query, $"system_{name}");
+		return RegisterSystem<TSystem, TPhase>(name, queryId);
+	}
+
+	// register a query which automatically ignores disabled entities
+	public EntityHandle RegisterSystemQuery(Query query, string name)
+	{
+		EntityHandle e = RegisterQuery(CreateQuery()
+				.Has(query)
+				.Not<EcsDisabled>() // ignore disabled entities
+				.Build(), name);
+
+		return e;
+	}
+
+	// trigger an update of all the systems
+	public void Update(double deltaTime)
+	{
+		_systemScheduler.Update(deltaTime);
 	}
 }
