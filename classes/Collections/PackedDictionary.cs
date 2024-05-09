@@ -17,138 +17,138 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+// public partial class PackedDictionaryReal<TKey, TValue>
+// {
+// 	// max size this dictionary can be (no growing)
+// 	private int _maxSize;
+//
+// 	// current size of the dictionary
+// 	private int _currentSize;
+//
+// 	// data stores for keys and values
+// 	private PackedArray<TKey> _keys;
+// 	private PackedArray<TValue> _values;
+//
+// 	// expose Keys and Values properties
+// 	public Span<TKey> Keys {
+// 		get {
+// 			return _keys.Span;
+// 		}
+// 	}
+// 	public Span<TValue> Values {
+// 		get {
+// 			return _values.Span;
+// 		}
+// 	}
+// 	public ReadOnlySpan<TKey> KeysSegment {
+// 		get {
+// 			return _keys.ArraySegment;
+// 		}
+// 	}
+// 	public ReadOnlySpan<TValue> ValuesSegment {
+// 		get {
+// 			return _values.ArraySegment;
+// 		}
+// 	}
+// 	public PackedArray<TKey> PKeys {
+// 		get {
+// 			return _keys;
+// 		}
+// 	}
+// 	public PackedArray<TValue> PValues {
+// 		get {
+// 			return _values;
+// 		}
+// 	}
+//
+// 	// allow accessing indexes like regular dictionary
+// 	public TValue this[TKey key] {
+// 		get {
+// 			return Get(key);
+// 		}
+// 		set {
+// 			Insert(key, value);
+// 		}
+// 	}
+//
+// 	public PackedDictionaryReal(int maxSize = 0)
+// 	{
+// 		_maxSize = maxSize;
+//
+// 		_keys = new();
+// 		_values = new();
+// 	}
+//
+// 	public TValue Get(TKey key)
+// 	{
+// 		return _values[GetIndex(key)];
+// 	}
+// 	public ref TValue GetRef(TKey key)
+// 	{
+// 		return ref _values.GetRef(GetIndex(key));
+// 	}
+//
+// 	public int GetIndex(TKey key)
+// 	{
+// 		return _keys.IndexOf(key);
+// 	}
+//
+// 	public void Add(TKey key, TValue value)
+// 	{
+// 		Insert(key, value);
+// 	}
+//
+// 	public void Insert(TKey key, TValue value)
+// 	{
+// 		int keyIndex = GetIndex(key);
+//
+// 		if (keyIndex == -1)
+// 		{
+// 			keyIndex = _currentSize;
+// 			_currentSize++;
+// 		}
+//
+// 		// add the key and value to the backing arrays
+// 		_keys.Insert(keyIndex, key);
+// 		_values.Insert(keyIndex, value);
+// 	}
+//
+// 	public void Remove(TKey key)
+// 	{
+// 		int keyIndex = GetIndex(key);
+//
+// 		if (keyIndex != -1)
+// 		{
+// 			// remove the key and value from the backing store
+// 			_keys.RemoveAt(keyIndex);
+// 			_values.RemoveAt(keyIndex);
+//
+// 			_currentSize--;
+// 		}
+// 	}
+//
+// 	public bool ContainsKey(TKey key)
+// 	{
+// 		return (GetIndex(key) != -1);
+// 	}
+//
+// 	public bool TryGetValue(TKey key, out TValue value)
+// 	{
+// 		value = default(TValue);
+//
+// 		int foundIndex = GetIndex(key);
+//
+// 		if (foundIndex != -1)
+// 		{
+// 			value = _values[foundIndex];
+// 			return true;
+// 		}
+//
+// 		return false;
+// 	}
+// }
+
 public partial class PackedDictionary<TKey, TValue>
-{
-	// max size this dictionary can be (no growing)
-	private int _maxSize;
-
-	// current size of the dictionary
-	private int _currentSize;
-
-	// data stores for keys and values
-	private PackedArray<TKey> _keys;
-	private PackedArray<TValue> _values;
-
-	// expose Keys and Values properties
-	public Span<TKey> Keys {
-		get {
-			return _keys.Span;
-		}
-	}
-	public Span<TValue> Values {
-		get {
-			return _values.Span;
-		}
-	}
-	public ReadOnlySpan<TKey> KeysSegment {
-		get {
-			return _keys.ArraySegment;
-		}
-	}
-	public ReadOnlySpan<TValue> ValuesSegment {
-		get {
-			return _values.ArraySegment;
-		}
-	}
-	public PackedArray<TKey> PKeys {
-		get {
-			return _keys;
-		}
-	}
-	public PackedArray<TValue> PValues {
-		get {
-			return _values;
-		}
-	}
-
-	// allow accessing indexes like regular dictionary
-	public TValue this[TKey key] {
-		get {
-			return Get(key);
-		}
-		set {
-			Insert(key, value);
-		}
-	}
-
-	public PackedDictionary(int maxSize = 0)
-	{
-		_maxSize = maxSize;
-
-		_keys = new();
-		_values = new();
-	}
-
-	public TValue Get(TKey key)
-	{
-		return _values[GetIndex(key)];
-	}
-	public ref TValue GetRef(TKey key)
-	{
-		return ref _values.GetRef(GetIndex(key));
-	}
-
-	public int GetIndex(TKey key)
-	{
-		return _keys.IndexOf(key);
-	}
-
-	public void Add(TKey key, TValue value)
-	{
-		Insert(key, value);
-	}
-
-	public void Insert(TKey key, TValue value)
-	{
-		int keyIndex = GetIndex(key);
-
-		if (keyIndex == -1)
-		{
-			keyIndex = _currentSize;
-			_currentSize++;
-		}
-
-		// add the key and value to the backing arrays
-		_keys.Insert(keyIndex, key);
-		_values.Insert(keyIndex, value);
-	}
-
-	public void Remove(TKey key)
-	{
-		int keyIndex = GetIndex(key);
-
-		if (keyIndex != -1)
-		{
-			// remove the key and value from the backing store
-			_keys.RemoveAt(keyIndex);
-			_values.RemoveAt(keyIndex);
-
-			_currentSize--;
-		}
-	}
-
-	public bool ContainsKey(TKey key)
-	{
-		return (GetIndex(key) != -1);
-	}
-
-	public bool TryGetValue(TKey key, out TValue value)
-	{
-		value = default(TValue);
-
-		int foundIndex = GetIndex(key);
-
-		if (foundIndex != -1)
-		{
-			value = _values[foundIndex];
-			return true;
-		}
-
-		return false;
-	}
-}
-
-public partial class PackedDictionaryBuckets<TKey, TValue>
 {
 	// max size this dictionary can be (no growing)
 	private int _maxSize;
@@ -185,7 +185,7 @@ public partial class PackedDictionaryBuckets<TKey, TValue>
 		}
 	}
 
-	public PackedDictionaryBuckets(int maxSize = 0, int bucketSize = 10)
+	public PackedDictionary(int maxSize = 0, int bucketSize = 10)
 	{
 		_maxSize = maxSize;
 		_bucketSize = bucketSize;
@@ -286,6 +286,22 @@ public partial class PackedDictionaryBuckets<TKey, TValue>
 		int bucket = GetBucket(key);
 		
 		return (GetIndex(key, bucket) != -1);
+	}
+
+	public bool TryGetValue(TKey key, out TValue value)
+	{
+		value = default(TValue);
+
+		int bucket = GetBucket(key);
+		int foundIndex = GetIndex(key, bucket);
+
+		if (foundIndex != -1)
+		{
+			value = _values[GetBucket(key)][foundIndex];
+			return true;
+		}
+
+		return false;
 	}
 }
 
