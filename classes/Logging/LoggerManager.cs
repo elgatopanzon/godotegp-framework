@@ -28,7 +28,7 @@ public partial class LoggerManager : Service
 	}
 
 	private LoggerConfig _loggerConfig;
-	private LoggerConfig Config
+	public LoggerConfig Config
 	{
 		get { 
 			return _loggerConfig;
