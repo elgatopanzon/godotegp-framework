@@ -51,16 +51,18 @@ public partial class LoggerConfig : VObject
         InitConfigParams();
 	}
 
-	public Logging.Message.LogLevel GetMatchingLogLevelOverride(string match)
+	public bool GetMatchingLogLevelOverride(string match, out Logging.Message.LogLevel level)
 	{
+		level = LogLevel;
 		foreach (KeyValuePair<string, Logging.Message.LogLevel> levelOverride in LogLevelOverrides)
 		{
 			if (match.Contains(levelOverride.Key))
 			{
-				return levelOverride.Value;
+				level = levelOverride.Value;
+				return true;
 			}
 		}
 
-		return LogLevel;
+		return false;
 	}
 }

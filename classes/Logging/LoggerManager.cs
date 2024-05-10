@@ -112,16 +112,14 @@ public partial class LoggerManager : Service
 		var currentLogLevel = Message.DefaultLogLevel;
 		if (Instance.Config != null)
 		{
-			var overrideLevel = Instance.Config.GetMatchingLogLevelOverride(sourceType.Name);
-
-			// if the override level matches the current level, then we can try
-			// to find a match by name
-			if (overrideLevel == currentLogLevel)
+			if (Instance.Config.GetMatchingLogLevelOverride(sourceType.Name, out Logging.Message.LogLevel level))
 			{
-				overrideLevel = Instance.Config.GetMatchingLogLevelOverride(logMessage);
+				logLevel = level;
+				if (level == currentLogLevel && Instance.Config.GetMatchingLogLevelOverride(logMessage, out Logging.Message.LogLevel level2))
+				{
+					logLevel = level;
+				}
 			}
-
-			logLevel = overrideLevel;
 		}
 
 		if (logLevel >= currentLogLevel)
