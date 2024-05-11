@@ -42,6 +42,11 @@ public partial class SystemManager
 		_systemArchetypes = new(maxSystems);
 	}
 
+	public Dictionary<Type, SystemBase> GetSystems()
+	{
+		return _systems;
+	}
+
 	public SystemBase RegisterSystem<T>(ECS ecs) where T : SystemBase, new()
 	{
 		Type systemType = typeof(T);

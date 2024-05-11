@@ -15,7 +15,7 @@ using GodotEGP.Config;
 
 using System.Collections;
 
-public partial class ECS : Service
+public partial class ECS
 {
 	private int _maxEntities;
 	private int _maxComponents;
@@ -37,6 +37,13 @@ public partial class ECS : Service
 		_systemManager = new(maxSystems:maxSystems, maxComponents:maxComponents);
 	}
 
+	public void _Process(double deltaTime)
+	{
+		foreach (var system in _systemManager.GetSystems())
+		{
+			system.Value._Process(deltaTime);
+		}
+	}
 
 	/*******************************
 	*  Entity management methods  *
