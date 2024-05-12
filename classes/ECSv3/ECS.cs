@@ -165,12 +165,13 @@ public partial class ECS : Service
 
 	public bool IsAlive(Entity entity, bool throwIfDead = false)
 	{
-		bool alive = _entityManager.IsAlive(entity);
+		return true;
+		// bool alive = _entityManager.IsAlive(entity);
 
 		// throw an exception if throwIfDead is true
-		if (throwIfDead && !alive) { throw new OperationOnDeadEntityException($"Entity is dead: {new EntityHandle(entity, this).ToString()}"); }
+		// if (throwIfDead && !alive) { throw new OperationOnDeadEntityException($"Entity is dead: {new EntityHandle(entity, this).ToString()}"); }
 
-		return alive;
+		// return alive;
 	}
 
 	public void Destroy(Entity entity)
@@ -293,11 +294,15 @@ public partial class ECS : Service
 	// create the needed type ID and component array
 	public EntityHandle RegisterComponent<T>() where T : IComponent
 	{
-		Entity typeId = _componentManager.CreateTypeId<T>();
+		Entity typeId = Entity.CreateFrom((ulong) _componentManager.CreateTypeId<T>());
 
-		LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
+		_componentManager.CreateComponentArray<T>((int) typeId.Id);
+
+		// LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
 
 		LoggerManager.LogDebug("Registering component", typeof(T).Name, "typeId", typeId);
+
+		_entityManager.CreateUnmanaged(typeId, typeof(T).Name);
 
 		// if component doesn't implement ITag then it gets the
 		// ComponentEntity component, allowing us to check later if the
@@ -590,6 +595,11 @@ public partial class ECS : Service
 		return ref _componentManager.GetComponent<T>(entity);
 	}
 
+	public ref T Get<T>(int typeId, Entity entity) where T : IComponentData
+	{
+		return ref _componentManager.GetComponent<T>(entity, typeId);
+	}
+
 	// get component TData for pair (TSource, TTarget) where TData is the data
 	// component of the pair
 	public ref TData Get<TSource, TData>(Entity entity)
@@ -618,7 +628,7 @@ public partial class ECS : Service
 	// get entity ID for T
 	public Entity Id<T>() where T : IComponent
 	{
-		return _componentManager.GetTypeId<T>();
+		return Entity.CreateFrom((ulong) _componentManager.GetTypeId<T>());
 	}
 
 	// get entity ID for component pair (TSource, TTarget)
@@ -626,13 +636,13 @@ public partial class ECS : Service
 		where TSource : IComponent
 		where TTarget : IComponent
 	{
-			return Entity.CreateFrom(_componentManager.GetTypeId<TSource>().Id, _componentManager.GetTypeId<TTarget>().Id);
+			return Entity.CreateFrom((uint) _componentManager.GetTypeId<TSource>(), (uint) _componentManager.GetTypeId<TTarget>());
 	}
 
 	// get entity ID for entity component pair (T, entity)
 	public Entity Id<T>(Entity entity) where T : IComponent
 	{
-		return Entity.CreateFrom(_componentManager.GetTypeId<T>().Id, entity.Id);
+		return Entity.CreateFrom((uint) _componentManager.GetTypeId<T>(), entity.Id);
 	}
 
 	// get entity ID for entity pair (entitySource, entityTarget)

@@ -25,17 +25,17 @@ using ComponentTypeId = Entity;
 public partial class ComponentManager
 {
 	// component storage by component id 
-	private Dictionary<ComponentTypeId, IComponentArray> _componentArrays;
+	private IndexMap<IComponentArray> _componentArrays;
 
 	// Type to componentId mapping
-	private Dictionary<Type, ComponentTypeId> _componentTypeIds;
+	// private Dictionary<Type, ComponentTypeId> _componentTypeIds;
 
 	private EntityManager _entityManager;
 
 	public ComponentManager(EntityManager entityManager)
 	{
 		_componentArrays = new();
-		_componentTypeIds = new();
+		// _componentTypeIds = new();
 
 		_entityManager = entityManager;
 	}
@@ -45,19 +45,20 @@ public partial class ComponentManager
 	**********************************/
 
 	// register component type and generate a component ID
-	public ComponentTypeId CreateTypeId<T>() where T : IComponent
+	public int CreateTypeId<T>() where T : IComponent
 	{
-		// register the component type
-		if (!_componentTypeIds.TryGetValue(typeof(T), out Entity id))
-		{
-			id = _entityManager.Create();
-			_componentTypeIds[typeof(T)] = id;
-		}
+		return typeof(T).GetHashCode();
+		// // register the component type
+		// if (!_componentTypeIds.TryGetValue(typeof(T), out Entity id))
+		// {
+		// 	id = _entityManager.Create();
+		// 	_componentTypeIds[typeof(T)] = id;
+		// }
 
-		return id;
+		// return id;
 	}
 
-	public ComponentTypeId GetTypeId<T>() where T : IComponent
+	public int GetTypeId<T>() where T : IComponent
 	{
 		return CreateTypeId<T>();
 	}
@@ -68,28 +69,34 @@ public partial class ComponentManager
 	********************************/
 	
 	// create a component array for a type ID as type T
-	public IComponentArray CreateComponentArray<T>(ComponentTypeId typeId) where T : IComponent
+	public IComponentArray CreateComponentArray<T>(int typeId) where T : IComponent
 	{
-		if (!_componentArrays.TryGetValue(typeId, out IComponentArray array))
+		if (_componentArrays.IndexOfData(typeId) == -1)
 		{
-			array = new ComponentArray<T>();
+			IComponentArray array = new ComponentArray<T>();
 			_componentArrays[typeId] = array;
+			return array;
 		}
+		// if (!_componentArrays.TryGetValue(typeId, out IComponentArray array))
+		// {
+		// 	array = new ComponentArray<T>();
+		// 	_componentArrays[typeId] = array;
+		// }
 
-		return array;
+		return _componentArrays[typeId];
 	}
 
 	// create a component array for type T without an ID
 	public IComponentArray CreateComponentArray<T>() where T : IComponent
 	{
-		ComponentTypeId typeId = CreateTypeId<T>();
+		int typeId = CreateTypeId<T>();
 		return CreateComponentArray<T>(typeId);
 	}
 
 	// get component array for type ID
-	public ComponentArray<T> GetComponentArray<T>(ComponentTypeId typeId) where T : IComponent
+	public ComponentArray<T> GetComponentArray<T>(int typeId) where T : IComponent
 	{
-		return Unsafe.As<ComponentArray<T>>(CreateComponentArray<T>(typeId));
+		return Unsafe.As<ComponentArray<T>>(_componentArrays[typeId]);
 	}
 
 	// get component array for type without ID
@@ -106,21 +113,25 @@ public partial class ComponentManager
 	// add the component to the component array with the given type id
 	public ComponentTypeId AddComponent<T>(Entity entity, ComponentTypeId typeId, T component) where T : IComponent
 	{
-		GetComponentArray<T>(typeId).InsertComponent(entity, component);
+		GetComponentArray<T>((int) typeId.Id).InsertComponent(entity, component);
 
 		return typeId;
 	}
 	// add the component to the component array without type ID
 	public ComponentTypeId AddComponent<T>(Entity entity, T component) where T : IComponent
 	{
-		ComponentTypeId typeId = GetTypeId<T>();
+		int typeId = GetTypeId<T>();
 		GetComponentArray<T>(typeId).InsertComponent(entity, component);
 
-		return typeId;
+		return Entity.CreateFrom((ulong) typeId);;
 	}
 
 	// get the component of type T with the provided type ID
 	public ref T GetComponent<T>(Entity entity, ComponentTypeId typeId) where T : IComponent
+	{
+		return ref GetComponentArray<T>((int) typeId.Id).GetComponent(entity);
+	}
+	public ref T GetComponent<T>(Entity entity, int typeId) where T : IComponent
 	{
 		return ref GetComponentArray<T>(typeId).GetComponent(entity);
 	}
@@ -133,7 +144,7 @@ public partial class ComponentManager
 	// remove the component of type T with type ID
 	public void RemoveComponent<T>(Entity entity, ComponentTypeId typeId) where T : IComponent
 	{
-		GetComponentArray<T>(typeId).RemoveComponent(entity);
+		GetComponentArray<T>((int) typeId.Id).RemoveComponent(entity);
 	}
 	// remove the component of type T without type ID
 	public void RemoveComponent<T>(Entity entity) where T : IComponent
