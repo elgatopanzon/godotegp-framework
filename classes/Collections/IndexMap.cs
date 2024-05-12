@@ -58,6 +58,14 @@ public partial class IndexMap<T>
 		}
 	}
 
+	// array segment instance, updated when changed
+	private ArraySegment<T> _arraySegment;
+	public ArraySegment<T> ArraySegment {
+		get {
+			return _arraySegment;
+		}
+	}
+
 	// holds int index to array indexes
 	private int[] _dataToIndexMap;
 
@@ -66,7 +74,7 @@ public partial class IndexMap<T>
 
 	public T this[int index] {
 		get {
-			return Get(index);
+			return _array[_dataToIndexMap[index]];
 		}
 		set {
 			Set(index, value);
@@ -74,7 +82,7 @@ public partial class IndexMap<T>
 	}
 	public T this[uint index] {
 		get {
-			return Get(index);
+			return _array[_dataToIndexMap[index]];
 		}
 		set {
 			Set(index, value);
@@ -91,6 +99,12 @@ public partial class IndexMap<T>
 
 		ClearIndexMap(0);
 		ClearDataIndexMap(0);
+		CreateArraySegment();
+	}
+
+	public void CreateArraySegment()
+	{
+		_arraySegment = new ArraySegment<T>(_array, 0, _dataSizeCurrent);
 	}
 
 	// similar method to dictionary's Add()
@@ -143,19 +157,19 @@ public partial class IndexMap<T>
 	}
 
 	// get the value for the given index
-	public T Get(int index)
-	{
-		return _array[_dataToIndexMap[index]];
-	}
+	// public T Get(int index)
+	// {
+	// 	return _array[_dataToIndexMap[index]];
+	// }
 	public ref T GetRef(int index)
 	{
 		return ref _array[_dataToIndexMap[index]];
 	}
 
-	public T Get(uint index)
-	{
-		return Get((int) index);
-	}
+	// public T Get(uint index)
+	// {
+	// 	return Get((int) index);
+	// }
 	public ref T GetRef(uint index)
 	{
 		return ref GetRef((int) index);

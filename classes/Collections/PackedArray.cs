@@ -53,11 +53,6 @@ public partial class PackedArray<T>
 	private ArraySegment<T> _arraySegment;
 	public ArraySegment<T> ArraySegment {
 		get {
-			if (_arraySegment == null)
-			{
-				_arraySegment = new ArraySegment<T>(_array, 0, _currentSize);
-			}
-
 			return _arraySegment;
 		}
 	}
@@ -69,7 +64,7 @@ public partial class PackedArray<T>
 	// allow accessing indexes like regular array
 	public T this[int index] {
 		get {
-			return Get(index);
+			return _array[_dataToIndexMap[index]];
 		}
 		set {
 			Insert(index, value);
@@ -89,6 +84,7 @@ public partial class PackedArray<T>
 		// LoggerManager.LogDebug("Init packed array", typeof(T).Name, "size", maxSize);
 
 		ClearDataIndexes();
+		CreateArraySegment();
 	}
 
 	public void ClearDataIndexes(int startFrom = 0)
@@ -102,15 +98,18 @@ public partial class PackedArray<T>
 		}
 	}
 
-	public T Get(int index)
+	public void CreateArraySegment()
 	{
-		int dataIndex = _dataToIndexMap[index];
-		return _array[dataIndex];
+		_arraySegment = new ArraySegment<T>(_array, 0, _currentSize);
 	}
+
+	// public T Get(int index)
+	// {
+	// 	return _array[_dataToIndexMap[index]];
+	// }
 	public ref T GetRef(int index)
 	{
-		int dataIndex = _dataToIndexMap[index];
-		return ref _array[dataIndex];
+		return ref _array[_dataToIndexMap[index]];
 	}
 
 	// add value and grow array size
@@ -155,7 +154,7 @@ public partial class PackedArray<T>
 		
 		// increment current size
 		_currentSize++;
-		_arraySegment = null;
+		CreateArraySegment();
 
 		// LoggerManager.LogDebug("_array", typeof(T).Name, "_array", _array);
 	}
@@ -199,7 +198,7 @@ public partial class PackedArray<T>
 
 		// decrease array size
 		_currentSize--;
-		_arraySegment = null;
+		CreateArraySegment();
 
 		// LoggerManager.LogDebug("_dataToIndexMap", typeof(T).Name, "_dataToIndexMap", _indexToDataMap);
 		// LoggerManager.LogDebug("_indexToDataMap", typeof(T).Name, "_indexToDataMap", _dataToIndexMap);
