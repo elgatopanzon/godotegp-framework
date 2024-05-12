@@ -51,6 +51,7 @@ public partial class SystemScheduler
 		_processPhaseList.AddPhase(_core.RegisterComponent<OnUpdatePhase>());
 		_processPhaseList.AddPhase(_core.RegisterComponent<PostUpdatePhase>());
 		_processPhaseList.AddPhase(_core.RegisterComponent<FinalPhase>());
+		_processPhaseList.Reset();
 
 		_phaseQueries = new();
 
@@ -199,7 +200,7 @@ public partial class SystemScheduler
 public partial class ProcessPhaseList
 {
 	// hold a list of IEcsProcessPhase entities
-	private PackedArray<Entity> _phases;
+	private IndexMap<Entity> _phases;
 
 	// holds the current phase index
 	private int _currentPhaseIndex;
@@ -212,7 +213,8 @@ public partial class ProcessPhaseList
 	// add a phase entity ID to the list
 	public void AddPhase(Entity entity)
 	{
-		_phases.Add(entity);
+		_phases.Set(_currentPhaseIndex, entity);
+		_currentPhaseIndex++;
 	}
 
 	// clear the phase list
