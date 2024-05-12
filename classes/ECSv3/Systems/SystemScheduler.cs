@@ -229,7 +229,7 @@ public partial class ProcessPhaseList
 
 		if (!isLast)
 		{
-			phase = _phases[_currentPhaseIndex];
+			phase = _phases.RawArray[_currentPhaseIndex];
 			_currentPhaseIndex++;
 		}
 
