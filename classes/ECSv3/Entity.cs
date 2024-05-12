@@ -21,7 +21,7 @@ using GodotEGP.ECSv3.Components;
 
 // entity struct holds the entity ID and a reference to the ECS core
 // [StructLayout(LayoutKind.Explicit)]
-public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatable<ulong>
+public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatable<ulong>, IComparable<Entity>
 {
 	internal ulong _id;
 	public ulong RawId
@@ -123,6 +123,11 @@ public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatab
 	public override int GetHashCode()
 	{
 		return RawId.GetHashCode();
+	}
+
+	public int CompareTo(Entity entity)
+	{
+		return RawId.CompareTo(entity.RawId);
 	}
 
 	public static Entity CreateFrom(ulong id)
