@@ -72,6 +72,14 @@ public partial class IndexMap<T>
 			Set(index, value);
 		}
 	}
+	public T this[uint index] {
+		get {
+			return Get(index);
+		}
+		set {
+			Set(index, value);
+		}
+	}
 
 	public IndexMap(int maxSize = 0, double growMultiplier = 1.61803398874989484820458683436)
 	{
@@ -92,6 +100,10 @@ public partial class IndexMap<T>
 	}
 
 	// set the value for the given index
+	public void Set(uint index, T value)
+	{
+		Set((int) index, value);
+	}
 	public void Set(int index, T value)
 	{
 		int insertDataIndex = _dataSizeCurrent;
@@ -140,7 +152,20 @@ public partial class IndexMap<T>
 		return ref _array[_dataToIndexMap[index]];
 	}
 
+	public T Get(uint index)
+	{
+		return Get((int) index);
+	}
+	public ref T GetRef(uint index)
+	{
+		return ref GetRef((int) index);
+	}
+
 	// remove the data at the given index
+	public bool Unset(uint index)
+	{
+		return Unset((int) index);
+	}
 	public bool Unset(int index)
 	{
 		if (IndexOfData(index) != -1)
@@ -176,6 +201,10 @@ public partial class IndexMap<T>
 	******************************/
 
 	// get the index of the real data value
+	public int IndexOfData(uint index)
+	{
+		return IndexOfData((int) index);
+	}
 	public int IndexOfData(int index)
 	{
 		if (_dataIndexSizeCurrent > index)
