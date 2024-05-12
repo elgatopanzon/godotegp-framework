@@ -32,30 +32,30 @@ public partial class ComponentArray<T> : IComponentArray where T : notnull
 
 	public void InsertComponent(int entityId, T component)
 	{
-		if (_array.ContainsIndex(entityId))
-		{
-			throw new ComponentExistsException($"Component already exists for entity.");
-		}
+		// if (_array.ContainsIndex(entityId))
+		// {
+		// 	throw new ComponentExistsException($"Component already exists for entity.");
+		// }
 
 		_array.Insert(entityId, component);
 	}
 
 	public void RemoveComponent(int entityId)
 	{
-		if (!_array.ContainsIndex(entityId))
-		{
-			throw new ComponentNotFoundException($"Entity does not contain component.");
-		}
+		// if (!_array.ContainsIndex(entityId))
+		// {
+		// 	throw new ComponentNotFoundException($"Entity does not contain component.");
+		// }
 
 		_array.RemoveAt(entityId);
 	}
 
 	public ref T GetComponent(int entityId)
 	{
-		if (!_array.ContainsIndex(entityId))
-		{
-			throw new ComponentNotFoundException($"Entity does not contain component.");
-		}
+		// if (!_array.ContainsIndex(entityId))
+		// {
+		// 	throw new ComponentNotFoundException($"Entity does not contain component.");
+		// }
 
 		return ref _array.GetRef(entityId);
 	}

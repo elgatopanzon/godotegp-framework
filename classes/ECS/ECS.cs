@@ -102,6 +102,10 @@ public partial class ECS
 	{
 		return ref _componentManager.GetComponent<T>(entityId);
 	}
+	public ref T GetComponent<T>(int typeId, int entityId) where T : notnull
+	{
+		return ref _componentManager.GetComponent<T>(typeId, entityId);
+	}
 
 	public int GetComponentType<T>() where T : notnull
 	{

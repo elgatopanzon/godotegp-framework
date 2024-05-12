@@ -12,6 +12,7 @@ using GodotEGP.Logging;
 using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
+using GodotEGP.Collections;
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +32,7 @@ public partial class ComponentManager
 	private Dictionary<Type, int> _componentTypes;
 
 	// dictionary of active component array instances
-	private Dictionary<int, IComponentArray> _componentArrays;
+	private IndexMap<IComponentArray> _componentArrays;
 
 	// size of component arrays
 	private int _componentArraySize;
@@ -83,6 +84,11 @@ public partial class ComponentManager
 		return Unsafe.As<ComponentArray<T>>(_componentArrays[GetComponentType<T>()]);
 	}
 
+	public ComponentArray<T> GetComponentArray<T>(int id) where T : notnull
+	{
+		return Unsafe.As<ComponentArray<T>>(_componentArrays[id]);
+	}
+
 	public void AddComponent<T>(int entityId, T component) where T : notnull
 	{
 		GetComponentArray<T>().InsertComponent(entityId, component);
@@ -96,6 +102,11 @@ public partial class ComponentManager
 	public ref T GetComponent<T>(int entityId) where T : notnull
 	{
 		return ref GetComponentArray<T>().GetComponent(entityId);
+	}
+
+	public ref T GetComponent<T>(int typeId, int entityId) where T : notnull
+	{
+		return ref GetComponentArray<T>(typeId).GetComponent(entityId);
 	}
 
 	public void DestroyEntityComponents(int entityId)
