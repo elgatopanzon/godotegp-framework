@@ -165,13 +165,12 @@ public partial class ECS : Service
 
 	public bool IsAlive(Entity entity, bool throwIfDead = false)
 	{
-		return true;
-		// bool alive = _entityManager.IsAlive(entity);
+		bool alive = _entityManager.IsAlive(entity);
 
 		// throw an exception if throwIfDead is true
-		// if (throwIfDead && !alive) { throw new OperationOnDeadEntityException($"Entity is dead: {new EntityHandle(entity, this).ToString()}"); }
+		if (throwIfDead && !alive) { throw new OperationOnDeadEntityException($"Entity is dead: {new EntityHandle(entity, this).ToString()}"); }
 
-		// return alive;
+		return alive;
 	}
 
 	public void Destroy(Entity entity)
@@ -294,15 +293,17 @@ public partial class ECS : Service
 	// create the needed type ID and component array
 	public EntityHandle RegisterComponent<T>() where T : IComponent
 	{
-		Entity typeId = Entity.CreateFrom((ulong) _componentManager.CreateTypeId<T>());
+		Entity typeId = Entity.CreateFrom(_entityManager.Create(typeof(T).Name));
+
+		T.Id = (int) typeId.Id;
 
 		_componentManager.CreateComponentArray<T>((int) typeId.Id);
 
-		// LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
+		LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
 
 		LoggerManager.LogDebug("Registering component", typeof(T).Name, "typeId", typeId);
 
-		_entityManager.CreateUnmanaged(typeId, typeof(T).Name);
+		// _entityManager.CreateUnmanaged(typeId, typeof(T).Name);
 
 		// if component doesn't implement ITag then it gets the
 		// ComponentEntity component, allowing us to check later if the
@@ -628,7 +629,7 @@ public partial class ECS : Service
 	// get entity ID for T
 	public Entity Id<T>() where T : IComponent
 	{
-		return Entity.CreateFrom((ulong) _componentManager.GetTypeId<T>());
+		return Entity.CreateFrom((ulong) T.Id);
 	}
 
 	// get entity ID for component pair (TSource, TTarget)
@@ -636,13 +637,13 @@ public partial class ECS : Service
 		where TSource : IComponent
 		where TTarget : IComponent
 	{
-			return Entity.CreateFrom((uint) _componentManager.GetTypeId<TSource>(), (uint) _componentManager.GetTypeId<TTarget>());
+			return Entity.CreateFrom((uint) TSource.Id, (uint) TTarget.Id);
 	}
 
 	// get entity ID for entity component pair (T, entity)
 	public Entity Id<T>(Entity entity) where T : IComponent
 	{
-		return Entity.CreateFrom((uint) _componentManager.GetTypeId<T>(), entity.Id);
+		return Entity.CreateFrom((uint) T.Id, entity.Id);
 	}
 
 	// get entity ID for entity pair (entitySource, entityTarget)
