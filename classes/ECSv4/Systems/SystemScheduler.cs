@@ -4,7 +4,7 @@
  * @created     : Wednesday May 08, 2024 16:21:39 CST
  */
 
-namespace GodotEGP.ECSv3.Systems;
+namespace GodotEGP.ECSv4.Systems;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -14,10 +14,10 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Collections;
 
-using GodotEGP.ECSv3;
-using GodotEGP.ECSv3.Components;
-using GodotEGP.ECSv3.Queries;
-using GodotEGP.ECSv3.Systems;
+using GodotEGP.ECSv4;
+using GodotEGP.ECSv4.Components;
+using GodotEGP.ECSv4.Queries;
+using GodotEGP.ECSv4.Systems;
 
 using System;
 using System.Collections.Generic;
@@ -51,6 +51,7 @@ public partial class SystemScheduler
 		_processPhaseList.AddPhase(_core.RegisterComponent<OnUpdatePhase>());
 		_processPhaseList.AddPhase(_core.RegisterComponent<PostUpdatePhase>());
 		_processPhaseList.AddPhase(_core.RegisterComponent<FinalPhase>());
+		_processPhaseList.Reset();
 
 		_phaseQueries = new();
 
@@ -199,7 +200,7 @@ public partial class SystemScheduler
 public partial class ProcessPhaseList
 {
 	// hold a list of IEcsProcessPhase entities
-	private PackedArray<Entity> _phases;
+	private IndexMap<Entity> _phases;
 
 	// holds the current phase index
 	private int _currentPhaseIndex;
@@ -212,7 +213,8 @@ public partial class ProcessPhaseList
 	// add a phase entity ID to the list
 	public void AddPhase(Entity entity)
 	{
-		_phases.Add(entity);
+		_phases.Set(_currentPhaseIndex, entity);
+		_currentPhaseIndex++;
 	}
 
 	// clear the phase list
@@ -229,7 +231,7 @@ public partial class ProcessPhaseList
 
 		if (!isLast)
 		{
-			phase = _phases[_currentPhaseIndex];
+			phase = _phases.RawArray[_currentPhaseIndex];
 			_currentPhaseIndex++;
 		}
 

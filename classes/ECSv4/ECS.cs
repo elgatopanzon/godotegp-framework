@@ -4,7 +4,7 @@
  * @created     : Monday Apr 29, 2024 20:51:05 CST
  */
 
-namespace GodotEGP.ECSv3;
+namespace GodotEGP.ECSv4;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -14,10 +14,10 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Collections;
 
-using GodotEGP.ECSv3.Components;
-using GodotEGP.ECSv3.Exceptions;
-using GodotEGP.ECSv3.Queries;
-using GodotEGP.ECSv3.Systems;
+using GodotEGP.ECSv4.Components;
+using GodotEGP.ECSv4.Exceptions;
+using GodotEGP.ECSv4.Queries;
+using GodotEGP.ECSv4.Systems;
 
 using System;
 using System.Linq;
@@ -293,11 +293,17 @@ public partial class ECS : Service
 	// create the needed type ID and component array
 	public EntityHandle RegisterComponent<T>() where T : IComponent
 	{
-		Entity typeId = _componentManager.CreateTypeId<T>();
+		Entity typeId = Entity.CreateFrom(_entityManager.Create(typeof(T).Name));
+
+		T.Id = (int) typeId.Id;
+
+		_componentManager.CreateComponentArray<T>((int) typeId.Id);
 
 		LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
 
 		LoggerManager.LogDebug("Registering component", typeof(T).Name, "typeId", typeId);
+
+		// _entityManager.CreateUnmanaged(typeId, typeof(T).Name);
 
 		// if component doesn't implement ITag then it gets the
 		// ComponentEntity component, allowing us to check later if the
@@ -590,6 +596,11 @@ public partial class ECS : Service
 		return ref _componentManager.GetComponent<T>(entity);
 	}
 
+	public ref T Get<T>(int typeId, Entity entity) where T : IComponentData
+	{
+		return ref _componentManager.GetComponent<T>(entity, typeId);
+	}
+
 	// get component TData for pair (TSource, TTarget) where TData is the data
 	// component of the pair
 	public ref TData Get<TSource, TData>(Entity entity)
@@ -618,7 +629,7 @@ public partial class ECS : Service
 	// get entity ID for T
 	public Entity Id<T>() where T : IComponent
 	{
-		return _componentManager.GetTypeId<T>();
+		return Entity.CreateFrom((ulong) T.Id);
 	}
 
 	// get entity ID for component pair (TSource, TTarget)
@@ -626,13 +637,13 @@ public partial class ECS : Service
 		where TSource : IComponent
 		where TTarget : IComponent
 	{
-			return Entity.CreateFrom(_componentManager.GetTypeId<TSource>().Id, _componentManager.GetTypeId<TTarget>().Id);
+			return Entity.CreateFrom((uint) TSource.Id, (uint) TTarget.Id);
 	}
 
 	// get entity ID for entity component pair (T, entity)
 	public Entity Id<T>(Entity entity) where T : IComponent
 	{
-		return Entity.CreateFrom(_componentManager.GetTypeId<T>().Id, entity.Id);
+		return Entity.CreateFrom((uint) T.Id, entity.Id);
 	}
 
 	// get entity ID for entity pair (entitySource, entityTarget)

@@ -4,7 +4,7 @@
  * @created     : Friday Apr 26, 2024 20:06:09 CST
  */
 
-namespace GodotEGP.ECSv3;
+namespace GodotEGP.ECSv4;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -17,11 +17,11 @@ using System;
 using System.Runtime.InteropServices;
 using System.Numerics;
 
-using GodotEGP.ECSv3.Components;
+using GodotEGP.ECSv4.Components;
 
 // entity struct holds the entity ID and a reference to the ECS core
 // [StructLayout(LayoutKind.Explicit)]
-public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatable<ulong>
+public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatable<ulong>, IComparable<Entity>
 {
 	internal ulong _id;
 	public ulong RawId
@@ -123,6 +123,11 @@ public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatab
 	public override int GetHashCode()
 	{
 		return RawId.GetHashCode();
+	}
+
+	public int CompareTo(Entity entity)
+	{
+		return RawId.CompareTo(entity.RawId);
 	}
 
 	public static Entity CreateFrom(ulong id)
