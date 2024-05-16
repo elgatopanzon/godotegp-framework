@@ -29,7 +29,7 @@ public partial class QueryManager
 	Dictionary<string, Entity> _entityNames;
 
 	// store query objects with result objects by their entity ID
-	Dictionary<Entity, QueryResult> _queries;
+	IndexMap<QueryResult> _queries;
 
 	// store query names mapping to query entities
 	Dictionary<string, Entity> _queryNameMap;
@@ -182,13 +182,8 @@ public partial class QueryManager
 		LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
 
 		// loop over all queries and match with the provided entity
-		var queriesKeys = _queries.Keys;
-		var queriesValues = _queries.Values;
-		int length = queriesKeys.Count;
-		foreach (var query in _queries)
+		foreach (var results in _queries.Span)
 		{
-			var results = query.Value;
-
 			// skip non-live queries
 			if (!results.Query.IsLiveQuery)
 			{

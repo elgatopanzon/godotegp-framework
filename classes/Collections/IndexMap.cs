@@ -210,6 +210,18 @@ public partial class IndexMap<T>
 		return false;
 	}
 
+	public bool TryGetValue(int index, out T value)
+	{
+		if (IndexOfData(index) != -1)
+		{
+			value = this[index];
+			return true;
+		}
+
+		value = default(T);
+		return false;
+	}
+
 	/******************************
 	*  Array management methods  *
 	******************************/
