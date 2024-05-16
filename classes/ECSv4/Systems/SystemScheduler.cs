@@ -29,7 +29,7 @@ public partial class SystemScheduler
 	private QueryManager _queryManager;
 
 	// holds query IDs for phase entity IDs
-	private Dictionary<Entity, Entity> _phaseQueries;
+	private IndexMap<Entity> _phaseQueries;
 
 	// the global delta time
 	private double _deltaTime;
@@ -70,7 +70,7 @@ public partial class SystemScheduler
 			_core.Add<EcsProcessPhase>(phaseEntity);
 
 			// skip making the query if it already exists
-			if (_phaseQueries.ContainsKey(phaseEntity))
+			if (_phaseQueries.IndexOfData(phaseEntity) != -1)
 			{
 				continue;
 			}
@@ -104,7 +104,8 @@ public partial class SystemScheduler
 			// update systems for phase
 			LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
-			Span<Entity> systemEntities = _queryManager.QueryResults(_phaseQueries[phaseEntity]).Entities.Span;
+			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity]);
+			Span<Entity> systemEntities = results.Entities.Span;
 			int systemCount = systemEntities.Length;
 
 			for (int i = 0; i < systemCount; i++)
