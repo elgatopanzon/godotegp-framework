@@ -26,6 +26,13 @@ public partial class QueryResult
 		}
 	}
 
+	private Query _query;
+	public Query Query
+	{
+		get { return _query; }
+		set { _query = value; }
+	}
+
 	public QueryResult()
 	{
 		_entities = new();
