@@ -15,6 +15,8 @@ using GodotEGP.Config;
 
 using GodotEGP.Collections;
 using GodotEGP.ECSv4;
+using GodotEGP.ECSv4.Components;
+using System.Runtime.CompilerServices;
 
 public partial class Query
 {
@@ -56,6 +58,13 @@ public partial class Query
 		}
 	}
 
+	private IndexMap<IComponentArray> _componentArrayCache;
+	public IndexMap<IComponentArray> ComponentArrayCache
+	{
+		get { return _componentArrayCache; }
+		set { _componentArrayCache = value; }
+	}
+
 	public string Name { get; set; }
 
 	// a live query is included in the auto update results on entity changes
@@ -68,6 +77,8 @@ public partial class Query
 
 		_readArchetype = new();
 		_writeArchetype = new();
+
+		_componentArrayCache = new();
 	}
 
 	public void AddFilter(IQueryFilter filter)
@@ -88,6 +99,12 @@ public partial class Query
 		AddReadAccess(entity);
 		AddWriteAccess(entity);
 	}
+
+	public void CacheComponentArray(Entity typeId, IComponentArray componentArray)
+	{
+		_componentArrayCache[typeId] = componentArray;
+	}
+
 }
 
 public partial class QueryArchetypeFilter

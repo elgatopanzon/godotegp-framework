@@ -72,6 +72,11 @@ public partial class ComponentManager
 		return Unsafe.As<ComponentArray<T>>(_componentArrays[T.Id]);
 	}
 
+	// get component array for type ID as IComponentArray
+	public IComponentArray GetComponentArray(int typeId)
+	{
+		return _componentArrays[typeId];
+	}
 
 	/**********************************
 	*  Component management methods  *

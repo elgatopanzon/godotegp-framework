@@ -187,23 +187,25 @@ public partial class QueryBuilder
 	// InAnd() methods
 	public QueryBuilder InAnd<T>() where T : IComponent
 	{
-		return InAnd(_ecs.GetEntityArchetype(_ecs.Id<T>()));
+		PackedArray<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		return InAnd(archetype);
 	}
 
 
 	// InOr() methods
 	public QueryBuilder InOr<T>() where T : IComponent
 	{
-		return InOr(_ecs.GetEntityArchetype(_ecs.Id<T>()));
+		PackedArray<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		return InOr(archetype);
 	}
 
 
 	// InNot() methods
 	public QueryBuilder InNot<T>() where T : IComponent
 	{
-		return InNot(_ecs.GetEntityArchetype(_ecs.Id<T>()));
+		PackedArray<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		return InNot(archetype);
 	}
-
 
 	/*********************
 	*  Builder methods  *
@@ -224,6 +226,7 @@ public partial class QueryBuilder
 	// has component or entity ID
 	public QueryBuilder Has(Entity entity)
 	{
+		CacheComponentArray(entity);
 		_query.AddFilter(new HasQueryFilter() { Entity = entity });
 		return this;
 	}
@@ -250,6 +253,7 @@ public partial class QueryBuilder
 	// is a specific component or entity ID
 	public QueryBuilder Is(Entity entity)
 	{
+		CacheComponentArray(entity);
 		_query.AddFilter(new IsQueryFilter() { Entity = entity });
 		return this;
 	}
@@ -322,4 +326,10 @@ public partial class QueryBuilder
 		return this;
 	}
 
+
+	// cache an IComponentArray in the query
+	public void CacheComponentArray(Entity typeId)
+	{
+		_query.CacheComponentArray(typeId, _ecs.GetComponentArray(typeId));
+	}
 }

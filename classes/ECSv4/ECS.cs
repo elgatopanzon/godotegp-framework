@@ -337,6 +337,12 @@ public partial class ECS : Service
 		throw new NotImplementedException("Enabling components is not implemented");
 	}
 
+	// get a component array as an IComponentArray
+	public IComponentArray GetComponentArray(Entity typeId)
+	{
+		return _componentManager.GetComponentArray(typeId);
+	}
+
 	/***************************
 	 *  Add component methods  *
 	 ***************************/
