@@ -20,86 +20,26 @@ using System.Numerics;
 using GodotEGP.ECSv4.Components;
 
 // entity struct holds the entity ID and a reference to the ECS core
-// [StructLayout(LayoutKind.Explicit)]
-public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatable<ulong>, IComparable<Entity>
+public struct Entity : IEquatable<Entity>, IEquatable<int>, IComparable<Entity>
 {
-	internal ulong _id;
-	public ulong RawId
+	internal readonly int _id;
+	public int RawId
 	{
 		get {
 			return _id;
 		}
 	}
 
-	public uint Id
+	internal int Id
 	{
 		get {
-			return GetEncodedId(_id);
-		}
-		set {
-			uint pair = PairId;
-			_id = (ulong) value;
-			PairId = pair;
+			return _id;
 		}
 	}
 
-	public uint PairId
-	{
-		get {
-			return GetPairId(_id);
-		}
-		set {
-			_id = SetPairId(_id, value);
-		}
-	}
-
-	public ushort Version
-	{
-		get {
-			return GetEncodedVersion(_id);
-		}
-		set {
-			_id = SetEncodedVersion(_id, value);
-		}
-	}
-
-	public ushort Version2
-	{
-		get {
-			return GetEncodedVersion(_id);
-		}
-	}
-
-	// underlying ulong ID of this entity
-	// [FieldOffset(0)]
-	// internal readonly ulong _id;
-	// [FieldOffset(0)]
-	// public readonly ulong RawId;
-    //
-	// // uint version of this id (left-side ID)
-	// [FieldOffset(0)]
-	// public uint Id;
-    //
-	// // version of this entity
-	// [FieldOffset(4)]
-	// public ushort Version;
-    //
-	// // unused 2nd version of this entity
-	// [FieldOffset(6)]
-	// public ushort Version2;
-    //
-	// // right side pair ID
-	// [FieldOffset(4)]
-	// public uint PairId;
-
-	public Entity(ulong id)
+	public Entity(int id)
 	{
 		_id = id;
-	}
-	public Entity(uint id, uint id2)
-	{
-		Id = id;
-		PairId = id2;
 	}
 
 	/**********************
@@ -108,21 +48,19 @@ public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatab
 
 	public override bool Equals(object? entity)
 	{
-		return ((Entity) entity).RawId == RawId; // 1400 fps
-		// Entity? v = entity as Entity?; 
-		// return v.Value.RawId == RawId; // 666 fps
+		return ((Entity) entity).Id == Id;
 	}
 	public bool Equals(Entity entity)
 	{
 		return RawId == entity.RawId;
 	}
-	public bool Equals(ulong entity)
+	public bool Equals(int entity)
 	{
 		return RawId == entity;
 	}
 	public override int GetHashCode()
 	{
-		return RawId.GetHashCode();
+		return RawId;
 	}
 
 	public int CompareTo(Entity entity)
@@ -130,72 +68,61 @@ public struct Entity : IIncrementOperators<Entity>, IEquatable<Entity>, IEquatab
 		return RawId.CompareTo(entity.RawId);
 	}
 
-	public static Entity CreateFrom(ulong id)
+	public static Entity CreateFrom(int id)
 	{
 		return new Entity(id);
 	}
 
-	public static Entity CreateFrom(uint id, uint id2)
-	{
-		return new Entity(id, id2);
-	}
-
 	public override string ToString()
 	{
-		return $"Entity {_id}: ({Id}, {PairId})";
+		return $"Entity {_id}";
 	}
 
 	/************************
 	*  Operator overloads  *
 	************************/
 
-	public static Entity operator ++(Entity other)
-	{
-		other.Version++;
-		return other;
-	}
-	
-	public static implicit operator ulong(Entity entity) => entity.RawId;
-	public static implicit operator Entity(ulong id) => Entity.CreateFrom(id);
+	public static implicit operator int(Entity entity) => entity.Id;
+	public static implicit operator Entity(int id) => Entity.CreateFrom(id);
 
 
 	/********************************
 	*  Entity ID encoding methods  *
 	********************************/
 
-	// get the left-side ID from a ulong ID
-	public static uint GetEncodedId(ulong id)
-	{
-		return (uint) id;
-	}
-	
-	// get the entity version from a ulong ID
-	public static ushort GetEncodedVersion(ulong id)
-	{
-		return (ushort) (id >> 32);
-	}
-
-	// set the entity version on a ulong ID
-	public static ulong SetEncodedVersion(ulong id, ushort version)
-	{
-		return (ulong) ((ulong) version << 32) | GetEncodedId(id);
-	}
-
-	// increment the entity version on a ulong ID
-	public static ulong IncrementVersion(ulong id)
-	{
-		return SetEncodedVersion(id, (ushort) (GetEncodedVersion(id) + (ushort) 1));
-	}
-
-	// set the right side pair ID on a ulong ID
-	public static ulong SetPairId(ulong id, ulong idLeft)
-	{
-		return (ulong) ((ulong) GetEncodedId(idLeft) << 32) | GetEncodedId(id);
-	}
-
-	// get the right side pair ID of a ulong ID
-	public static uint GetPairId(ulong id)
-	{
-		return (uint) (id >> 32);
-	}
+	// // get the left-side ID from a ulong ID
+	// public static uint GetEncodedId(ulong id)
+	// {
+	// 	return (uint) id;
+	// }
+	//
+	// // get the entity version from a ulong ID
+	// public static ushort GetEncodedVersion(ulong id)
+	// {
+	// 	return (ushort) (id >> 32);
+	// }
+    //
+	// // set the entity version on a ulong ID
+	// public static ulong SetEncodedVersion(ulong id, ushort version)
+	// {
+	// 	return (ulong) ((ulong) version << 32) | GetEncodedId(id);
+	// }
+    //
+	// // increment the entity version on a ulong ID
+	// public static ulong IncrementVersion(ulong id)
+	// {
+	// 	return SetEncodedVersion(id, (ushort) (GetEncodedVersion(id) + (ushort) 1));
+	// }
+    //
+	// // set the right side pair ID on a ulong ID
+	// public static ulong SetPairId(ulong id, ulong idLeft)
+	// {
+	// 	return (ulong) ((ulong) GetEncodedId(idLeft) << 32) | GetEncodedId(id);
+	// }
+    //
+	// // get the right side pair ID of a ulong ID
+	// public static uint GetPairId(ulong id)
+	// {
+	// 	return (uint) (id >> 32);
+	// }
 }

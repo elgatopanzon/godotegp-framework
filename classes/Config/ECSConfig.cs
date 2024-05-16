@@ -18,17 +18,17 @@ public partial class ECSConfig : VConfig
 {
 	partial void InitConfigParams();
 
-	internal readonly VValue<uint> _entityIdRangeMin;
+	internal readonly VValue<int> _entityIdRangeMin;
 
-	public uint EntityIdRangeMin
+	public int EntityIdRangeMin
 	{
 		get { return (EntityIdRangeCheckEnabled) ? _entityIdRangeMin.Value : 0; }
 		set { _entityIdRangeMin.Value = value; }
 	}
 
-	internal readonly VValue<uint> _entityIdRangeMax;
+	internal readonly VValue<int> _entityIdRangeMax;
 
-	public uint EntityIdRangeMax
+	public int EntityIdRangeMax
 	{
 		get { return (EntityIdRangeCheckEnabled) ? _entityIdRangeMax.Value : 0; }
 		set { _entityIdRangeMax.Value = value; }
@@ -52,11 +52,11 @@ public partial class ECSConfig : VConfig
 	
 	public ECSConfig()
 	{
-		_entityIdRangeMin = AddValidatedValue<uint>(this)
+		_entityIdRangeMin = AddValidatedValue<int>(this)
 		    .Default(5000)
 		    .ChangeEventsEnabled();
 
-		_entityIdRangeMax = AddValidatedValue<uint>(this)
+		_entityIdRangeMax = AddValidatedValue<int>(this)
 		    .Default(0)
 		    .ChangeEventsEnabled();
 

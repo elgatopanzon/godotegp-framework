@@ -42,7 +42,7 @@ public partial class EntityHandle
 
 	// allow implicit conversion from EntityHandle to Entity
 	public static implicit operator Entity(EntityHandle entityHandle) => entityHandle.Entity.RawId;
-	public static implicit operator uint(EntityHandle entityHandle) => entityHandle.Entity.Id;
+	public static implicit operator int(EntityHandle entityHandle) => entityHandle.Entity.Id;
 
 	public override string ToString()
 	{
@@ -53,21 +53,6 @@ public partial class EntityHandle
 			name = $"e{_entity.RawId}";
 		}
 		name = $"{name} ({_entity.Id})";
-
-
-		// add entity ID info
-		if (_entity.PairId > 0)
-		{
-			string pairName = _core.GetEntityName(_entity.PairId);
-			if (pairName.Length == 0)
-			{
-				pairName = $"e{_entity.PairId}";
-			}
-			else {
-				pairName = $"{pairName} ({_entity.PairId})";
-			}
-			name += $", {pairName}";
-		}
 
 		return name;
 	}
@@ -103,51 +88,6 @@ public partial class EntityHandle
 		return this;
 	}
 
-	public EntityHandle Set<TSource, TTarget>(TSource sourceComponent) 
-		where TSource : IComponentData
-		where TTarget : ITag
-	{
-		_core.Set<TSource, TTarget>(_entity, sourceComponent);
-
-		return this;
-	}
-	public EntityHandle Set<TSource, TTarget>(TTarget targetComponent) 
-		where TSource : ITag
-		where TTarget : IComponentData
-	{
-		_core.Set<TSource, TTarget>(_entity, targetComponent);
-
-		return this;
-	}
-	public EntityHandle Add<TSource, TTarget>() 
-		where TSource : ITag
-		where TTarget : ITag
-	{
-		_core.Add<TSource, TTarget>(_entity);
-
-		return this;
-	}
-
-	public EntityHandle Set<T>(Entity targetEntity, T component) where T : IComponentData
-	{
-		_core.Set<T>(_entity, targetEntity, component);
-
-		return this;
-	}
-
-	public EntityHandle Add<T>(Entity targetEntity) where T : ITag
-	{
-		_core.Add<T>(_entity, targetEntity);
-
-		return this;
-	}
-
-	public EntityHandle Add(Entity entitySource, Entity entityTarget)
-	{
-		_core.Add(_entity, entitySource, entityTarget);
-
-		return this;
-	}
 	
 	/**************
 	*  Remove()  *
@@ -156,29 +96,6 @@ public partial class EntityHandle
 	public EntityHandle Remove<T>() where T : IComponent
 	{
 		_core.Remove<T>(_entity);
-
-		return this;
-	}
-
-	public EntityHandle Remove<TSource, TTarget>() 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		_core.Remove<TSource, TTarget>(_entity);
-
-		return this;
-	}
-
-	public EntityHandle Remove<T>(Entity entitySource) where T : IComponent
-	{
-		_core.Remove<T>(_entity, entitySource);
-
-		return this;
-	}
-
-	public EntityHandle Remove(Entity entitySource, Entity entityTarget)
-	{
-		_core.Remove(_entity, entitySource, entityTarget);
 
 		return this;
 	}
@@ -192,23 +109,6 @@ public partial class EntityHandle
 		return _core.Has<T>(_entity);
 	}
 
-	public bool Has<TSource, TTarget>() 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		return _core.Has<TSource, TTarget>(_entity);
-	}
-	
-	public bool Has<T>(Entity entitySource) where T : IComponent
-	{
-		return _core.Has<T>(_entity, entitySource);
-	}
-
-	public bool Has(Entity entitySource, Entity entityTarget)
-	{
-		return _core.Has(_entity, entitySource, entityTarget);
-	}
-
 
 	/***********
 	*  Get()  *
@@ -217,17 +117,5 @@ public partial class EntityHandle
 	public ref T Get<T>() where T : IComponentData
 	{
 		return ref _core.Get<T>(_entity);
-	}
-
-	public ref TData Get<TSource, TData>() 
-		where TSource : ITag
-		where TData : IComponentData
-	{
-		return ref _core.Get<TSource, TData>(_entity);
-	}
-
-	public ref T Get<T>(Entity entity) where T : IComponentData
-	{
-		return ref _core.Get<T>(_entity, entity);
 	}
 }

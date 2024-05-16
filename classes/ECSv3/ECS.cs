@@ -125,7 +125,7 @@ public partial class ECS : Service
 		_config = config;
 
 		// set the configured ID ranges
-		_entityManager.SetIdRanges(_config.EntityIdRangeMin, _config.EntityIdRangeMax);
+		_entityManager.SetIdRanges((uint) _config.EntityIdRangeMin, (uint) _config.EntityIdRangeMax);
 
 		_SetServiceReady(true);
 	}

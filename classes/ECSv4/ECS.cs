@@ -45,6 +45,7 @@ public partial class ECS : Service
 	public SystemManager SystemManager { get { return _systemManager; }}
 	public SystemScheduler SystemScheduler { get { return _systemScheduler; }}
 
+	private readonly object _registerComponentLock = new object();
 
 	// default component IDs
 	public readonly Entity EcsWildcard;
@@ -58,6 +59,7 @@ public partial class ECS : Service
 	public readonly Entity EcsWriteQuery;
 	public readonly Entity EcsNoAccessQuery;
 	public readonly Entity EcsSystem;
+	public readonly Entity EcsProcessPhase;
 
 	public ECS()
 	{
@@ -78,6 +80,7 @@ public partial class ECS : Service
 		EcsWriteQuery = RegisterComponent<EcsWriteQuery>();
 		EcsNoAccessQuery = RegisterComponent<EcsNoAccessQuery>();
 		EcsSystem = RegisterComponent<EcsSystem>();
+		EcsProcessPhase = RegisterComponent<EcsProcessPhase>();
 
 		// set the config
 		SetConfig(new ECSConfig());
@@ -249,26 +252,6 @@ public partial class ECS : Service
 		_entityManager.CreateArchetypeStorage(typeId);
 		return new EntityHandle(typeId, this);
 	}
-	public EntityHandle EntityHandle<TSource, TTarget>() 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		Entity typeId = Id<TSource, TTarget>();
-		_entityManager.CreateArchetypeStorage(typeId);
-		return new EntityHandle(typeId, this);
-	}
-	public EntityHandle EntityHandle<T>(Entity entitySource) where T : IComponent
-	{
-		Entity typeId = Id<T>(entitySource);
-		_entityManager.CreateArchetypeStorage(typeId);
-		return new EntityHandle(typeId, this);
-	}
-	public EntityHandle EntityHandle(Entity sourceEntity, Entity targetEntity)
-	{
-		Entity typeId = Id(sourceEntity, targetEntity);
-		_entityManager.CreateArchetypeStorage(typeId);
-		return new EntityHandle(typeId, this);
-	}
 	public EntityHandle EntityHandle(Entity entity)
 	{
 		_entityManager.CreateArchetypeStorage(entity);
@@ -295,9 +278,9 @@ public partial class ECS : Service
 	{
 		Entity typeId = Entity.CreateFrom(_entityManager.Create(typeof(T).Name));
 
-		T.Id = (int) typeId.Id;
+		T.Id = typeId.Id;
 
-		_componentManager.CreateComponentArray<T>((int) typeId.Id);
+		_componentManager.CreateComponentArray<T>(typeId.Id);
 
 		LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
 
@@ -375,29 +358,6 @@ public partial class ECS : Service
 		Add(entity, Id<T>());
 	}
 
-	// add a ITag component relation pair to an entity
-	public void Add<TSource, TTarget>(Entity entity) 
-		where TSource : ITag
-		where TTarget : ITag
-	{
-		// add pair ID to entity archetype
-		Add(entity, Id<TSource, TTarget>());
-	}
-
-	// add an ITag component entity relation pair to an entity
-	public void Add<T>(Entity entity, Entity targetEntity) where T : ITag
-	{
-		// add entity ID for T to entity archetype
-		Add(entity, Id<T>(targetEntity));
-	}
-
-	// add a pair of entities to an entity
-	public void Add(Entity entity, Entity entitySource, Entity entityTarget)
-	{
-		// add pair ID to entity archetype
-		Add(entity, Id(entitySource, entityTarget));
-	}
-
 
 	/***************************
 	*  Set component methods  *
@@ -422,35 +382,10 @@ public partial class ECS : Service
 		Set<T>(entity, Id<T>(), component, isEntityId:true);
 	}
 
-	// add a component relation pair to an entity (with TSource as data
-	// component)
-	public void Set<TSource, TTarget>(Entity entity, TSource sourceComponent) 
-		where TSource : IComponentData
-		where TTarget : ITag
-	{
-		Set<TSource>(entity, Id<TSource, TTarget>(), sourceComponent, isEntityId:true);
-	}
-
-	// add a component relation pair to an entity (with TTarget as data
-	// component)
-	public void Set<TSource, TTarget>(Entity entity, TTarget targetComponent) 
-		where TSource : ITag
-		where TTarget : IComponentData
-	{
-		Set<TTarget>(entity, Id<TSource, TTarget>(), targetComponent, isEntityId:true);
-	}
-
-	// add a component entity relation pair to an entity
-	public void Set<T>(Entity entity, Entity targetEntity, T component) where T : IComponentData
-	{
-		Set<T>(entity, Id<T>(targetEntity), component, isEntityId:true);
-	}
-
 
 	/******************************
 	 *  Remove component methods  *
 	 ******************************/
-
 
 	// remove an entity ID from an entity
 	public void Remove(Entity entity, Entity id)
@@ -482,28 +417,6 @@ public partial class ECS : Service
 		Remove<T>(entity, Id<T>(), isEntityId:true);
 	}
 
-	// remove component pair from entity
-	public void Remove<TSource, TTarget>(Entity entity) 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		Remove<TSource>(entity, Id<TSource, TTarget>(), isEntityId:true);
-		Remove<TTarget>(entity, Id<TSource, TTarget>(), isEntityId:true);
-	}
-
-	// remove entity component pair from entity
-	public void Remove<T>(Entity entity, Entity entitySource) where T : IComponent
-	{
-		Remove<T>(entity, Id<T>(entitySource), isEntityId:true);
-	}
-
-	// remove entity pair from entity
-	public void Remove(Entity entity, Entity entitySource, Entity entityTarget)
-	{
-		// remove type ID from entity archetype
-		Remove(entity, Id(entitySource, entityTarget));
-	}
-
 
 	/**************************************
 	*  Enable/disable component methods  *
@@ -513,38 +426,10 @@ public partial class ECS : Service
 	{
 		DisableArchetype(entity, Id<T>());
 	}
-	public void Disable<TSource, TTarget>(Entity entity) 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		DisableArchetype(entity, Id<TSource, TTarget>());
-	}
-	public void Disable<T>(Entity entity, Entity sourceEntity) where T : IComponent
-	{
-		DisableArchetype(entity, Id<T>(sourceEntity));
-	}
-	public void Disable(Entity entity, Entity sourceEntity, Entity targetEntity)
-	{
-		DisableArchetype(entity, Id(sourceEntity, targetEntity));
-	}
 
 	public void Enable<T>(Entity entity) where T : IComponent
 	{
 		EnableArchetype(entity, Id<T>());
-	}
-	public void Enable<TSource, TTarget>(Entity entity) 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		EnableArchetype(entity, Id<TSource, TTarget>());
-	}
-	public void Enable<T>(Entity entity, Entity sourceEntity) where T : IComponent
-	{
-		EnableArchetype(entity, Id<T>(sourceEntity));
-	}
-	public void Enable(Entity entity, Entity sourceEntity, Entity targetEntity)
-	{
-		EnableArchetype(entity, Id(sourceEntity, targetEntity));
 	}
 
 	/***************************
@@ -555,26 +440,6 @@ public partial class ECS : Service
 	public bool Has<T>(Entity entity) where T : IComponent
 	{
 		return Has(entity, Id<T>());
-	}
-
-	// check if an entity has component pair (TSource, TTarget)
-	public bool Has<TSource, TTarget>(Entity entity) 
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-		return Has(entity, Id<TSource, TTarget>());
-	}
-
-	// check if entity has entity component pair (T, entitySource)
-	public bool Has<T>(Entity entity, Entity entitySource) where T : IComponent
-	{
-		return Has(entity, Id<T>(entitySource));
-	}
-
-	// check if entity has entity pair (entitySource, entityTarget)
-	public bool Has(Entity entity, Entity entitySource, Entity entityTarget)
-	{
-		return Has(entity, Id(entitySource, entityTarget));
 	}
 
 	// check if entity has entity ID
@@ -601,26 +466,6 @@ public partial class ECS : Service
 		return ref _componentManager.GetComponent<T>(entity, typeId);
 	}
 
-	// get component TData for pair (TSource, TTarget) where TData is the data
-	// component of the pair
-	public ref TData Get<TSource, TData>(Entity entity)
-		where TSource : ITag
-		where TData : IComponentData
-	{
-		return ref Get<TData>(entity, Id<TSource, TData>(), isEntityId:true);
-	}
-
-	// get component T for component entity pair (T, entitySource)
-	public ref T Get<T>(Entity entity, Entity entitySource) where T : IComponentData
-	{
-		return ref Get<T>(entity, Id<T>(entitySource), isEntityId:true);
-	}
-
-	public ref T Get<T>(Entity entity, Entity id, bool isEntityId = true) where T : IComponentData
-	{
-		return ref _componentManager.GetComponent<T>(entity, id);
-	}
-
 
 	/****************
 	 *  Id methods  *
@@ -629,27 +474,17 @@ public partial class ECS : Service
 	// get entity ID for T
 	public Entity Id<T>() where T : IComponent
 	{
-		return Entity.CreateFrom((ulong) T.Id);
-	}
-
-	// get entity ID for component pair (TSource, TTarget)
-	public Entity Id<TSource, TTarget>()
-		where TSource : IComponent
-		where TTarget : IComponent
-	{
-			return Entity.CreateFrom((uint) TSource.Id, (uint) TTarget.Id);
-	}
-
-	// get entity ID for entity component pair (T, entity)
-	public Entity Id<T>(Entity entity) where T : IComponent
-	{
-		return Entity.CreateFrom((uint) T.Id, entity.Id);
-	}
-
-	// get entity ID for entity pair (entitySource, entityTarget)
-	public Entity Id(Entity entitySource, Entity entityTarget)
-	{
-		return Entity.CreateFrom(entitySource.Id, entityTarget.Id);
+		// if it's got a 0 Id it hasn't been registered
+		if (T.Id == 0)
+		{
+			Entity e = RegisterComponent<T>().Entity;
+			LoggerManager.LogWarning("Registering dynamic component", "", typeof(T).Name, e);
+			return e;
+		}
+		else
+		{
+			return T.Id;
+		}
 	}
 
 

@@ -24,18 +24,18 @@ using GodotEGP.ECSv4.Components;
 public partial class EntityManager
 {
 	// current count of used entities
-	private ulong _entityCounter;
+	private int _entityCounter;
 
 	// current count of alive entities
-	private ulong _entityAliveCounter;
+	private int _entityAliveCounter;
 
 	// stack of recycled and re-usable entity IDs
-	private Stack<ulong> _recycledEntities;
-	private ulong _recycledEntityCount;
+	private Stack<int> _recycledEntities;
+	private int _recycledEntityCount;
 
 	// ID generation ranges
-	private uint _idRangeMin;
-	private uint _idRangeMax;
+	private int _idRangeMin;
+	private int _idRangeMax;
 
 	// archetypes for entity IDs, storing other entities
 	private Dictionary<Entity, PackedArray<Entity>> _entityArchetypes;
@@ -79,7 +79,7 @@ public partial class EntityManager
 	*  Entity ID management methods  *
 	**********************************/
 
-	public void SetIdRanges(uint rangeMin, uint rangeMax = 0)
+	public void SetIdRanges(int rangeMin, int rangeMax = 0)
 	{
 		_idRangeMin = rangeMin;
 		_idRangeMax = rangeMax;
@@ -163,9 +163,6 @@ public partial class EntityManager
 
 	private void _recycle(Entity entity)
 	{
-		// increase the entity version count
-		entity++;
-
 		_recycledEntities.Push(entity);
 		Interlocked.Increment(ref _recycledEntityCount);
 	}
