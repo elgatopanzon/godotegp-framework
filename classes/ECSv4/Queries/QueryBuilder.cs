@@ -338,6 +338,10 @@ public partial class QueryBuilder
 	// cache an IComponentArray in the query
 	public void CacheComponentArray(Entity typeId)
 	{
+		if (_ecs == null)
+		{
+			return;
+		}
 		_query.CacheComponentArray(typeId, _ecs.GetComponentArray(typeId));
 	}
 }
