@@ -62,7 +62,7 @@ public partial class SystemManager
 		LoggerManager.LogDebug("Registering system instance", "", "system", system);
 
 		// add the registered system
-		_systems.Add((int) e.Id, system);
+		_systems.Add(e.Id, system);
 
 		// add name to name map
 		_nameToSystemMap.Add(name, e);
@@ -77,7 +77,7 @@ public partial class SystemManager
 	// get a system instance by entity ID
 	public SystemInstance GetSystemInstance(Entity entity)
 	{
-		return _systems[(int) entity.Id];
+		return _systems[entity.Id];
 		// if (_systems.TryGetValue(entity, out SystemInstance system))
 		// {
 		// 	return system;

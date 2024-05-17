@@ -30,7 +30,7 @@ public partial class EntityManager
 	private int _entityAliveCounter;
 
 	// stack of recycled and re-usable entity IDs
-	private Stack<int> _recycledEntities;
+	private Stack<Entity> _recycledEntities;
 	private int _recycledEntityCount;
 
 	// ID generation ranges
@@ -111,7 +111,7 @@ public partial class EntityManager
 				throw new ArgumentException("Max entities exist!");
 			}
 
-			entity = CreateUnmanaged(_entityCounter + _idRangeMin, name);
+			entity = CreateUnmanaged(Entity.CreateFrom(_entityCounter + _idRangeMin), name);
 
 			// increase global entity counter
 			Interlocked.Increment(ref _entityCounter);
@@ -284,19 +284,19 @@ public partial class EntityManager
 	
 	public void SetEntityName(Entity entity, string name)
 	{
-		_nameToEntityMap[name] = entity.Id;
-		_entityToNameMap[entity.Id] = name;
+		_nameToEntityMap[name] = entity;
+		_entityToNameMap[entity] = name;
 	}
 
 	public void RemoveEntityName(Entity entity)
 	{
-		_nameToEntityMap.Remove(_entityToNameMap[entity.Id]);
-		_entityToNameMap.Remove(entity.Id);
+		_nameToEntityMap.Remove(_entityToNameMap[entity]);
+		_entityToNameMap.Remove(entity);
 	}
 
 	public bool EntityHasName(Entity entity)
 	{
-		return _entityToNameMap.ContainsKey(entity.Id);
+		return _entityToNameMap.ContainsKey(entity);
 	}
 
 	public bool EntityNameExists(string name)
@@ -306,7 +306,7 @@ public partial class EntityManager
 
 	public bool TryGetEntityName(Entity entity, out string entityName)
 	{
-		if (_entityToNameMap.TryGetValue(entity.Id, out string name))
+		if (_entityToNameMap.TryGetValue(entity, out string name))
 		{
 			entityName = name;
 			return true;

@@ -152,7 +152,7 @@ public partial class SystemScheduler
 		// if the system has no query, then run it without anything
 		else
 		{
-			_updateSystem(system, 0, null);
+			_updateSystem(system, default(Entity), null);
 
 			// set the last update time
 			system.LastUpdateTime = DateTime.Now;
@@ -162,21 +162,14 @@ public partial class SystemScheduler
 	// run the system with the given entities
 	public void _runSystem(SystemInstance system, QueryResult result)
 	{
-		int length = result.Entities.Length;
-
-		if (length == 0)
-		{
-			return;
-		}
-
-		LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", length);
+		LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", result.Entities.Count);
 
 		foreach (var entity in result.Entities.Span)
 		{
 			_updateSystem(system, entity, result);
 		}
 
-		LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", length);
+		LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", result.Entities.Count);
 	}
 
 	// run the Update() method for the given system instance
@@ -185,7 +178,7 @@ public partial class SystemScheduler
 		LoggerManager.LogDebug("Running System's update process", system.System.GetType().Name, "entity", entity);
 
 		// call Update() on the system instance
-		system.Update(entity, 0, _core, _deltaTime, result.Query);
+		system.Update(entity, 0, _core, _deltaTime, result);
 
 		LoggerManager.LogDebug("Finished System's update process", system.System.GetType().Name, "entity", entity);
 	}
@@ -220,7 +213,7 @@ public partial class ProcessPhaseList
 	// get the next phase entity from the list until the end
 	public bool TryNext(out Entity phase)
 	{
-		phase = 0;
+		phase = default(Entity);
 		bool isLast = _currentPhaseIndex == _phases.Count;
 
 		if (!isLast)

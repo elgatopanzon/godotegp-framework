@@ -41,7 +41,7 @@ public partial class EntityHandle
 	}
 
 	// allow implicit conversion from EntityHandle to Entity
-	public static implicit operator Entity(EntityHandle entityHandle) => entityHandle.Entity.RawId;
+	public static implicit operator Entity(EntityHandle entityHandle) => entityHandle.Entity;
 	public static implicit operator int(EntityHandle entityHandle) => entityHandle.Entity.Id;
 
 	public override string ToString()

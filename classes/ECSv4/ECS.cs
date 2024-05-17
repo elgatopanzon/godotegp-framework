@@ -410,7 +410,7 @@ public partial class ECS : Service
 		Remove(entity, id);
 
 		// remove the component data if it has any
-		if (Has<EcsComponent>(Id<T>().Id))
+		if (Has<EcsComponent>(Id<T>()))
 		{
 			_componentManager.RemoveComponent<T>(entity, id);
 		}
@@ -489,7 +489,7 @@ public partial class ECS : Service
 		}
 		else
 		{
-			return T.Id;
+			return Entity.CreateFrom(T.Id);
 		}
 	}
 
@@ -582,7 +582,7 @@ public partial class ECS : Service
 		where TSystem : ISystem, new()
 		where TPhase : IEcsProcessPhase
 	{
-		return RegisterSystem<TSystem, TPhase>(String.Empty, 0);
+		return RegisterSystem<TSystem, TPhase>(String.Empty, default(Entity));
 	}
 
 	// register a system with a provided name, and no attached query
@@ -590,7 +590,7 @@ public partial class ECS : Service
 		where TSystem : ISystem, new()
 		where TPhase : IEcsProcessPhase
 	{
-		return RegisterSystem<TSystem, TPhase>(name, 0);
+		return RegisterSystem<TSystem, TPhase>(name, default(Entity));
 	}
 
 	// register a system with a default name, and an attached query entity ID

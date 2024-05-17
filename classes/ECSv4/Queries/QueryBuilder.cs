@@ -101,7 +101,7 @@ public partial class QueryBuilder
 				// merge cached component arrays
 				foreach (var typeId in filter.ScopedQuery.ComponentArrayCache.Keys)
 				{
-					CacheComponentArray(typeId);
+					CacheComponentArray(Entity.CreateFrom(typeId));
 				}
 
 				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);

@@ -82,8 +82,9 @@ public struct Entity : IEquatable<Entity>, IEquatable<int>, IComparable<Entity>
 	*  Operator overloads  *
 	************************/
 
-	public static implicit operator int(Entity entity) => entity.Id;
-	public static implicit operator Entity(int id) => Entity.CreateFrom(id);
+	public static implicit operator int(Entity entity) {
+		return entity.Id;
+	}
 
 
 	/********************************
