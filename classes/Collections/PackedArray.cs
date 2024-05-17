@@ -71,6 +71,9 @@ public partial class PackedArray<T>
 		}
 	}
 
+	// current TryNext index
+	private int _tryNextIndex;
+
 	public PackedArray(int maxSize = 0, double growMultiplier = 1.61803398874989484820458683436)
 	{
 		_maxSize = maxSize;
@@ -250,6 +253,27 @@ public partial class PackedArray<T>
 		}
 
 		return -1;
+	}
+
+	// get the next phase entity from the list until the end
+	public bool TryNext(out T phase)
+	{
+		phase = default(T);
+		bool isLast = _tryNextIndex == Count;
+
+		if (!isLast)
+		{
+			phase = RawArray[_tryNextIndex];
+			_tryNextIndex++;
+		}
+
+		return !isLast;
+	}
+
+	// reset the phase index to 0
+	public void Reset()
+	{
+		_tryNextIndex = 0;
 	}
 
 	// IEnumerator IEnumerable.GetEnumerator()
