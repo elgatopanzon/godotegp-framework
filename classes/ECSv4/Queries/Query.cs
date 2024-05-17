@@ -58,11 +58,11 @@ public partial class Query
 		}
 	}
 
-	private IndexMap<IComponentArray> _componentArrayCache;
-	public IndexMap<IComponentArray> ComponentArrayCache
+	private QueryResult _results;
+	public QueryResult Results
 	{
-		get { return _componentArrayCache; }
-		set { _componentArrayCache = value; }
+		get { return _results; }
+		set { _results = value; }
 	}
 
 	public string Name { get; set; }
@@ -78,7 +78,7 @@ public partial class Query
 		_readArchetype = new();
 		_writeArchetype = new();
 
-		_componentArrayCache = new();
+		_results = new();
 	}
 
 	public void AddFilter(IQueryFilter filter)
@@ -98,16 +98,6 @@ public partial class Query
 	{
 		AddReadAccess(entity);
 		AddWriteAccess(entity);
-	}
-
-	public void CacheComponentArray(Entity typeId, IComponentArray componentArray)
-	{
-		_componentArrayCache[typeId] = componentArray;
-	}
-
-	public ref T GetComponent<T>(Entity entity) where T : IComponentData
-	{
-		return ref Unsafe.As<ComponentArray<T>>(_componentArrayCache[T.Id]).GetComponent(entity);
 	}
 }
 

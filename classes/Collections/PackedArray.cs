@@ -255,6 +255,12 @@ public partial class PackedArray<T>
 		return -1;
 	}
 
+	public void Clear()
+	{
+		_currentSize = 0;
+		Resize(0);
+	}
+
 	// get the next phase entity from the list until the end
 	public bool TryNext(out T phase)
 	{

@@ -105,12 +105,12 @@ public partial class SystemScheduler
 			LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
 			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity]);
-			Span<Entity> systemEntities = results.Entities.Span;
+			Span<QueryResultEntity> systemEntities = results.Entities.Span;
 			int systemCount = systemEntities.Length;
 
 			for (int i = 0; i < systemCount; i++)
 			{
-				Run(systemEntities[i]);
+				Run(systemEntities[i].Entity);
 			}
 
 			LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
@@ -134,16 +134,17 @@ public partial class SystemScheduler
 		if (system.QueryEntity != 0)
 		{
 			// check if the system's query is live
-			QueryResult results = _queryManager.QueryResults(system.QueryEntity);
+			Query query = _queryManager.GetQuery(system.QueryEntity);
+			QueryResult results = query.Results;
 
 			// run the query if it's not live
-			if (!results.Query.IsLiveQuery)
+			if (!query.IsLiveQuery)
 			{
-				results = _queryManager.RunQuery(results.Query);
+				results = _queryManager.RunQuery(query);
 			}
 
 			// run the system with the resulting entity list
-			_runSystem(system, results);
+			_runSystem(system, query);
 		}
 
 		// if the system has no query, then run it without anything
@@ -154,25 +155,25 @@ public partial class SystemScheduler
 	}
 
 	// run the system with the given entities
-	public void _runSystem(SystemInstance system, QueryResult result)
+	public void _runSystem(SystemInstance system, Query query)
 	{
-		LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", result.Entities.Count);
+		LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
 
-		foreach (var entity in result.Entities.Span)
+		foreach (var entity in query.Results.Entities.Span)
 		{
-			_updateSystem(system, entity, result);
+			_updateSystem(system, entity.Entity, query);
 		}
 
-		LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", result.Entities.Count);
+		LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
 	}
 
 	// run the Update() method for the given system instance
-	public void _updateSystem(SystemInstance system, Entity entity, QueryResult result)
+	public void _updateSystem(SystemInstance system, Entity entity, Query query)
 	{
 		LoggerManager.LogDebug("Running System's update process", system.System.GetType().Name, "entity", entity);
 
 		// call Update() on the system instance
-		system.Update(entity, 0, _core, _deltaTime, result);
+		system.Update(entity, 0, _core, _deltaTime, query);
 
 		LoggerManager.LogDebug("Finished System's update process", system.System.GetType().Name, "entity", entity);
 	}

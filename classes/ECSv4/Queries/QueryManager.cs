@@ -29,7 +29,7 @@ public partial class QueryManager
 	Dictionary<string, Entity> _entityNames;
 
 	// store query objects with result objects by their entity ID
-	IndexMap<QueryResult> _queries;
+	IndexMap<Query> _queries;
 
 	// store query names mapping to query entities
 	Dictionary<string, Entity> _queryNameMap;
@@ -59,11 +59,9 @@ public partial class QueryManager
 		Entity e = _entityManager.Create(name);
 
 		// store the query object if it doesn't exist
-		if (!_queries.TryGetValue(e, out QueryResult results))
+		if (!_queries.TryGetValue(e, out Query queryExisting))
 		{
-			results = new QueryResult();
-			results.Query = query;
-			_queries[e] = results;
+			_queries[e] = query;
 
 			// if we have a name, map it to the entity
 			if (name.Length > 0)
@@ -78,9 +76,9 @@ public partial class QueryManager
 
 	public Query GetQuery(Entity entity)
 	{
-		if (_queries.TryGetValue(entity, out QueryResult results))
+		if (_queries.TryGetValue(entity, out Query query))
 		{
-			return results.Query;
+			return query;
 		}
 
 		throw new ArgumentException($"No query matches '{entity}'.");
@@ -111,9 +109,9 @@ public partial class QueryManager
 	// get saved query results for query by entity id
 	public QueryResult QueryResults(Entity entity)
 	{
-		if (_queries.TryGetValue(entity, out QueryResult results))
+		if (_queries.TryGetValue(entity, out Query query))
 		{
-			return results;
+			return query.Results;
 		}
 
 		// if results don't exist, run the query
@@ -146,8 +144,7 @@ public partial class QueryManager
 	public QueryResult RunQuery(Query query)
 	{
 		// create a new result object
-		QueryResult result = new();
-		result.Query = query;
+		query.Results.ClearEntities();
 
 		LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
 
@@ -158,21 +155,17 @@ public partial class QueryManager
 			// match the entity against the query, adding to results on match
 			if (_matchEntity(entity, query))
 			{
-				result.AddEntity(entity);
+				query.Results.AddEntity(entity);
 			}
 		}
 
-		return result;
+		return query.Results;
 	}
 
 	// execute a registered query and store the results object
 	public QueryResult RunRegisteredQuery(Query query, Entity queryEntity)
 	{
-		QueryResult result = RunQuery(query);
-		result.Query = query;
-		_queries[queryEntity] = result;
-
-		return result;
+		return RunQuery(query);
 	}
 
 	// update registered query results for an entity by matching just the entity
@@ -182,30 +175,30 @@ public partial class QueryManager
 		LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
 
 		// loop over all queries and match with the provided entity
-		foreach (var results in _queries.Span)
+		foreach (var query in _queries.Span)
 		{
 			// skip non-live queries
-			if (!results.Query.IsLiveQuery)
+			if (!query.IsLiveQuery)
 			{
 				continue;
 			}
 
-			bool existsInResults = results.Entities.Contains(entity);
+			bool existsInResults = query.Results.ContainsEntity(entity);
 
-			bool match = _matchEntity(entity, results.Query);
+			bool match = _matchEntity(entity, query);
 
 			// if it's not a match, attempt to remove from results
 			if (existsInResults && !match)
 			{
-				LoggerManager.LogDebug("Removing entity from query results", results.Query.Name, "entity", entity);
-				results.Entities.Remove(entity);
+				LoggerManager.LogDebug("Removing entity from query results", query.Name, "entity", entity);
+				query.Results.RemoveEntity(entity);
 			}
 
 			// otherwise, attempt to add if it doesn't exist
 			else if (!existsInResults && match)
 			{
-				LoggerManager.LogDebug("Adding entity to query results", results.Query.Name, "entity", entity);
-				results.Entities.Add(entity);
+				LoggerManager.LogDebug("Adding entity to query results", query.Name, "entity", entity);
+				query.Results.AddEntity(entity);
 			}
 		}
 	}

@@ -26,9 +26,9 @@ public partial class SystemInstance
 	public Entity QueryEntity { get; set; }
 
 	// update the system and call the ISystem Update() method
-	public void Update(Entity entity, int index, ECS core, double deltaTime, QueryResult result)
+	public void Update(Entity entity, int index, ECS core, double deltaTime, Query query)
 	{
 		// call the system update
-		System.Update(entity, index, this, deltaTime, core, result.Query);
+		System.Update(entity, index, this, deltaTime, core, query);
 	}
 }

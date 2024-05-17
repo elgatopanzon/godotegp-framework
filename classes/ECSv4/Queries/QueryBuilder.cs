@@ -99,7 +99,7 @@ public partial class QueryBuilder
 				BuildQuery(filter.ScopedQuery);
 
 				// merge cached component arrays
-				foreach (var typeId in filter.ScopedQuery.ComponentArrayCache.Keys)
+				foreach (var typeId in filter.ScopedQuery.Results.ComponentArrayCache.Keys)
 				{
 					CacheComponentArray(Entity.CreateFrom(typeId));
 				}
@@ -342,6 +342,6 @@ public partial class QueryBuilder
 		{
 			return;
 		}
-		_query.CacheComponentArray(typeId, _ecs.GetComponentArray(typeId));
+		_query.Results.CacheComponentArray(typeId, _ecs.GetComponentArray(typeId));
 	}
 }
