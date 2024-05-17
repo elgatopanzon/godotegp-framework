@@ -144,18 +144,12 @@ public partial class SystemScheduler
 
 			// run the system with the resulting entity list
 			_runSystem(system, results);
-
-			// set the last update time
-			system.LastUpdateTime = DateTime.Now;
 		}
 
 		// if the system has no query, then run it without anything
 		else
 		{
 			_updateSystem(system, default(Entity), null);
-
-			// set the last update time
-			system.LastUpdateTime = DateTime.Now;
 		}
 	}
 

@@ -17,19 +17,10 @@ using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Queries;
 
 using System;
+using System.Diagnostics;
 
 public partial class SystemInstance
 {
-	// per-system delta time
-	public DateTime LastUpdateTime { get; set; } = DateTime.Now;
-	public double SystemDeltaTime
-	{
-		get {
-			return (DateTime.Now.Ticks - LastUpdateTime.Ticks) / 10000000f;
-		}
-	}
-
-	public double DeltaTime { get; set; }
 	public ISystem System { get; set; }
 	public Entity SystemEntity { get; set; }
 	public Entity QueryEntity { get; set; }
@@ -37,10 +28,7 @@ public partial class SystemInstance
 	// update the system and call the ISystem Update() method
 	public void Update(Entity entity, int index, ECS core, double deltaTime, QueryResult result)
 	{
-		// update the frame-based delta time
-		DeltaTime = deltaTime;
-
 		// call the system update
-		System.Update(entity, index, this, core, result.Query);
+		System.Update(entity, index, this, deltaTime, core, result.Query);
 	}
 }
