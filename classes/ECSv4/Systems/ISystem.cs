@@ -14,8 +14,9 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
 using GodotEGP.ECSv4;
+using GodotEGP.ECSv4.Queries;
 
 public partial interface ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, ECS core);
+	public void Update(Entity entity, int index, SystemInstance system, ECS core, Query query);
 }

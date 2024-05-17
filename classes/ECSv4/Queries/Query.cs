@@ -105,6 +105,10 @@ public partial class Query
 		_componentArrayCache[typeId] = componentArray;
 	}
 
+	public ref T GetComponent<T>(Entity entity) where T : IComponentData
+	{
+		return ref Unsafe.As<ComponentArray<T>>(_componentArrayCache[T.Id]).GetComponent(entity);
+	}
 }
 
 public partial class QueryArchetypeFilter

@@ -71,6 +71,11 @@ public partial class IndexMap<T>
 
 	// holds array indexes to int indexes
 	private int[] _indexToDataMap;
+	public Span<int> Keys {
+		get {
+			return _indexToDataMap.AsSpan().Slice(0, _dataSizeCurrent);
+		}
+	}
 
 	public T this[int index] {
 		get {

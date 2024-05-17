@@ -98,10 +98,20 @@ public partial class QueryBuilder
 				// build this filter's queries
 				BuildQuery(filter.ScopedQuery);
 
+				// merge cached component arrays
+				foreach (var typeId in filter.ScopedQuery.ComponentArrayCache.Keys)
+				{
+					CacheComponentArray(typeId);
+				}
+
 				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
 				archetypeFilter.ScopedQueries.Add(filter.ScopedQuery);
 			}
 
+			if (filter.Entity != 0)
+			{
+				CacheComponentArray(filter.Entity);
+			}
 
 			// only add the entity to the archetypes if it's not part of a
 			// scoped query
@@ -226,7 +236,6 @@ public partial class QueryBuilder
 	// has component or entity ID
 	public QueryBuilder Has(Entity entity)
 	{
-		CacheComponentArray(entity);
 		_query.AddFilter(new HasQueryFilter() { Entity = entity });
 		return this;
 	}
@@ -253,7 +262,6 @@ public partial class QueryBuilder
 	// is a specific component or entity ID
 	public QueryBuilder Is(Entity entity)
 	{
-		CacheComponentArray(entity);
 		_query.AddFilter(new IsQueryFilter() { Entity = entity });
 		return this;
 	}
