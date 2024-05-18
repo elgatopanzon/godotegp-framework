@@ -105,12 +105,12 @@ public partial class SystemScheduler
 			LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
 			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity]);
-			Span<QueryResultEntity> systemEntities = results.Entities.Span;
+			Span<Entity> systemEntities = results.Entities.Span;
 			int systemCount = systemEntities.Length;
 
 			for (int i = 0; i < systemCount; i++)
 			{
-				Run(systemEntities[i].Entity);
+				Run(systemEntities[i]);
 			}
 
 			LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
@@ -161,7 +161,7 @@ public partial class SystemScheduler
 
 		foreach (var entity in query.Results.Entities.Span)
 		{
-			_updateSystem(system, entity.Entity, query);
+			_updateSystem(system, entity, query);
 		}
 
 		LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);

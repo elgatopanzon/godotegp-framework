@@ -18,11 +18,13 @@ using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Components;
 using System.Runtime.CompilerServices;
 
+using System.Collections.Generic;
+
 public partial class QueryResult
 {
 	// holds entity objects representing the entities in the results
-	private PackedArray<QueryResultEntity> _entities;
-	public PackedArray<QueryResultEntity> Entities
+	private IndexMap<Entity> _entities;
+	public IndexMap<Entity> Entities
 	{
 		get {
 			return _entities;
@@ -30,18 +32,17 @@ public partial class QueryResult
 	}
 
 	// a map of the components belonging to the results of the query
-	private IndexMap<IComponentArray> _componentArrayCache;
-	public IndexMap<IComponentArray> ComponentArrayCache
+	private IComponentArray[] _componentArrays;
+	public IComponentArray[] ComponentArrays
 	{
-		get { return _componentArrayCache; }
-		set { _componentArrayCache = value; }
+		get { return _componentArrays; }
 	}
 
+	private int _componentArraySize;
 
 	public QueryResult()
 	{
 		_entities = new();
-		_componentArrayCache = new();
 	}
 
 	/****************************
@@ -50,12 +51,17 @@ public partial class QueryResult
 
 	public void CacheComponentArray(Entity typeId, IComponentArray componentArray)
 	{
-		_componentArrayCache[typeId] = componentArray;
+		if (_componentArraySize <= typeId.Id + 1)
+		{
+			_componentArraySize = typeId.Id + 1;
+			System.Array.Resize(ref _componentArrays, _componentArraySize);
+		}
+		_componentArrays[typeId] = componentArray;
 	}
 
 	public ref T GetComponent<T>(Entity entity) where T : IComponentData
 	{
-		return ref Unsafe.As<ComponentArray<T>>(_componentArrayCache[T.Id]).GetComponent(entity);
+		return ref Unsafe.As<ComponentArray<T>>(_componentArrays[T.Id]).GetComponent(entity);
 	}
 
 	/***********************
@@ -64,43 +70,21 @@ public partial class QueryResult
 
 	public void AddEntity(Entity entity)
 	{
-		_entities.Add(new QueryResultEntity () {
-			Entity = entity,
-		});
+		_entities.Set(entity.Id, entity);
 	}
 
 	public void RemoveEntity(Entity entity)
 	{
-		for (int i = 0; i < _entities.Count; i++)
-		{
-			if (_entities[i].Entity == entity)
-			{
-				_entities.RemoveAt(i);
-				break;
-			}
-		}
+		_entities.Unset(entity.Id);
 	}
 
 	public bool ContainsEntity(Entity entity)
 	{
-		for (int i = 0; i < _entities.Count; i++)
-		{
-			if (_entities[i].Entity == entity)
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return _entities.Count >= entity.Id + 1;
 	}
 
 	public void ClearEntities()
 	{
-		_entities.Clear();
+		_entities = new();
 	}
-}
-
-public partial class QueryResultEntity
-{
-	public Entity Entity { get; set; }
 }

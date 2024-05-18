@@ -20,6 +20,7 @@ using GodotEGP.ECSv4.Exceptions;
 
 using System;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 public partial class QueryBuilder
 {
@@ -99,9 +100,9 @@ public partial class QueryBuilder
 				BuildQuery(filter.ScopedQuery);
 
 				// merge cached component arrays
-				foreach (var typeId in filter.ScopedQuery.Results.ComponentArrayCache.Keys)
+				foreach (var array in filter.ScopedQuery.Results.ComponentArrays)
 				{
-					CacheComponentArray(Entity.CreateFrom(typeId));
+					CacheComponentArray(Entity.CreateFrom(System.Array.IndexOf(filter.ScopedQuery.Results.ComponentArrays, array)));
 				}
 
 				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
