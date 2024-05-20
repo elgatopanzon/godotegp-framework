@@ -106,9 +106,10 @@ public partial class ECS : Service
 	}
 
 	// // Called every frame. 'delta' is the elapsed time since the previous frame.
-	// public override void _Process(double delta)
-	// {
-	// }
+	public override void _Process(double delta)
+	{
+		Update(delta);
+	}
 
 	// Called when service is registered in manager
 	public override void _OnServiceRegistered()
@@ -146,7 +147,7 @@ public partial class ECS : Service
 	{
 		EntityHandle e = new EntityHandle(_entityManager.Create(name), this);
 
-		LoggerManager.LogDebug("Creating entity", e.ToString(), "name", name);
+		// LoggerManager.LogDebug("Creating entity", e.ToString(), "name", name);
 
 		_updateQueryResults(e.Entity);
 
@@ -185,7 +186,7 @@ public partial class ECS : Service
 	{
 		if (IsAlive(entity))
 		{
-			LoggerManager.LogDebug("Destroying entity", new EntityHandle(entity, this).ToString());
+			// LoggerManager.LogDebug("Destroying entity", new EntityHandle(entity, this).ToString());
 
 			_entityManager.Destroy(entity);
 			_componentManager.DestroyEntityComponents(entity);
@@ -197,7 +198,7 @@ public partial class ECS : Service
 	{
 		IsAlive(entity, throwIfDead:true);
 
-		LoggerManager.LogDebug("Setting archetype state", new EntityHandle(entity, this).ToString(), new EntityHandle(id, this).ToString(), state);
+		// LoggerManager.LogDebug("Setting archetype state", new EntityHandle(entity, this).ToString(), new EntityHandle(id, this).ToString(), state);
 
 		// update the state for the entities archetype
 		if (state == true)
@@ -287,7 +288,7 @@ public partial class ECS : Service
 
 		_componentManager.CreateComponentArray<T>(typeId.Id);
 
-		LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
+		// LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
 
 		LoggerManager.LogDebug("Registering component", typeof(T).Name, "typeId", typeId);
 
@@ -355,7 +356,7 @@ public partial class ECS : Service
 	// add an entity ID to an entity
 	public void Add(Entity entity, Entity id)
 	{
-		LoggerManager.LogDebug("Adding entity to entity", new EntityHandle(entity, this).ToString(), "entity", new EntityHandle(id, this).ToString());
+		// LoggerManager.LogDebug("Adding entity to entity", new EntityHandle(entity, this).ToString(), "entity", new EntityHandle(id, this).ToString());
 
 		// set the archetype state
 		SetEntityArchetypeState(entity, id, true);
@@ -377,7 +378,7 @@ public partial class ECS : Service
 	// set component data on an entity
 	public void Set<T>(Entity entity, Entity id, T component, bool isEntityId = true) where T : IComponentData
 	{
-		LoggerManager.LogDebug("Setting component data", new EntityHandle(entity, this).ToString(), new EntityHandle(id, this).ToString(), component);
+		// LoggerManager.LogDebug("Setting component data", new EntityHandle(entity, this).ToString(), new EntityHandle(id, this).ToString(), component);
 
 		// add entity ID to entity
 		Add(entity, id);
@@ -401,7 +402,7 @@ public partial class ECS : Service
 	// remove an entity ID from an entity
 	public void Remove(Entity entity, Entity id)
 	{
-		LoggerManager.LogDebug("Removing entity from entity", new EntityHandle(entity, this).ToString(), "pair", new EntityHandle(id, this).ToString());
+		// LoggerManager.LogDebug("Removing entity from entity", new EntityHandle(entity, this).ToString(), "pair", new EntityHandle(id, this).ToString());
 
 		// make sure entity is alive first
 		IsAlive(entity, throwIfDead:true);

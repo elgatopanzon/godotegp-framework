@@ -146,7 +146,7 @@ public partial class QueryManager
 		// create a new result object
 		query.Results.ClearEntities();
 
-		LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
+		// LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
 
 		// match all entities against any of the valid filter archetypes
 		// loop over all entities and build a results list
@@ -172,7 +172,7 @@ public partial class QueryManager
 	// through all queries and adding/removing from results
 	public void UpdateQueryResults(Entity entity)
 	{
-		LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
+		// LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
 
 		// loop over all queries and match with the provided entity
 		foreach (var query in _queries.Span)
@@ -190,14 +190,14 @@ public partial class QueryManager
 			// if it's not a match, attempt to remove from results
 			if (existsInResults && !match)
 			{
-				LoggerManager.LogDebug("Removing entity from query results", query.Name, "entity", entity);
+				// LoggerManager.LogDebug("Removing entity from query results", query.Name, "entity", entity);
 				query.Results.RemoveEntity(entity);
 			}
 
 			// otherwise, attempt to add if it doesn't exist
 			else if (!existsInResults && match)
 			{
-				LoggerManager.LogDebug("Adding entity to query results", query.Name, "entity", entity);
+				// LoggerManager.LogDebug("Adding entity to query results", query.Name, "entity", entity);
 				query.Results.AddEntity(entity);
 			}
 		}
@@ -214,18 +214,18 @@ public partial class QueryManager
 				return false;
 			}
 
-			LoggerManager.LogDebug($"Matching {entity.ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.ArraySegment);
+			// LoggerManager.LogDebug($"Matching {entity.ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.ArraySegment);
 
 			int matchCount = 0;
 			foreach (var filter in query.ArchetypeFilters.Span)
 			{
-				LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
+				// LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
 				bool matched = _matchFilter(entity, query, filter, entitiesArchetypes, out bool nonMatchingEntity);
 
 				if (matched)
 				{
-					LoggerManager.LogDebug($"Filter matched type {entity.ToString()}", query.GetHashCode().ToString(), "matcher", filter.Filter.Matcher.GetType().Name);
+					// LoggerManager.LogDebug($"Filter matched type {entity.ToString()}", query.GetHashCode().ToString(), "matcher", filter.Filter.Matcher.GetType().Name);
 
 					matchCount++;
 				}
@@ -253,7 +253,7 @@ public partial class QueryManager
 		// do an archetype comparison if there's no scoped query
 		if (filter.ScopedQueries.Count == 0)
 		{
-			LoggerManager.LogDebug($"Matching against archetype filter {entity.ToString()}", query.GetHashCode().ToString(), "filter", filter);
+			// LoggerManager.LogDebug($"Matching against archetype filter {entity.ToString()}", query.GetHashCode().ToString(), "filter", filter);
 
 			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetypes, _entityArchetypes, _entityNames, out bool nonMatchingEntityPre);
 		}
@@ -269,18 +269,18 @@ public partial class QueryManager
 
 		if (matched)
 		{
-			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.ArraySegment);
-			LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.ArraySegment);
+			// LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "filterArchetypes", filter.Archetypes.ArraySegment);
+			// LoggerManager.LogDebug($"Matched {filter.Filter.Matcher.GetType().Name} filter {entity.ToString()}", query.GetHashCode().ToString(), "entityArchetypes", entitiesArchetypes.ArraySegment);
 		}
 
-		LoggerManager.LogDebug("Filter match result", "", "matched", matched);
+		// LoggerManager.LogDebug("Filter match result", "", "matched", matched);
 
 		return matched;
 	}
 
 	public bool _matchScopedQueries(Entity entity, PackedArray<Query> scopedQueries, Query query)
 	{
-		LoggerManager.LogDebug($"Matching against scoped query {entity.ToString()}", query.GetHashCode().ToString(), "scopedQuery", scopedQueries);
+		// LoggerManager.LogDebug($"Matching against scoped query {entity.ToString()}", query.GetHashCode().ToString(), "scopedQuery", scopedQueries);
 
 		int matchCount = 0;
 		bool match = false;
@@ -294,7 +294,7 @@ public partial class QueryManager
 			}
 		}
 
-		LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
+		// LoggerManager.LogDebug("Scoped query match result", query.GetHashCode().ToString(), matchCount.ToString(), matchCount);
 
 		// ensure all the scoped queries match
 		return (matchCount == scopedQueries.Count);

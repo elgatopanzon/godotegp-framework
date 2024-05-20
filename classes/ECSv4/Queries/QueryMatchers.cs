@@ -53,7 +53,7 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 			matched = true;
 		}
 
-		LoggerManager.LogDebug("PreMatch", "", matchEntity.ToString(), matched);
+		// LoggerManager.LogDebug("PreMatch", "", matchEntity.ToString(), matched);
 
 		return matched;
 	}

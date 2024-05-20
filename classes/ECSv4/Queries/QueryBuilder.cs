@@ -68,18 +68,18 @@ public partial class QueryBuilder
 			archetypeFilter = SetQueryArchetypeFilterProperties(archetypeFilter, query.Filters[0], isNotOnlyQuery);
 		}
 
-		LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.ArraySegment);
+		// LoggerManager.LogDebug("Query filters", query.GetHashCode().ToString(), "filters", query.Filters.ArraySegment);
 
 		for (int i = 0; i < query.Filters.Count; i++)
 		{
 			IQueryFilter filter = query.Filters[i];
 
-			LoggerManager.LogDebug("Query filter", query.GetHashCode().ToString(), "filter", filter);
+			// LoggerManager.LogDebug("Query filter", query.GetHashCode().ToString(), "filter", filter);
 
 			// if trigger end is set, we end this archetype and create a new one
 			if (filter.TriggerFilterEnd)
 			{
-				LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString());
+				// LoggerManager.LogDebug("Query filter move next", query.GetHashCode().ToString());
 
 				if (archetypeFilter.HasBuiltFilters && archetypeFilter.Filter.Matcher != null)
 				{
@@ -94,7 +94,7 @@ public partial class QueryBuilder
 			// insert built scoped queries here
 			if (filter.ScopedQuery != null)
 			{
-				LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
+				// LoggerManager.LogDebug("Scoped query found", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
 
 				// build this filter's queries
 				BuildQuery(filter.ScopedQuery);
@@ -105,7 +105,7 @@ public partial class QueryBuilder
 					CacheComponentArray(Entity.CreateFrom(System.Array.IndexOf(filter.ScopedQuery.Results.ComponentArrays, array)));
 				}
 
-				LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
+				// LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
 				archetypeFilter.ScopedQueries.Add(filter.ScopedQuery);
 			}
 
@@ -129,7 +129,7 @@ public partial class QueryBuilder
 			query.ArchetypeFilters.Add(archetypeFilter);
 		}
 
-		LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
+		// LoggerManager.LogDebug("Archetype filters built", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
 
 		return query;
 	}
@@ -140,7 +140,7 @@ public partial class QueryBuilder
 
 		if (isNotOnlyQuery)
 		{
-			LoggerManager.LogDebug("Setting as not-only query");
+			// LoggerManager.LogDebug("Setting as not-only query");
 			archetypeFilter.Filter.MatchMethod = FilterMatchMethod.MatchReverse;
 		}
 

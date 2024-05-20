@@ -127,19 +127,19 @@ public partial class IndexMap<T>
 	{
 		int insertDataIndex = _dataSizeCurrent;
 
-		LoggerManager.LogDebug("Setting item at index", "", "index", index);
+		// LoggerManager.LogDebug("Setting item at index", "", "index", index);
 
 		// check if the current index exists so we can simply replace it
 		int indexOfData = IndexOfData(index);
 		if (indexOfData != -1)
 		{
-			LoggerManager.LogDebug("Index already exists in map", "", "index", index);
+			// LoggerManager.LogDebug("Index already exists in map", "", "index", index);
 
 			insertDataIndex = indexOfData;
 		}
 		else
 		{
-			LoggerManager.LogDebug("Index doesn't exists in map", "", "index", index);
+			// LoggerManager.LogDebug("Index doesn't exists in map", "", "index", index);
 
 			// first grow data index if needed
 			GrowDataIndex(index);
@@ -151,7 +151,7 @@ public partial class IndexMap<T>
 			_dataSizeCurrent++;
 		}
 
-		LoggerManager.LogDebug("Inserting data at real index", "", "index", insertDataIndex);
+		// LoggerManager.LogDebug("Inserting data at real index", "", "index", insertDataIndex);
 
 		// add/set the data
 		_array[insertDataIndex] = value;
@@ -189,7 +189,7 @@ public partial class IndexMap<T>
 	{
 		if (IndexOfData(index) != -1)
 		{
-			LoggerManager.LogDebug("Unsetting value at index", "", "index", index);
+			// LoggerManager.LogDebug("Unsetting value at index", "", "index", index);
 
 			// move the end element to the deleted element's position
 			int lastElementIndex = _dataSizeCurrent - 1;
@@ -273,7 +273,7 @@ public partial class IndexMap<T>
 		System.Array.Resize<T>(ref _array, newSize);
 		System.Array.Resize<int>(ref _indexToDataMap, newSize);
 
-		LoggerManager.LogDebug("Resizing data", typeof(T).Name, "size", $"{_dataSizeMax} => {newSize}");
+		// LoggerManager.LogDebug("Resizing data", typeof(T).Name, "size", $"{_dataSizeMax} => {newSize}");
 
 		_dataSizeMax = newSize;
 	}
@@ -282,7 +282,7 @@ public partial class IndexMap<T>
 	{
 		System.Array.Resize<int>(ref _dataToIndexMap, newSize);
 
-		LoggerManager.LogDebug("Resizing data index", typeof(T).Name, "size", $"{_dataIndexSizeCurrent} => {newSize}");
+		// LoggerManager.LogDebug("Resizing data index", typeof(T).Name, "size", $"{_dataIndexSizeCurrent} => {newSize}");
 
 		_dataIndexSizeCurrent = newSize;
 	}
@@ -290,7 +290,7 @@ public partial class IndexMap<T>
 	// mark the extra indexes as invalid
 	public void ClearIndexMap(int startFrom = 0)
 	{
-		LoggerManager.LogDebug("Clearing index map", typeof(T).Name, "from", startFrom);
+		// LoggerManager.LogDebug("Clearing index map", typeof(T).Name, "from", startFrom);
 
 		for (int i = startFrom; i < _dataSizeMax; i++)
 		{
@@ -299,7 +299,7 @@ public partial class IndexMap<T>
 	}
 	public void ClearDataIndexMap(int startFrom = 0)
 	{
-		LoggerManager.LogDebug("Clearing data index map", typeof(T).Name, "from", startFrom);
+		// LoggerManager.LogDebug("Clearing data index map", typeof(T).Name, "from", startFrom);
 
 		for (int i = startFrom; i < _dataIndexSizeCurrent; i++)
 		{

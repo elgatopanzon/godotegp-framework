@@ -102,7 +102,7 @@ public partial class SystemScheduler
 		while (_processPhaseList.TryNext(out Entity phaseEntity))
 		{
 			// update systems for phase
-			LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
+			// LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
 			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity]);
 			Span<Entity> systemEntities = results.Entities.Span;
@@ -113,7 +113,7 @@ public partial class SystemScheduler
 				Run(systemEntities[i]);
 			}
 
-			LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
+			// LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
 		}
 
 		_processPhaseList.Reset();
@@ -157,25 +157,25 @@ public partial class SystemScheduler
 	// run the system with the given entities
 	public void _runSystem(SystemInstance system, Query query)
 	{
-		LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
+		// LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
 
 		foreach (var entity in query.Results.Entities.Span)
 		{
 			_updateSystem(system, entity, query);
 		}
 
-		LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
+		// LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
 	}
 
 	// run the Update() method for the given system instance
 	public void _updateSystem(SystemInstance system, Entity entity, Query query)
 	{
-		LoggerManager.LogDebug("Running System's update process", system.System.GetType().Name, "entity", entity);
+		// LoggerManager.LogDebug("Running System's update process", system.System.GetType().Name, "entity", entity);
 
 		// call Update() on the system instance
 		system.Update(entity, 0, _core, _deltaTime, query);
 
-		LoggerManager.LogDebug("Finished System's update process", system.System.GetType().Name, "entity", entity);
+		// LoggerManager.LogDebug("Finished System's update process", system.System.GetType().Name, "entity", entity);
 	}
 }
 
