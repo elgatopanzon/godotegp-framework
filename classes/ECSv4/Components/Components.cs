@@ -45,6 +45,9 @@ public partial struct EcsComponentConfig : IComponentData
 	public static int Id { get; set; } 
 }
 
+// component given to entities that represent object instances
+public partial struct EcsObject : ITag { public static int Id { get; set; } }
+
 // attached to components or entities to mark them as disabled
 public partial struct EcsDisabled : ITag { public static int Id { get; set; } }
 

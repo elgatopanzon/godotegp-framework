@@ -38,12 +38,14 @@ public partial class ECS : Service
 	private QueryManager _queryManager;
 	private SystemManager _systemManager;
 	private SystemScheduler _systemScheduler;
+	private ObjectManager _objectManager;
 
 	public EntityManager EntityManager { get { return _entityManager; }}
 	public ComponentManager ComponentManager { get { return _componentManager; }}
 	public QueryManager QueryManager { get { return _queryManager; }}
 	public SystemManager SystemManager { get { return _systemManager; }}
 	public SystemScheduler SystemScheduler { get { return _systemScheduler; }}
+	public ObjectManager ObjectManager { get { return _objectManager; }}
 
 	private readonly object _registerComponentLock = new object();
 
@@ -52,6 +54,7 @@ public partial class ECS : Service
 	public readonly Entity EcsTag;
 	public readonly Entity EcsComponent;
 	public readonly Entity EcsComponentConfig;
+	public readonly Entity EcsObject;
 	public readonly Entity EcsDisabled;
 	public readonly Entity EcsQuery;
 	public readonly Entity EcsReadOnlyQuery;
@@ -67,12 +70,14 @@ public partial class ECS : Service
 		_componentManager = new(_entityManager);
 		_queryManager = new(_entityManager);
 		_systemManager = new(_entityManager);
+		_objectManager = new(_entityManager);
 
 		// register default components
 		EcsWildcard = RegisterComponent<EcsWildcard>();
 		EcsTag = RegisterComponent<EcsTag>();
 		EcsComponent = RegisterComponent<EcsComponent>();
 		EcsComponentConfig = RegisterComponent<EcsComponentConfig>();
+		EcsObject = RegisterComponent<EcsObject>();
 		EcsDisabled = RegisterComponent<EcsDisabled>();
 		EcsQuery = RegisterComponent<EcsQuery>();
 		EcsReadOnlyQuery = RegisterComponent<EcsReadOnlyQuery>();
@@ -643,4 +648,26 @@ public partial class ECS : Service
 	{
 		_systemScheduler.Update(deltaTime);
 	}
+
+
+	/****************************
+	*  Object manager methods  *
+	****************************/
+
+	public Entity RegisterObject<T>(T obj) where T : class
+	{
+		return _objectManager.RegisterObject<T>(obj);
+	}
+
+	public T GetObject<T>(Entity id) where T : class
+	{
+		return _objectManager.Get<T>(id);
+	}
+
+	public void DestroyObject(Entity id)
+	{
+		_objectManager.DeregisterObject(id.Id);
+		Destroy(id);
+	}
+	
 }
