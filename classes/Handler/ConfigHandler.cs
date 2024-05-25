@@ -51,6 +51,10 @@ public partial class ConfigHandler : Handler
 		{
 			ServiceRegistry.Get<ScreenTransitionManager>().SetConfig(sceneResources);
 		}
+		else
+		{
+			ServiceRegistry.Get<ScreenTransitionManager>().SetConfig(new());
+		}
 
 		// set game scripts resources in ScriptService
 		ServiceRegistry.Get<ScriptService>().SetConfig(ServiceRegistry.Get<ResourceManager>().GetResources<GameScript>());
