@@ -48,6 +48,12 @@ public partial class ServiceRegistry : Node
 
 	// Dictionary of BaseService objects
 	private Dictionary<Type, Service.Service> _serviceObjs = new Dictionary<Type, Service.Service>();
+	public Dictionary<Type, Service.Service> Services
+	{
+		get {
+			return _serviceObjs;
+		}
+	}
 
 	/// <summary>
 	/// Access service objects using []
