@@ -38,6 +38,8 @@ public partial class ScreenTransitionManager : Service
 		_transitionScenes = config;
 
 		InstanceTransitionScenes();
+
+		_SetServiceReady(true);
 	}
 
 	/*******************
