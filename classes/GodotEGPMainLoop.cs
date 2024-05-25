@@ -17,7 +17,6 @@ using GodotEGP.ECSv4;
 
 #if GODOT
 [GlobalClass]
-#endif
 public partial class GodotEGPMainLoop : SceneTree
 {
 	private Main _main;
@@ -46,4 +45,4 @@ public partial class GodotEGPMainLoop : SceneTree
     {
     }
 }
-
+#endif
