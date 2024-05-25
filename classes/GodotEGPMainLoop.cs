@@ -37,6 +37,7 @@ public partial class GodotEGPMainLoop : SceneTree
 
 	// partial methods to allow partial overriding
 	partial void _On_Initialize();
+	partial void _On_Ready();
 	partial void _On_Process();
 	partial void _On_Finalize();
 
@@ -99,6 +100,8 @@ public partial class GodotEGPMainLoop : SceneTree
 		if (_serviceReadyCountCurrent >= _serviceReadyCount)
 		{
 			LoggerManager.LogInfo("All services ready!");
+
+			_On_Ready();
 
 			ChangeSceneToFile(_startScene);
 		}
