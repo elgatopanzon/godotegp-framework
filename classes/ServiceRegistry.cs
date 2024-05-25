@@ -200,4 +200,18 @@ public partial class ServiceRegistry : Node
 
 		return servicesReady;
 	}
+
+	/// <summary>
+	/// Deregister a service
+	/// </summary>
+	public static void Deregister<T>() where T : Service.Service
+	{
+		if (Instance._serviceObjs.TryGetValue(typeof(T), out Service.Service service))
+		{
+			Instance.RemoveChild(service);
+			Instance._serviceObjs.Remove(typeof(T));
+	
+			service._OnServiceDeregistered();
+		}
+	}
 }
