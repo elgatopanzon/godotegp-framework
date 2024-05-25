@@ -35,6 +35,13 @@ public partial class Main : Node
 		ServiceRegistry.Get<DataService>();
 		ServiceRegistry.Get<ConfigManager>();
 		ServiceRegistry.Get<InputManager>();
+		ServiceRegistry.Get<ResourceManager>();
+		ServiceRegistry.Get<SceneManager>();
+		ServiceRegistry.Get<SceneTransitionManager>();
+		ServiceRegistry.Get<ScreenTransitionManager>();
+		ServiceRegistry.Get<ScriptService>();
+		ServiceRegistry.Get<NodeManager>();
+		ServiceRegistry.Get<SaveDataManager>();
 	}
 
 	// Called when the node enters the scene tree for the first time.
