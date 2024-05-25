@@ -4,7 +4,7 @@
  * @created     : Monday May 20, 2024 12:09:52 CST
  */
 
-namespace GodotEGP.classes;
+namespace GodotEGP.MainLoop;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -21,6 +21,10 @@ public partial class GodotEGPMainLoop : SceneTree
 {
 	private Main _main;
 
+	partial void _On_Initialize();
+	partial void _On_Process();
+	partial void _On_Finalize();
+
 	public GodotEGPMainLoop()
 	{
 		LoggerManager.LogInfo("GodotEGP main loop starting");
@@ -34,15 +38,23 @@ public partial class GodotEGPMainLoop : SceneTree
 	public override void _Initialize()
     {
 		LoggerManager.LogInfo("Main loop initialize");
+
+		_On_Initialize();
     }
 
     public override bool _Process(double delta)
     {
+    	_On_Process();
+
     	return base._Process(delta);
     }
 
     private new void _Finalize()
     {
+		LoggerManager.LogInfo("Main loop finalize");
+
+		_On_Finalize();
     }
+    
 }
 #endif
