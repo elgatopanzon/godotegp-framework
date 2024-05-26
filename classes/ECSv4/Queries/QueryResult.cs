@@ -80,7 +80,7 @@ public partial class QueryResult
 
 	public bool ContainsEntity(Entity entity)
 	{
-		return _entities.Count >= entity.Id + 1;
+		return _entities.IndexOfData(entity.Id) != -1;
 	}
 
 	public void ClearEntities()
