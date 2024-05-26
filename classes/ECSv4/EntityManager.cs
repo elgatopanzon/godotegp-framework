@@ -102,6 +102,8 @@ public partial class EntityManager
 		{
 			// pop a recycled entity
 			entity = CreateUnmanaged(_recycledEntities.Pop(), name);
+
+			Interlocked.Decrement(ref _recycledEntityCount);
 		}
 		else
 		{
