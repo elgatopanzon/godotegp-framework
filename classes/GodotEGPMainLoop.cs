@@ -103,7 +103,7 @@ public partial class GodotEGPMainLoop : SceneTree
 
 			_On_Ready();
 
-			ChangeSceneToFile(_startScene);
+			ServiceRegistry.Get<SceneManager>().LoadScene(_startScene);
 		}
     }
 

@@ -84,7 +84,7 @@ public partial class SceneTransitionManager : Service
 	
 	public void TransitionScene(string sceneId, string transitionId, bool autoContinue = true)
 	{
-		if (_sceneManager.IsValidScene(sceneId) && _transitionManager.IsValidTransitionId(transitionId))
+		if (_sceneManager.SceneDefinitionExists(sceneId) && _transitionManager.IsValidTransitionId(transitionId))
 		{
 			LoggerManager.LogDebug("Starting scene transition", "", "transition", $"{sceneId} {transitionId}");
 
