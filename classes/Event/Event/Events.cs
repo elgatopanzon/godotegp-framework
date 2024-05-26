@@ -99,12 +99,31 @@ public partial class GodotSignal : Event
  	public string SignalName { get; set; }
  	public Variant[] SignalParams { get; set; }
 
+ 	public Node Node
+ 	{
+		get {
+			return (Node) Owner;
+		}
+ 	}
+
 	public override void Reset()
 	{
 		SignalName = null;
 		SignalParams = null;;
 
 		base.Reset();
+	}
+
+	public bool TryGetParam<T>(int index, out T val) where T : GodotObject
+	{
+		if (SignalParams.Length >= index + 1)
+		{
+			val = (T) SignalParams[index];
+			return true;
+		}
+
+		val = default(T);
+		return false;
 	}
 }
 static class SignalExtensionMethods
