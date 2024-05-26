@@ -186,10 +186,9 @@ public partial class ECS : Service
 	{
 		if (IsAlive(entity))
 		{
-			// LoggerManager.LogDebug("Destroying entity", new EntityHandle(entity, this).ToString());
-
 			_entityManager.Destroy(entity);
 			_componentManager.DestroyEntityComponents(entity);
+			_updateQueryResults(entity);
 		}
 	}
 
