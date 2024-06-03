@@ -155,7 +155,7 @@ public partial class SceneManager : Service
 		}
 		else
 		{
-			if (FileAccess.FileExists(sceneId))
+			if (Godot.FileAccess.FileExists(sceneId))
 			{
 				// create a defition for it
 				AddSceneDefinition(sceneId);
