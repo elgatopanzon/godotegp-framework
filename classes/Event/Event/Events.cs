@@ -114,6 +114,7 @@ public partial class GodotSignal : Event
 		base.Reset();
 	}
 
+#if GODOT
 	public bool TryGetParam<T>(int index, out T val) where T : GodotObject
 	{
 		if (SignalParams.Length >= index + 1)
@@ -125,6 +126,7 @@ public partial class GodotSignal : Event
 		val = default(T);
 		return false;
 	}
+#endif
 }
 static class SignalExtensionMethods
 {
