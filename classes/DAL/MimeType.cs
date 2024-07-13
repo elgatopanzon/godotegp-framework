@@ -575,6 +575,8 @@ public partial class MimeType
     		case "xwd": return "image/x-xwindowdump";
     		case "z": return "application/x-compress";
     		case "zip": return "application/x-zip-compressed";
+    		case "svg": return "image/svg+xml";
+    		case "webp": return "image/webp";
     		default: return "application/octet-stream";
   		}
 	}
