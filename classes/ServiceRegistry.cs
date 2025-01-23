@@ -208,7 +208,9 @@ public partial class ServiceRegistry : Node
 	{
 		if (Instance._serviceObjs.TryGetValue(typeof(T), out Service.Service service))
 		{
+#if GODOT
 			Instance.RemoveChild(service);
+#endif
 			Instance._serviceObjs.Remove(typeof(T));
 	
 			service._OnServiceDeregistered();

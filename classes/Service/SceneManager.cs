@@ -97,6 +97,7 @@ public partial class SceneManager : Service
 	{
 		// check for any loaded scenes such as the main scene, and if they match
 		// any scene resources set the current scene ID
+#if GODOT
 		var currentScene = GetTree().CurrentScene;
 		
 		if (currentScene != null && currentScene.SceneFilePath.Length > 0 && SceneDefinitionExists(currentScene.SceneFilePath))
@@ -124,6 +125,7 @@ public partial class SceneManager : Service
 
 			_currentSceneInstance = currentScene;
 		}
+#endif
 
 	}
 	
@@ -155,6 +157,7 @@ public partial class SceneManager : Service
 		}
 		else
 		{
+#if GODOT
 			if (Godot.FileAccess.FileExists(sceneId))
 			{
 				// create a defition for it
@@ -170,6 +173,7 @@ public partial class SceneManager : Service
 			{
 				throw new InvalidSceneException($"Invalid scene ID {sceneId}");
 			}
+#endif
 		}
 	}
 
@@ -180,9 +184,11 @@ public partial class SceneManager : Service
 		{
 			LoggerManager.LogDebug("Adding definition for scene path", "", "scenePath", scenePath);
 
+#if GODOT
 			_sceneDefinitions.Add(scenePath, new() {
 				Value = GD.Load<PackedScene>(scenePath)
 			});
+#endif
 		}
 	}
 
