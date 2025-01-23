@@ -41,8 +41,7 @@ public partial class SceneManager : Service
 
 	public void SetConfig(Dictionary<string, ResourceObject<PackedScene>> config)
 	{
-		// LoggerManager.LogDebug("Setting scene definition config", "", "scenes", config);
-		LoggerManager.LogDebug("Setting scene definition config");
+		LoggerManager.LogDebug("Setting scene definition config", "", "scenes", config.Keys);
 		
 		_sceneDefinitions = config;
 
@@ -50,6 +49,8 @@ public partial class SceneManager : Service
 		{
 			_SetServiceReady(true);
 		}
+
+		SetSceneIdFromLoadedScene();
 	}
 
 	/*******************
@@ -85,56 +86,103 @@ public partial class SceneManager : Service
 	// Called when service is considered ready
 	public override void _OnServiceReady()
 	{
-		// check for any loaded scenes such as the main scene, and if they match
-		// any scene resources set the current scene ID
-		foreach (Node node in ServiceRegistry.Get<NodeManager>().GetSceneTreeNodes())
-		{
-			if (node.SceneFilePath.Length > 0 && IsValidScene(node.SceneFilePath))
-			{
-				// find the scene resource with matching ID to the one with the
-				// current path, so we can find the short ID of it
-				// TODO: improve this code somehow
-				foreach (var sceneD in _sceneDefinitions)
-				{
-					if (sceneD.Key == node.SceneFilePath)
-					{
-						foreach (var sceneDD in _sceneDefinitions)
-						{
-							if (sceneDD.Value == sceneD.Value && sceneDD.Key != node.SceneFilePath)
-							{
-								_currentSceneId = sceneDD.Key;
-							}
-						}
-					}
-				}
-
-				_currentSceneInstance = node;
-			}
-		}
 	}
+
 
 	/******************************
 	*  Scene management methods  *
 	******************************/
+
+	public void SetSceneIdFromLoadedScene()
+	{
+		// check for any loaded scenes such as the main scene, and if they match
+		// any scene resources set the current scene ID
+		var currentScene = GetTree().CurrentScene;
+		
+		if (currentScene != null && currentScene.SceneFilePath.Length > 0 && SceneDefinitionExists(currentScene.SceneFilePath))
+		{
+			// find the scene resource with matching ID to the one with the
+			// current path, so we can find the short ID of it
+			// TODO: improve this code somehow
+			foreach (var sceneD in _sceneDefinitions)
+			{
+				if (sceneD.Key == currentScene.SceneFilePath)
+				{
+					foreach (var sceneDD in _sceneDefinitions)
+					{
+						if (sceneDD.Value == sceneD.Value && sceneDD.Key != currentScene.SceneFilePath)
+						{
+							_currentSceneId = sceneDD.Key;
+
+							LoggerManager.LogDebug("Setting current scene id to loaded scene", "", "currentSceneId", _currentSceneId);
+						}
+					}
+				}
+			}
+
+			LoggerManager.LogDebug("Setting current scene instance");
+
+			_currentSceneInstance = currentScene;
+		}
+
+	}
 	
 	public void LoadScene(string sceneId)
 	{
-		if (IsValidScene(sceneId))
+		if (SceneDefinitionExists(sceneId))
 		{
 			LoggerManager.LogDebug("Loading scene", "", "sceneId", sceneId);
-			LoggerManager.LogDebug("Current scene type", "", "sceneType", _currentSceneInstance.GetType().Name);
 
-			// UnloadManagedScenes();
-			_currentSceneInstance.SubscribeSignal("tree_exited", false, _On_NodeRemoved, oneshot: true);
-			_currentSceneInstance.QueueFree();
-			this.Emit<SceneUnloaded>((e) => e.SetSceneId(_currentSceneId));
+			// if there's already a current scene, then load it deferred
+			if (_currentSceneInstance != null)
+			{
+				LoggerManager.LogDebug("Current scene type", "", "sceneType", _currentSceneInstance.GetType().Name);
+
+				// UnloadManagedScenes();
+				_currentSceneInstance.SubscribeSignal("tree_exited", false, _On_NodeRemoved, oneshot: true);
+				_currentSceneInstance.QueueFree();
+				this.Emit<SceneUnloaded>((e) => e.SetSceneId(_currentSceneId));
+
+			}
+			// if there's no current scene, just call deferred add
+			else
+			{
+				CallDeferred("AddCurrentScene");
+			}
 
 			_currentSceneId = sceneId;
 			_currentSceneInstance = GetSceneInstance(sceneId);
 		}
 		else
 		{
-			throw new InvalidSceneException($"Invalid scene ID {sceneId}");
+			if (Godot.FileAccess.FileExists(sceneId))
+			{
+				// create a defition for it
+				AddSceneDefinition(sceneId);
+
+				// load it again
+				LoadScene(sceneId);
+			}
+
+			// if the scene definition doesn't exist and it's not a valid scene
+			// file
+			else
+			{
+				throw new InvalidSceneException($"Invalid scene ID {sceneId}");
+			}
+		}
+	}
+
+	public void AddSceneDefinition(string scenePath)
+	{
+		// add a scene definition
+		if (!_sceneDefinitions.TryGetValue(scenePath, out var resource))
+		{
+			LoggerManager.LogDebug("Adding definition for scene path", "", "scenePath", scenePath);
+
+			_sceneDefinitions.Add(scenePath, new() {
+				Value = GD.Load<PackedScene>(scenePath)
+			});
 		}
 	}
 
@@ -149,7 +197,7 @@ public partial class SceneManager : Service
 
 	public Node GetSceneInstance(string sceneId)
 	{
-		if (IsValidScene(sceneId))
+		if (SceneDefinitionExists(sceneId))
 		{
 			if (_sceneDefinitions[sceneId].RawValue is PackedScene ps)
 			{
@@ -160,7 +208,7 @@ public partial class SceneManager : Service
 		return null;
 	}
 
-	public bool IsValidScene(string sceneId)
+	public bool SceneDefinitionExists(string sceneId)
 	{
 		return _sceneDefinitions.ContainsKey(sceneId);
 	}
@@ -169,7 +217,7 @@ public partial class SceneManager : Service
 	{
 		foreach (Node node in ServiceRegistry.Get<NodeManager>().GetSceneTreeNodes())
 		{
-			if (node.SceneFilePath.Length > 0 && IsValidScene(node.SceneFilePath))
+			if (node.SceneFilePath.Length > 0 && SceneDefinitionExists(node.SceneFilePath))
 			{
 				node.QueueFree();
 			}

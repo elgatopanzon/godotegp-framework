@@ -69,7 +69,7 @@ public partial class NodeManager : Service
 		{
 			_registeredNodes[nodeId].Add(node);
 
-			// LoggerManager.LogDebug("Registered node", "", "node", new List<string>() {node.GetType().Name, nodeId});
+			LoggerManager.LogDebug("Registered node", "", "node", new List<string>() {node.GetType().Name, nodeId});
 		}
 
 		if (registerGroups)
