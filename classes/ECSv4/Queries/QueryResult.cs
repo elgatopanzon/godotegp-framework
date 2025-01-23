@@ -64,6 +64,11 @@ public partial class QueryResult
 		return ref Unsafe.As<ComponentArray<T>>(_componentArrays[T.Id]).GetComponent(entity);
 	}
 
+	public ComponentArray<T> GetComponents<T>() where T : IComponentData
+	{
+		return Unsafe.As<ComponentArray<T>>(_componentArrays[T.Id]);
+	}
+
 	/***********************
 	*  Entity management  *
 	***********************/

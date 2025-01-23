@@ -18,5 +18,5 @@ using GodotEGP.ECSv4.Queries;
 
 public partial interface ISystem
 {
-	public void Update(Entity entity, int index, SystemInstance system, double deltaTime, ECS core, Query query);
+	public void Update(SystemInstance system, double deltaTime, ECS core, Query query);
 }

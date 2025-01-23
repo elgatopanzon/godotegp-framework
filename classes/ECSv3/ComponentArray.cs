@@ -28,6 +28,16 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 		get { return _data; }
 	}
 
+	// allow accessing indexes like regular array
+	public T this[Entity entity] {
+		get {
+			return _data[entity];
+		}
+		set {
+			InsertComponent(entity, value);
+		}
+	}
+
 	public ComponentArray()
 	{
 		_data = new();
