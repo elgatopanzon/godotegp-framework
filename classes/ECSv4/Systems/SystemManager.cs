@@ -26,7 +26,7 @@ public partial class SystemManager
 	private EntityManager _entityManager;
 
 	// stores System objects by their entity ID
-	private IndexMap<SystemInstance> _systems;
+	private Dictionary<int, SystemInstance> _systems;
 
 	// stores a map of system names to entity IDs
 	private Dictionary<string, Entity> _nameToSystemMap;
@@ -97,7 +97,7 @@ public partial class SystemManager
 	}
 
 	// get all system instances
-	public IndexMap<SystemInstance> GetSystems()
+	public Dictionary<int, SystemInstance> GetSystems()
 	{
 		return _systems;
 	}

@@ -29,7 +29,7 @@ public partial class SystemScheduler
 	private QueryManager _queryManager;
 
 	// holds query IDs for phase entity IDs
-	private IndexMap<Entity> _phaseQueries;
+	private Dictionary<int, Entity> _phaseQueries;
 
 	// the global delta time
 	private double _deltaTime;
@@ -70,7 +70,7 @@ public partial class SystemScheduler
 			_core.Add<EcsProcessPhase>(phaseEntity);
 
 			// skip making the query if it already exists
-			if (_phaseQueries.IndexOfData(phaseEntity) != -1)
+			if (_phaseQueries.ContainsKey(phaseEntity.Id))
 			{
 				continue;
 			}
@@ -104,13 +104,10 @@ public partial class SystemScheduler
 			// update systems for phase
 			// LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
-			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity]);
-			Span<Entity> systemEntities = results.Entities.Span;
-			int systemCount = systemEntities.Length;
-
-			for (int i = 0; i < systemCount; i++)
+			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity.Id]);
+			foreach (var entity in results.Entities)
 			{
-				Run(systemEntities[i]);
+				Run(entity.Value);
 			}
 
 			// LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
@@ -159,9 +156,9 @@ public partial class SystemScheduler
 	{
 		// LoggerManager.LogDebug("Starting Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
 
-		foreach (var entity in query.Results.Entities.Span)
+		foreach (var entity in query.Results.Entities)
 		{
-			_updateSystem(system, entity, query);
+			_updateSystem(system, entity.Value, query);
 		}
 
 		// LoggerManager.LogDebug("Finished Systems update process", system.System.GetType().Name, "entityCount", query.Results.Entities.Count);
@@ -182,7 +179,7 @@ public partial class SystemScheduler
 public partial class ProcessPhaseList
 {
 	// hold a list of IEcsProcessPhase entities
-	private IndexMap<Entity> _phases;
+	private Dictionary<int, Entity> _phases;
 
 	// holds the current phase index
 	private int _currentPhaseIndex;
@@ -195,7 +192,7 @@ public partial class ProcessPhaseList
 	// add a phase entity ID to the list
 	public void AddPhase(Entity entity)
 	{
-		_phases.Set(_currentPhaseIndex, entity);
+		_phases[_currentPhaseIndex] = entity;
 		_currentPhaseIndex++;
 	}
 
@@ -213,7 +210,7 @@ public partial class ProcessPhaseList
 
 		if (!isLast)
 		{
-			phase = _phases.RawArray[_currentPhaseIndex];
+			phase = _phases[_currentPhaseIndex];
 			_currentPhaseIndex++;
 		}
 

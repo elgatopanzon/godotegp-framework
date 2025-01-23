@@ -15,6 +15,7 @@ using GodotEGP.Config;
 using GodotEGP.Collections;
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 public partial class ObjectManager
@@ -22,8 +23,8 @@ public partial class ObjectManager
 	private EntityManager _entityManager;
 
 	// map of object instances
-	private IndexMap<object> _objects;
-	public IndexMap<object> Objects
+	private Dictionary<int, object> _objects;
+	public Dictionary<int, object> Objects
 	{
 		get {
 			return _objects;
@@ -86,7 +87,7 @@ public partial class ObjectManager
 	protected void _deregister(int id)
 	{
 		_objects[id] = null;
-		_objects.Unset(id);
+		_objects.Remove(id);
 	}
 
 	// deregister an object by ID

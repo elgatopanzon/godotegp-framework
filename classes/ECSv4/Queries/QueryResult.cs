@@ -23,8 +23,8 @@ using System.Collections.Generic;
 public partial class QueryResult
 {
 	// holds entity objects representing the entities in the results
-	private IndexMap<Entity> _entities;
-	public IndexMap<Entity> Entities
+	private Dictionary<int, Entity> _entities;
+	public Dictionary<int, Entity> Entities
 	{
 		get {
 			return _entities;
@@ -70,12 +70,12 @@ public partial class QueryResult
 
 	public void AddEntity(Entity entity)
 	{
-		_entities.Set(entity.Id, entity);
+		_entities[entity.Id] = entity;
 	}
 
 	public void RemoveEntity(Entity entity)
 	{
-		_entities.Unset(entity.Id);
+		_entities.Remove(entity.Id);
 	}
 
 	public bool ContainsEntity(Entity entity)

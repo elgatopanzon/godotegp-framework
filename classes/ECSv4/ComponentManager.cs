@@ -25,7 +25,7 @@ using ComponentTypeId = Entity;
 public partial class ComponentManager
 {
 	// component storage by component id 
-	private IndexMap<IComponentArray> _componentArrays;
+	private Dictionary<int, IComponentArray> _componentArrays;
 
 	private EntityManager _entityManager;
 
@@ -44,7 +44,7 @@ public partial class ComponentManager
 	// create a component array for a type ID as type T
 	public IComponentArray CreateComponentArray<T>(int typeId) where T : IComponent
 	{
-		if (_componentArrays.IndexOfData(typeId) == -1)
+		if (!_componentArrays.ContainsKey(typeId))
 		{
 			IComponentArray array = new ComponentArray<T>();
 			_componentArrays[typeId] = array;

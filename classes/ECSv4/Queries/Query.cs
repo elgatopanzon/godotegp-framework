@@ -18,11 +18,13 @@ using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Components;
 using System.Runtime.CompilerServices;
 
+using System.Collections.Generic;
+
 public partial class Query
 {
 	// stores raw filter objects with matched entity and type
-	private PackedArray<IQueryFilter> _filters;
-	public PackedArray<IQueryFilter> Filters
+	private List<IQueryFilter> _filters;
+	public List<IQueryFilter> Filters
 	{
 		get {
 			return _filters;
@@ -30,8 +32,8 @@ public partial class Query
 	}
 
 	// stores unwrapped filters as archetype lists and operator type
-	private PackedArray<QueryArchetypeFilter> _archetypeFilters;
-	public PackedArray<QueryArchetypeFilter> ArchetypeFilters
+	private List<QueryArchetypeFilter> _archetypeFilters;
+	public List<QueryArchetypeFilter> ArchetypeFilters
 	{
 		get {
 			return _archetypeFilters;
@@ -42,16 +44,16 @@ public partial class Query
 	}
 
 	// an archetype for read and write access
-	private PackedArray<Entity> _readArchetype;
-	private PackedArray<Entity> _writeArchetype;
+	private List<Entity> _readArchetype;
+	private List<Entity> _writeArchetype;
 
-	public PackedArray<Entity> ReadsEntities
+	public List<Entity> ReadsEntities
 	{
 		get {
 			return _readArchetype;
 		}
 	}
-	public PackedArray<Entity> WritesEntities
+	public List<Entity> WritesEntities
 	{
 		get {
 			return _writeArchetype;
@@ -103,8 +105,8 @@ public partial class Query
 
 public partial class QueryArchetypeFilter
 {
-	public PackedArray<Entity> Archetypes;
-	public PackedArray<Query> ScopedQueries;
+	public List<Entity> Archetypes;
+	public List<Query> ScopedQueries;
 	public IQueryFilter Filter { get; set; }
 
 	public bool HasBuiltFilters

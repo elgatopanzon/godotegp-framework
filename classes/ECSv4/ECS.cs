@@ -243,7 +243,7 @@ public partial class ECS : Service
 		_updateQueryResults(entity);
 	}
 
-	public PackedArray<Entity> GetEntityArchetype(Entity entity)
+	public List<Entity> GetEntityArchetype(Entity entity)
 	{
 		return _entityManager.GetArchetype(entity);
 	}
@@ -264,9 +264,9 @@ public partial class ECS : Service
 		return new EntityHandle(entity, this);
 	}
 
-	public PackedArray<EntityHandle> EntityHandles(Entity[] entities)
+	public List<EntityHandle> EntityHandles(Entity[] entities)
 	{
-		PackedArray<EntityHandle> handles = new();
+		List<EntityHandle> handles = new();
 		foreach (Entity entity in entities)
 		{
 			handles.Add(EntityHandle(entity));

@@ -25,11 +25,11 @@ public partial class QueryManager
 	private EntityManager _entityManager;
 
 	// reference to entity names and entity archetypes
-	Dictionary<Entity, PackedArray<Entity>> _entityArchetypes;
+	Dictionary<Entity, List<Entity>> _entityArchetypes;
 	Dictionary<string, Entity> _entityNames;
 
 	// store query objects with result objects by their entity ID
-	IndexMap<Query> _queries;
+	Dictionary<int, Query> _queries;
 
 	// store query names mapping to query entities
 	Dictionary<string, Entity> _queryNameMap;
@@ -175,7 +175,7 @@ public partial class QueryManager
 		// LoggerManager.LogDebug("Updating query results for entity", "", "entity", entity);
 
 		// loop over all queries and match with the provided entity
-		foreach (var query in _queries.Span)
+		foreach (var query in _queries.Values)
 		{
 			// skip non-live queries
 			if (!query.IsLiveQuery)
@@ -205,7 +205,7 @@ public partial class QueryManager
 
 	public bool _matchEntity(Entity entity, Query query)
 	{
-		if (_entityArchetypes.TryGetValue(entity, out PackedArray<Entity> entitiesArchetypes))
+		if (_entityArchetypes.TryGetValue(entity, out List<Entity> entitiesArchetypes))
 		{
 			// for the sake of this on-demand query it's better performance
 			// to stop processing empty entities
@@ -217,7 +217,7 @@ public partial class QueryManager
 			// LoggerManager.LogDebug($"Matching {entity.ToString()}", query.GetHashCode().ToString(), "entitiesArchetypes", entitiesArchetypes.ArraySegment);
 
 			int matchCount = 0;
-			foreach (var filter in query.ArchetypeFilters.Span)
+			foreach (var filter in query.ArchetypeFilters)
 			{
 				// LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
@@ -244,7 +244,7 @@ public partial class QueryManager
 		return false;
 	}
 
-	public bool _matchFilter(Entity entity, Query query, QueryArchetypeFilter filter, PackedArray<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public bool _matchFilter(Entity entity, Query query, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, out bool nonMatchingEntity)
 	{
 		// match based on the operator type
 		bool matched = false;
@@ -278,13 +278,13 @@ public partial class QueryManager
 		return matched;
 	}
 
-	public bool _matchScopedQueries(Entity entity, PackedArray<Query> scopedQueries, Query query)
+	public bool _matchScopedQueries(Entity entity, List<Query> scopedQueries, Query query)
 	{
 		// LoggerManager.LogDebug($"Matching against scoped query {entity.ToString()}", query.GetHashCode().ToString(), "scopedQuery", scopedQueries);
 
 		int matchCount = 0;
 		bool match = false;
-		foreach (var q in scopedQueries.Span)
+		foreach (var q in scopedQueries)
 		{
 			match = _matchEntity(entity, q);
 

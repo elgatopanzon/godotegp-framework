@@ -18,6 +18,8 @@ using GodotEGP.ECSv4;
 using GodotEGP.ECSv4.Components;
 using GodotEGP.ECSv4.Exceptions;
 
+using System.Collections.Generic;
+
 using System;
 using System.Text.RegularExpressions;
 using System.Linq;
@@ -49,7 +51,7 @@ public partial class QueryBuilder
         
         bool isNotOnlyQuery = false;
         int notFilterCount = 0;
-        foreach (var filter in query.Filters.Span)
+        foreach (var filter in query.Filters)
         {
         	if (filter.MatchType == FilterMatchType.Not)
         	{
@@ -198,7 +200,7 @@ public partial class QueryBuilder
 	// InAnd() methods
 	public QueryBuilder InAnd<T>() where T : IComponent
 	{
-		PackedArray<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		List<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
 		return InAnd(archetype);
 	}
 
@@ -206,7 +208,7 @@ public partial class QueryBuilder
 	// InOr() methods
 	public QueryBuilder InOr<T>() where T : IComponent
 	{
-		PackedArray<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		List<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
 		return InOr(archetype);
 	}
 
@@ -214,7 +216,7 @@ public partial class QueryBuilder
 	// InNot() methods
 	public QueryBuilder InNot<T>() where T : IComponent
 	{
-		PackedArray<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		List<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
 		return InNot(archetype);
 	}
 
@@ -288,24 +290,24 @@ public partial class QueryBuilder
 	}
 
 	// add the archetypes as an and operation
-	public QueryBuilder InAnd(PackedArray<Entity> inArchetypes)
+	public QueryBuilder InAnd(List<Entity> inArchetypes)
 	{
 		_in(inArchetypes, Has);
 		return this;
 	}
-	public QueryBuilder InOr(PackedArray<Entity> inArchetypes)
+	public QueryBuilder InOr(List<Entity> inArchetypes)
 	{
 		_in(inArchetypes, Has, true);
 		return this;
 	}
-	public QueryBuilder InNot(PackedArray<Entity> inArchetypes)
+	public QueryBuilder InNot(List<Entity> inArchetypes)
 	{
 		_in(inArchetypes, Not);
 		return this;
 	}
-	public QueryBuilder _in(PackedArray<Entity> inArchetypes, Func<Entity, QueryBuilder> action, bool isOr = false)
+	public QueryBuilder _in(List<Entity> inArchetypes, Func<Entity, QueryBuilder> action, bool isOr = false)
 	{
-		foreach (var entity in inArchetypes.Span)
+		foreach (var entity in inArchetypes)
 		{
 			action(entity);
 			if (isOr)
