@@ -26,7 +26,8 @@ public partial class SystemManager
 	private EntityManager _entityManager;
 
 	// stores System objects by their entity ID
-	private Dictionary<int, SystemInstance> _systems;
+	private SystemInstance[] _systems;
+	private int _dataSize;
 
 	// stores a map of system names to entity IDs
 	private Dictionary<string, Entity> _nameToSystemMap;
@@ -34,7 +35,7 @@ public partial class SystemManager
 	public SystemManager(EntityManager entityManager)
 	{
 		_entityManager = entityManager;
-		_systems = new();
+		_systems = new SystemInstance[0];
 		_nameToSystemMap = new();
 	}
 
@@ -62,7 +63,12 @@ public partial class SystemManager
 		LoggerManager.LogDebug("Registering system instance", "", "system", system);
 
 		// add the registered system
-		_systems.Add(e.Id, system);
+		if (_dataSize <= e.Id + 1)
+		{
+			_dataSize = e.Id + 1;
+			System.Array.Resize(ref _systems, _dataSize);
+		}
+		_systems[e.Id] = system;
 
 		// add name to name map
 		_nameToSystemMap.Add(name, e);
@@ -97,7 +103,7 @@ public partial class SystemManager
 	}
 
 	// get all system instances
-	public Dictionary<int, SystemInstance> GetSystems()
+	public SystemInstance[] GetSystems()
 	{
 		return _systems;
 	}

@@ -99,56 +99,76 @@ public partial class SystemScheduler
 		_deltaTime = deltaTime;
 
 		// loop through each phase and run the query for the phase
-		while (_processPhaseList.TryNext(out Entity phaseEntity))
+		foreach (var phase in _processPhaseList.Phases.Values)
 		{
 			// update systems for phase
 			// LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
-			QueryResult results = _queryManager.QueryResults(_phaseQueries[phaseEntity.Id]);
-			foreach (var entity in results.Entities)
+			QueryResult results = _queryManager.QueryResults(_phaseQueries[phase]);
+			foreach (var entity in results.Entities.Values)
 			{
-				Run(entity.Value);
+				Query query;
+				SystemInstance system = _systemManager.GetSystemInstance(entity);
+
+				// fetch the query results for this system if it has one
+				if (system.QueryEntity != 0)
+				{
+					// check if the system's query is live
+					query = _queryManager.GetQuery(system.QueryEntity);
+
+					// run the query if it's not live
+					if (!query.IsLiveQuery)
+					{
+						_queryManager.RunQuery(query);
+					}
+				}
+				else
+				{
+					query = default(Query);
+				}
+
+				system.System.Update(system, _deltaTime, _core, query);
 			}
 
 			// LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));
 		}
 
-		_processPhaseList.Reset();
+		// _processPhaseList.Reset();
 	}
 	
-	public void Run(Entity entity)
-	{
-		Run(_systemManager.GetSystemInstance(entity));
-	}
-	public void Run(string name)
-	{
-		Run(_systemManager.GetSystemInstance(name));
-	}
-	public void Run(SystemInstance system)
-	{
-		Query query;
-
-		// fetch the query results for this system if it has one
-		if (system.QueryEntity != 0)
-		{
-			// check if the system's query is live
-			query = _queryManager.GetQuery(system.QueryEntity);
-			QueryResult results = query.Results;
-
-			// run the query if it's not live
-			if (!query.IsLiveQuery)
-			{
-				_queryManager.RunQuery(query);
-			}
-		}
-		else
-		{
-			query = default(Query);
-		}
-
-		// update the system
-		system.Update(_core, _deltaTime, query);
-	}
+	// public void Run(Entity entity)
+	// {
+	// 	Run(_systemManager.GetSystemInstance(entity));
+	// }
+	// public void Run(string name)
+	// {
+	// 	Run(_systemManager.GetSystemInstance(name));
+	// }
+	// public void Run(SystemInstance system)
+	// {
+	// 	Query query;
+    //
+	// 	// fetch the query results for this system if it has one
+	// 	if (system.QueryEntity != 0)
+	// 	{
+	// 		// check if the system's query is live
+	// 		query = _queryManager.GetQuery(system.QueryEntity);
+	// 		QueryResult results = query.Results;
+    //
+	// 		// run the query if it's not live
+	// 		if (!query.IsLiveQuery)
+	// 		{
+	// 			_queryManager.RunQuery(query);
+	// 		}
+	// 	}
+	// 	else
+	// 	{
+	// 		query = default(Query);
+	// 	}
+    //
+	// 	// update the system
+	// 	system.Update(_core, _deltaTime, query);
+	// }
 
 	// // run the system with the given entities
 	// public void _runSystem(SystemInstance system, Query query)
@@ -179,6 +199,12 @@ public partial class ProcessPhaseList
 {
 	// hold a list of IEcsProcessPhase entities
 	private Dictionary<int, Entity> _phases;
+	public Dictionary<int, Entity> Phases
+	{
+		get {
+			return _phases;
+		}
+	}
 
 	// holds the current phase index
 	private int _currentPhaseIndex;
