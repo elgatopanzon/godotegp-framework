@@ -22,24 +22,17 @@ using GodotEGP.ECSv4.Components;
 // entity struct holds the entity ID and a reference to the ECS core
 public struct Entity : IEquatable<Entity>, IEquatable<int>, IComparable<Entity>
 {
-	internal readonly int _id;
+	public int Id;
 	public int RawId
 	{
 		get {
-			return _id;
-		}
-	}
-
-	internal int Id
-	{
-		get {
-			return _id;
+			return Id;
 		}
 	}
 
 	public Entity(int id)
 	{
-		_id = id;
+		Id = id;
 	}
 
 	/**********************
@@ -75,7 +68,7 @@ public struct Entity : IEquatable<Entity>, IEquatable<int>, IComparable<Entity>
 
 	public override string ToString()
 	{
-		return $"Entity {_id}";
+		return $"Entity {Id}";
 	}
 
 	/************************
