@@ -23,17 +23,13 @@ using System.Runtime.InteropServices;
 public partial class ComponentArray<T> : IComponentArray where T : IComponent
 {
 	// backing data storage of components
-	private T[] _data;
-	public T[] Data
-	{
-		get { return _data; }
-	}
+	public T[] Data;
 
 	private int _dataSize;
 
 	public ComponentArray()
 	{
-		_data = new T[0];
+		Data = new T[0];
 	}
 
 	public void InsertComponent(Entity entity, T component)
@@ -43,9 +39,9 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 		if (_dataSize <= entity.Id + 1)
 		{
 			_dataSize = entity.Id + 1;
-			System.Array.Resize(ref _data, _dataSize);
+			System.Array.Resize(ref Data, _dataSize);
 		}
-		_data[entity.Id] = component;
+		Data[entity.Id] = component;
 	}
 
 	public void RemoveComponent(Entity entity)
@@ -60,7 +56,7 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 
 	public ref T GetComponent(Entity entity)
 	{
-		return ref _data[entity.Id];
+		return ref Data[entity.Id];
 	}
 
 	public void DestroyComponents(Entity entity)
