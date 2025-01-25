@@ -25,8 +25,6 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 	// backing data storage of components
 	public T[] Data;
 
-	private int _dataSize;
-
 	public ComponentArray()
 	{
 		Data = new T[0];
@@ -36,10 +34,9 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 	{
 		// add the component to the data store
 		// it will be overwritten if it already exists
-		if (_dataSize <= entity.Id + 1)
+		if (Data.Length <= entity.Id + 1)
 		{
-			_dataSize = entity.Id + 1;
-			System.Array.Resize(ref Data, _dataSize);
+			System.Array.Resize(ref Data, entity.Id + 1);
 		}
 		Data[entity.Id] = component;
 	}
@@ -51,7 +48,7 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 
 	public bool HasComponent(Entity entity)
 	{
-		return _dataSize >= entity.Id + 1;
+		return Data.Length >= entity.Id + 1;
 	}
 
 	public ref T GetComponent(Entity entity)
