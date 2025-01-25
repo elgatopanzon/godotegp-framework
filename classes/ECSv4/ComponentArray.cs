@@ -44,6 +44,7 @@ public partial class ComponentArray<T> : IComponentArray where T : IComponent
 	public void RemoveComponent(Entity entity)
 	{
 		// remove the provided key and value
+		Data[entity.Id] = default(T);
 	}
 
 	public bool HasComponent(Entity entity)
