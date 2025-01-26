@@ -82,8 +82,8 @@ public partial class ScriptService : Service
 
 		foreach (Type functionType in scriptFunctionClasses)
 		{
-			LoggerManager.LogDebug("Registering function", "", "func", $"{functionType.Name.ToLower()} as {functionType}");
-			_scriptFunctions.Add(functionType.Name.ToLower(), (IScriptFunction) Activator.CreateInstance(functionType));
+			// LoggerManager.LogDebug("Registering function", "", "func", $"{functionType.Name.ToLower()} as {functionType}");
+			// _scriptFunctions.Add(functionType.Name.ToLower(), (IScriptFunction) Activator.CreateInstance(functionType));
 		}
 	}
 
