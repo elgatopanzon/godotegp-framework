@@ -45,7 +45,7 @@ public partial class SystemManager
 	
 	public Entity RegisterSystem<TSystem, TPhase>(string name, Entity queryEntity) 
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		// assign default name if it's empty
 		name = (name == String.Empty) ? $"s{typeof(TSystem).Name}" : name;
@@ -56,7 +56,6 @@ public partial class SystemManager
 		// create a SystemInstance object for this system
 		SystemInstance system = new SystemInstance() {
 			System = new TSystem(),
-			SystemEntity = e,
 			QueryEntity = queryEntity,
 		};
 

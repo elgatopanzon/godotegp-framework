@@ -34,14 +34,14 @@ public partial class ECS : Service
 	}
 
 	private EntityManager _entityManager;
-	private ComponentManager _componentManager;
+	private ComponentDatabase _componentDatabase;
 	private QueryManager _queryManager;
 	private SystemManager _systemManager;
 	private SystemScheduler _systemScheduler;
 	private ObjectManager _objectManager;
 
 	public EntityManager EntityManager { get { return _entityManager; }}
-	public ComponentManager ComponentManager { get { return _componentManager; }}
+	public ComponentDatabase ComponentDatabase { get { return _componentDatabase; }}
 	public QueryManager QueryManager { get { return _queryManager; }}
 	public SystemManager SystemManager { get { return _systemManager; }}
 	public SystemScheduler SystemScheduler { get { return _systemScheduler; }}
@@ -67,7 +67,7 @@ public partial class ECS : Service
 	public ECS()
 	{
 		_entityManager = new();
-		_componentManager = new(_entityManager);
+		_componentDatabase = new();
 		_queryManager = new(_entityManager);
 		_systemManager = new(_entityManager);
 		_objectManager = new(_entityManager);
@@ -187,7 +187,7 @@ public partial class ECS : Service
 		if (IsAlive(entity))
 		{
 			_entityManager.Destroy(entity);
-			_componentManager.DestroyEntityComponents(entity);
+			_componentDatabase.DestroyComponents(entity);
 			_updateQueryResults(entity);
 		}
 	}
@@ -285,7 +285,7 @@ public partial class ECS : Service
 
 		T.Id = typeId.Id;
 
-		_componentManager.CreateComponentArray<T>(typeId.Id);
+		_componentDatabase.CreateStore<T>(typeId.Id);
 
 		// LoggerManager.LogDebug("IsAlive", "", "isAlive", IsAlive(typeId));
 
@@ -293,10 +293,10 @@ public partial class ECS : Service
 
 		// _entityManager.CreateUnmanaged(typeId, typeof(T).Name);
 
-		// if component doesn't implement ITag then it gets the
+		// if component doesn't implement ITagComponent then it gets the
 		// ComponentEntity component, allowing us to check later if the
-		// component has this entity rather than the ITag interface
-		if (typeof(T).GetInterface(nameof(ITag)) == null)
+		// component has this entity rather than the ITagComponent interface
+		if (typeof(T).GetInterface(nameof(ITagComponent)) == null)
 		{
 			Add<EcsComponent>(typeId);
 		}
@@ -342,10 +342,15 @@ public partial class ECS : Service
 		throw new NotImplementedException("Enabling components is not implemented");
 	}
 
-	// get a component array as an IComponentArray
-	public IComponentArray GetComponentArray(Entity typeId)
+	// get a component array as an IComponentStore
+	public IComponentStore GetComponentStore(Entity typeId)
 	{
-		return _componentManager.GetComponentArray(typeId);
+		return _componentDatabase.GetStore(typeId);
+	}
+
+	public ComponentStore<T> GetComponentStore<T>() where T : IDataComponent
+	{
+		return _componentDatabase.GetStore<T>();
 	}
 
 	/***************************
@@ -362,8 +367,8 @@ public partial class ECS : Service
 	}
 
 
-	// add a single ITag component to an entity
-	public void Add<T>(Entity entity) where T : ITag, new()
+	// add a single ITagComponent component to an entity
+	public void Add<T>(Entity entity) where T : ITagComponent, new()
 	{
 		// add entity ID for T to entity archetype
 		Add(entity, Id<T>());
@@ -375,7 +380,7 @@ public partial class ECS : Service
 	***************************/
 
 	// set component data on an entity
-	public void Set<T>(Entity entity, Entity id, T component, bool isEntityId = true) where T : IComponentData
+	public void Set<T>(Entity entity, Entity id, T component, bool isEntityId = true) where T : IDataComponent
 	{
 		// LoggerManager.LogDebug("Setting component data", new EntityHandle(entity, this).ToString(), new EntityHandle(id, this).ToString(), component);
 
@@ -383,12 +388,12 @@ public partial class ECS : Service
 		Add(entity, id);
 
 		// set component data
-		_componentManager.AddComponent<T>(entity, id, component);
+		_componentDatabase.GetStore<T>(id).Add(entity, component);
 	}
 
 
 	// add a single component to an entity
-	public void Set<T>(Entity entity, T component) where T : IComponentData
+	public void Set<T>(Entity entity, T component) where T : IDataComponent
 	{
 		Set<T>(entity, Id<T>(), component, isEntityId:true);
 	}
@@ -417,7 +422,7 @@ public partial class ECS : Service
 		// remove the component data if it has any
 		if (Has<EcsComponent>(Id<T>()))
 		{
-			_componentManager.RemoveComponent<T>(entity, id);
+			_componentDatabase.GetStore<T>(id).Remove<T>(entity);
 		}
 	}
 
@@ -467,14 +472,14 @@ public partial class ECS : Service
 	 ***************************/
 
 	// get component T for entity
-	public ref T Get<T>(Entity entity) where T : IComponentData
+	public ref T Get<T>(Entity entity) where T : IDataComponent
 	{
-		return ref _componentManager.GetComponent<T>(entity);
+		return ref _componentDatabase.GetStore<T>().GetMutable<T>(entity);
 	}
 
-	public ref T Get<T>(int typeId, Entity entity) where T : IComponentData
+	public ref T Get<T>(int typeId, Entity entity) where T : IDataComponent
 	{
-		return ref _componentManager.GetComponent<T>(entity, typeId);
+		return ref _componentDatabase.GetStore<T>(Entity.CreateFrom(typeId)).GetMutable<T>(entity);
 	}
 
 
@@ -571,7 +576,7 @@ public partial class ECS : Service
 	// register a system with a provided name and query entity ID
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, Entity queryId)
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		EntityHandle e = EntityHandle(_systemManager.RegisterSystem<TSystem, TPhase>(name, queryId));
 
@@ -585,7 +590,7 @@ public partial class ECS : Service
 	// register a system with a default name and no attached query
 	public EntityHandle RegisterSystem<TSystem, TPhase>()
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(String.Empty, default(Entity));
 	}
@@ -593,7 +598,7 @@ public partial class ECS : Service
 	// register a system with a provided name, and no attached query
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name)
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(name, default(Entity));
 	}
@@ -601,7 +606,7 @@ public partial class ECS : Service
 	// register a system with a default name, and an attached query entity ID
 	public EntityHandle RegisterSystem<TSystem, TPhase>(Entity queryId)
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(String.Empty, queryId);
 	}
@@ -609,7 +614,7 @@ public partial class ECS : Service
 	// register a system with a provided name and query name
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, string queryName)
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(name, _queryManager.GetQueryEntity(queryName));
 	}
@@ -617,7 +622,7 @@ public partial class ECS : Service
 	// register a system with a provided name and query object
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, Query query)
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		EntityHandle queryId = RegisterSystemQuery(query, $"system_{name}");
 		return RegisterSystem<TSystem, TPhase>(name, queryId);
@@ -626,7 +631,7 @@ public partial class ECS : Service
 	// register a system with query object
 	public EntityHandle RegisterSystem<TSystem, TPhase>(Query query)
 		where TSystem : ISystem, new()
-		where TPhase : IEcsProcessPhase
+		where TPhase : IEcsProcessPhaseComponent
 	{
 		string name = typeof(TSystem).Name;
 		return RegisterSystem<TSystem, TPhase>(name, query);

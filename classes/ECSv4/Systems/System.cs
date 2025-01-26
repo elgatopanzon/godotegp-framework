@@ -22,7 +22,6 @@ using System.Diagnostics;
 public partial class SystemInstance
 {
 	public ISystem System { get; set; }
-	public Entity SystemEntity { get; set; }
 	public Entity QueryEntity { get; set; }
 
 	// update the system and call the ISystem Update() method

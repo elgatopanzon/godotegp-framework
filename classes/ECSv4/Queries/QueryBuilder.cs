@@ -345,6 +345,6 @@ public partial class QueryBuilder
 		{
 			return;
 		}
-		_query.Results.CacheComponentArray(typeId, _ecs.GetComponentArray(typeId));
+		_query.Results.CacheComponentArray(typeId, _ecs.GetComponentStore(typeId));
 	}
 }

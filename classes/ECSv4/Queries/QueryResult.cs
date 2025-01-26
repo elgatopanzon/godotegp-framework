@@ -32,8 +32,8 @@ public partial class QueryResult
 	}
 
 	// a map of the components belonging to the results of the query
-	private IComponentArray[] _componentArrays;
-	public IComponentArray[] ComponentArrays
+	private IComponentStore[] _componentArrays;
+	public IComponentStore[] ComponentArrays
 	{
 		get { return _componentArrays; }
 	}
@@ -49,7 +49,7 @@ public partial class QueryResult
 	*  Cached component methods  *
 	****************************/
 
-	public void CacheComponentArray(Entity typeId, IComponentArray componentArray)
+	public void CacheComponentArray(Entity typeId, IComponentStore componentArray)
 	{
 		if (_componentArraySize <= typeId.Id + 1)
 		{
@@ -59,14 +59,14 @@ public partial class QueryResult
 		_componentArrays[typeId] = componentArray;
 	}
 
-	public ref T GetComponent<T>(Entity entity) where T : IComponentData
+	public ref T GetComponent<T>(Entity entity) where T : IDataComponent
 	{
-		return ref Unsafe.As<ComponentArray<T>>(_componentArrays[T.Id]).GetComponent(entity);
+		return ref Unsafe.As<ComponentStore<T>>(_componentArrays[T.Id]).GetMutable(entity);
 	}
 
-	public ComponentArray<T> GetComponents<T>() where T : IComponentData
+	public ComponentStore<T> GetComponentStore<T>() where T : IDataComponent
 	{
-		return Unsafe.As<ComponentArray<T>>(_componentArrays[T.Id]);
+		return Unsafe.As<ComponentStore<T>>(_componentArrays[T.Id]);
 	}
 
 	/***********************

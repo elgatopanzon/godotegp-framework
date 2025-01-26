@@ -75,13 +75,13 @@ public partial class EntityHandle
 	*  Add()  *
 	***********/
 	
-	public EntityHandle Set<T>(T component) where T : IComponentData
+	public EntityHandle Set<T>(T component) where T : IDataComponent
 	{
 		_core.Set<T>(_entity, component);
 
 		return this;
 	}
-	public EntityHandle Add<T>() where T : ITag, new()
+	public EntityHandle Add<T>() where T : ITagComponent, new()
 	{
 		_core.Add<T>(_entity);
 
@@ -114,7 +114,7 @@ public partial class EntityHandle
 	*  Get()  *
 	***********/
 	
-	public ref T Get<T>() where T : IComponentData
+	public ref T Get<T>() where T : IDataComponent
 	{
 		return ref _core.Get<T>(_entity);
 	}

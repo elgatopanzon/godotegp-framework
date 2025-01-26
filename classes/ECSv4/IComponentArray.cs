@@ -15,7 +15,11 @@ using GodotEGP.Config;
 
 using GodotEGP.ECSv4.Components;
 
-public partial interface IComponentArray
+public partial interface IComponentStore
 {
-	public void DestroyComponents(Entity entity);
+	public void Destroy(Entity entity);
 }
+// public partial interface IComponentArray
+// {
+// 	public void DestroyComponents(Entity entity);
+// }
