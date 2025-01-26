@@ -14,6 +14,9 @@ using GodotEGP.Event.Events;
 using GodotEGP.Config;
 using GodotEGP.Collections;
 
+using GodotEGP.ECSv4.Queries;
+
+using System;
 
 /****************
 *  Components  *
@@ -56,4 +59,18 @@ public partial struct EcsWriteQuery : ITagComponent { public static int Id { get
 public partial struct EcsNoAccessQuery : ITagComponent { public static int Id { get; set; } }
 
 // main component attached to system entities
-public partial struct EcsSystem : IEcsSystemComponent { public static int Id { get; set; } }
+public partial struct EcsSystem : IDataComponent { 
+	public static int Id { get; set; }
+
+	// entity mapping to assigned system component entity
+	public Entity SystemEntity { get; set; }
+
+	// entity mapping to assigned query entity containing entity list
+	public Entity QueryEntity { get; set; }
+
+	// this system's delta time (time since this system last updated)
+	public double DeltaTime { get; set; }
+
+	// reference to the system's update function
+	public Action<double, double, ECS, Query> UpdateAction { get; set; }
+}

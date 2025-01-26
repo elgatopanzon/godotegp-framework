@@ -13,4 +13,10 @@ using GodotEGP.Service;
 using GodotEGP.Event.Events;
 using GodotEGP.Config;
 
-public partial interface IEcsSystemComponent : ITagComponent {}
+using GodotEGP.ECSv4.Queries;
+
+public partial interface IEcsSystemComponent : ITagComponent 
+{
+	// system's update method
+	public static abstract void Update(double deltaTimeSys, double deltaTime, ECS core, Query query);
+}

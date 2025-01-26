@@ -25,7 +25,6 @@ using System.Collections.Generic;
 public partial class SystemScheduler
 {
 	private ECS _core;
-	private SystemManager _systemManager;
 	private QueryManager _queryManager;
 
 	// holds query IDs for phase entity IDs
@@ -37,10 +36,9 @@ public partial class SystemScheduler
 	// keep a rolling stack of process phase entities
 	private ProcessPhaseList _processPhaseList;
 
-	public SystemScheduler(ECS core, SystemManager systemManager, QueryManager queryManager)
+	public SystemScheduler(ECS core, QueryManager queryManager)
 	{
 		_core = core;
-		_systemManager = systemManager;
 		_queryManager = queryManager;
 
 		// set the default process phase list
@@ -98,6 +96,8 @@ public partial class SystemScheduler
 	{
 		_deltaTime = deltaTime;
 
+		ComponentStore<EcsSystem> systemConfigComponents = _core.GetComponentStore<EcsSystem>();
+
 		// loop through each phase and run the query for the phase
 		foreach (var phase in _processPhaseList.Phases.Values)
 		{
@@ -107,14 +107,14 @@ public partial class SystemScheduler
 			QueryResult results = _queryManager.QueryResults(_phaseQueries[phase]);
 			foreach (var entity in results.Entities.Values)
 			{
+				EcsSystem systemConfig = systemConfigComponents.Get(entity);
 				Query query;
-				SystemInstance system = _systemManager.GetSystemInstance(entity);
 
 				// fetch the query results for this system if it has one
-				if (system.QueryEntity != 0)
+				if (systemConfig.QueryEntity != 0)
 				{
 					// check if the system's query is live
-					query = _queryManager.GetQuery(system.QueryEntity);
+					query = _queryManager.GetQuery(systemConfig.QueryEntity);
 
 					// run the query if it's not live
 					if (!query.IsLiveQuery)
@@ -127,7 +127,7 @@ public partial class SystemScheduler
 					query = default(Query);
 				}
 
-				system.System.Update(system, _deltaTime, _core, query);
+				systemConfig.UpdateAction(systemConfig.DeltaTime, _deltaTime, _core, query);
 			}
 
 			// LoggerManager.LogDebug("Finished update phase", "", "phase", _core.GetEntityName(phaseEntity));

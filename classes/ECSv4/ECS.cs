@@ -36,14 +36,12 @@ public partial class ECS : Service
 	private EntityManager _entityManager;
 	private ComponentDatabase _componentDatabase;
 	private QueryManager _queryManager;
-	private SystemManager _systemManager;
 	private SystemScheduler _systemScheduler;
 	private ObjectManager _objectManager;
 
 	public EntityManager EntityManager { get { return _entityManager; }}
 	public ComponentDatabase ComponentDatabase { get { return _componentDatabase; }}
 	public QueryManager QueryManager { get { return _queryManager; }}
-	public SystemManager SystemManager { get { return _systemManager; }}
 	public SystemScheduler SystemScheduler { get { return _systemScheduler; }}
 	public ObjectManager ObjectManager { get { return _objectManager; }}
 
@@ -69,7 +67,6 @@ public partial class ECS : Service
 		_entityManager = new();
 		_componentDatabase = new();
 		_queryManager = new(_entityManager);
-		_systemManager = new(_entityManager);
 		_objectManager = new(_entityManager);
 
 		// register default components
@@ -91,7 +88,7 @@ public partial class ECS : Service
 		SetConfig(new ECSConfig());
 
 		// create system scheduler instance
-		_systemScheduler = new(this, _systemManager, _queryManager);
+		_systemScheduler = new(this, _queryManager);
 	}
 
 
@@ -575,21 +572,30 @@ public partial class ECS : Service
 
 	// register a system with a provided name and query entity ID
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, Entity queryId)
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
-		EntityHandle e = EntityHandle(_systemManager.RegisterSystem<TSystem, TPhase>(name, queryId));
+		EntityHandle e = Create(typeof(TSystem).Name);
 
-		// add components to entity
-		e.Add<EcsSystem>();
+		// add the process phase tag component
 		Add(e.Entity, Id<TPhase>());
+
+		// create a new system component instance
+		e.Add<TSystem>();
+
+		// set the system component's data
+		e.Set<EcsSystem>(new () {
+			SystemEntity = Id<TSystem>(),
+			QueryEntity = queryId,
+			UpdateAction = TSystem.Update,
+		});
 
 		return e;
 	}
 	
 	// register a system with a default name and no attached query
 	public EntityHandle RegisterSystem<TSystem, TPhase>()
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(String.Empty, default(Entity));
@@ -597,7 +603,7 @@ public partial class ECS : Service
 
 	// register a system with a provided name, and no attached query
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name)
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(name, default(Entity));
@@ -605,7 +611,7 @@ public partial class ECS : Service
 
 	// register a system with a default name, and an attached query entity ID
 	public EntityHandle RegisterSystem<TSystem, TPhase>(Entity queryId)
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(String.Empty, queryId);
@@ -613,7 +619,7 @@ public partial class ECS : Service
 
 	// register a system with a provided name and query name
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, string queryName)
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
 		return RegisterSystem<TSystem, TPhase>(name, _queryManager.GetQueryEntity(queryName));
@@ -621,7 +627,7 @@ public partial class ECS : Service
 
 	// register a system with a provided name and query object
 	public EntityHandle RegisterSystem<TSystem, TPhase>(string name, Query query)
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
 		EntityHandle queryId = RegisterSystemQuery(query, $"system_{name}");
@@ -630,7 +636,7 @@ public partial class ECS : Service
 
 	// register a system with query object
 	public EntityHandle RegisterSystem<TSystem, TPhase>(Query query)
-		where TSystem : ISystem, new()
+		where TSystem : IEcsSystemComponent, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
 		string name = typeof(TSystem).Name;
