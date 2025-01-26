@@ -20,7 +20,6 @@ public partial class EntityMap<T>
 	public T this[int index]
 	{
 		get { return Data[index]; }
-		set { Data[index] = value; }
 	}
 	
 	public EntityMap(int length = 0)
@@ -46,7 +45,10 @@ public static class EntityMapExtensions
 
     public static void Remove<T>(this EntityMap<T> map, Entity entity)
     {
-		map.Data[entity.Id] = default(T);
+    	if (map.Has(entity))
+    	{
+			map.Data[entity.Id] = default(T);
+    	}
     }
 
     public static T Get<T>(this EntityMap<T> components, Entity entity)

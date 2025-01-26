@@ -74,7 +74,10 @@ public static class ComponentDatabaseExtensions
     {
     	foreach (var componentStore in components.Components.Data)
     	{
-			componentStore.Destroy(entity);    		
+    		if (componentStore != null)
+    		{
+				componentStore.Destroy(entity);    		
+    		}
     	}
     }
 }

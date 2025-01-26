@@ -31,7 +31,7 @@ public partial record ComponentStore<T> : IComponentStore where T : IComponent
 
 	public void Destroy(Entity entity)
 	{
-		Data[entity.Id] = default(T);
+		Data.Remove(entity);
 	}
 }
 public static class ComponentsExtensions
