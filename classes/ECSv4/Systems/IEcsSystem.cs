@@ -1,10 +1,10 @@
 /**
  * @author      : ElGatoPanzon (contact@elgatopanzon.io) Copyright (c) ElGatoPanzon
- * @file        : IEcsSystemComponent
- * @created     : Saturday Jan 25, 2025 20:09:51 CST
+ * @file        : IEcsSystem
+ * @created     : Saturday Jan 25, 2025 23:02:27 CST
  */
 
-namespace GodotEGP.ECSv4.Components;
+namespace GodotEGP.ECSv4.Systems;
 
 using Godot;
 using GodotEGP.Objects.Extensions;
@@ -15,7 +15,7 @@ using GodotEGP.Config;
 
 using GodotEGP.ECSv4.Queries;
 
-public partial interface IEcsSystemComponent : ITagComponent 
+public partial interface IEcsSystem 
 {
 	// system's update method
 	public static abstract void Update(double deltaTimeSys, double deltaTime, ECS core, Query query);
