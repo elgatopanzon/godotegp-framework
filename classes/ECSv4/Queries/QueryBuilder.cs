@@ -101,19 +101,8 @@ public partial class QueryBuilder
 				// build this filter's queries
 				BuildQuery(filter.ScopedQuery);
 
-				// merge cached component arrays
-				foreach (var array in filter.ScopedQuery.Results.ComponentArrays)
-				{
-					CacheComponentArray(Entity.CreateFrom(System.Array.IndexOf(filter.ScopedQuery.Results.ComponentArrays, array)));
-				}
-
 				// LoggerManager.LogDebug("Scoped query built", query.GetHashCode().ToString(), "scopedQuery", filter.ScopedQuery);
 				archetypeFilter.ScopedQueries.Add(filter.ScopedQuery);
-			}
-
-			if (filter.Entity != 0)
-			{
-				CacheComponentArray(filter.Entity);
 			}
 
 			// only add the entity to the archetypes if it's not part of a
@@ -335,16 +324,5 @@ public partial class QueryBuilder
 	{
 		_query.AddReadWriteAccess(entity);
 		return this;
-	}
-
-
-	// cache an IComponentArray in the query
-	public void CacheComponentArray(Entity typeId)
-	{
-		if (_ecs == null)
-		{
-			return;
-		}
-		_query.Results.CacheComponentArray(typeId, _ecs.GetComponentStore(typeId));
 	}
 }

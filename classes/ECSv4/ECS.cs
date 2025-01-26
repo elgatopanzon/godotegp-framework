@@ -531,30 +531,30 @@ public partial class ECS : Service
 	}
 
 	// run an on-demand query
-	public QueryResult Query(Query query)
+	public QueryEntities Query(Query query)
 	{
 		return _queryManager.RunQuery(query);
 	}
 	// run registered query by name
-	public QueryResult Query(string name)
+	public QueryEntities Query(string name)
 	{
 		return _queryManager.RunQuery(name);
 	}
 	// run registered query by id
-	public QueryResult Query(Entity entity)
+	public QueryEntities Query(Entity entity)
 	{
 		return _queryManager.RunQuery(entity);
 	}
 
 	// get query results by name
-	public QueryResult QueryResults(string name)
+	public QueryEntities QueryResults(string name)
 	{
-		return _queryManager.QueryResults(name);
+		return _queryManager.QueryEntities(name);
 	}
 	// get query results by id
-	public QueryResult QueryResults(Entity entity)
+	public QueryEntities QueryResults(Entity entity)
 	{
-		return _queryManager.QueryResults(entity);
+		return _queryManager.QueryEntities(entity);
 	}
 
 	// update query results for an entity

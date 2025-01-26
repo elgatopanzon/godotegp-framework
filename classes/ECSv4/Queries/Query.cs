@@ -60,11 +60,11 @@ public partial class Query
 		}
 	}
 
-	private QueryResult _results;
-	public QueryResult Results
+	private QueryEntities _entities;
+	public QueryEntities Entities
 	{
-		get { return _results; }
-		set { _results = value; }
+		get { return _entities; }
+		set { _entities = value; }
 	}
 
 	public string Name { get; set; }
@@ -80,7 +80,7 @@ public partial class Query
 		_readArchetype = new();
 		_writeArchetype = new();
 
-		_results = new();
+		_entities = new();
 	}
 
 	public void AddFilter(IQueryFilter filter)

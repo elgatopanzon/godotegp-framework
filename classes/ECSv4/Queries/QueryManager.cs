@@ -107,11 +107,11 @@ public partial class QueryManager
 	***************************/
 	
 	// get saved query results for query by entity id
-	public QueryResult QueryResults(Entity entity)
+	public QueryEntities QueryEntities(Entity entity)
 	{
 		if (_queries.TryGetValue(entity, out Query query))
 		{
-			return query.Results;
+			return query.Entities;
 		}
 
 		// if results don't exist, run the query
@@ -119,9 +119,9 @@ public partial class QueryManager
 	}
 
 	// get saved query results for query by name
-	public QueryResult QueryResults(string name)
+	public QueryEntities QueryEntities(string name)
 	{
-		return QueryResults(GetQueryEntity(name));
+		return QueryEntities(GetQueryEntity(name));
 	}
 
 	/*************************************
@@ -129,22 +129,22 @@ public partial class QueryManager
 	*************************************/
 
 	// run a registered query on-demand by name
-	public QueryResult RunQuery(string name)
+	public QueryEntities RunQuery(string name)
 	{
 		return RunRegisteredQuery(GetQuery(name), GetQueryEntity(name));
 	}
 
 	// run a registered query on-demand by entity id
-	public QueryResult RunQuery(Entity entity)
+	public QueryEntities RunQuery(Entity entity)
 	{
 		return RunRegisteredQuery(GetQuery(entity), entity);
 	}
 	
 	// execute an on-demand query and return the results
-	public QueryResult RunQuery(Query query)
+	public QueryEntities RunQuery(Query query)
 	{
 		// create a new result object
-		query.Results.ClearEntities();
+		query.Entities.Clear();
 
 		// LoggerManager.LogDebug("ArchetypeFilters", query.GetHashCode().ToString(), "archetypeFilters", query.ArchetypeFilters.ArraySegment);
 
@@ -155,15 +155,15 @@ public partial class QueryManager
 			// match the entity against the query, adding to results on match
 			if (_matchEntity(entity, query))
 			{
-				query.Results.AddEntity(entity);
+				query.Entities.Add(entity);
 			}
 		}
 
-		return query.Results;
+		return query.Entities;
 	}
 
 	// execute a registered query and store the results object
-	public QueryResult RunRegisteredQuery(Query query, Entity queryEntity)
+	public QueryEntities RunRegisteredQuery(Query query, Entity queryEntity)
 	{
 		return RunQuery(query);
 	}
@@ -183,7 +183,7 @@ public partial class QueryManager
 				continue;
 			}
 
-			bool existsInResults = query.Results.ContainsEntity(entity);
+			bool existsInResults = query.Entities.Contains(entity);
 
 			bool match = _matchEntity(entity, query);
 
@@ -191,14 +191,14 @@ public partial class QueryManager
 			if (existsInResults && !match)
 			{
 				// LoggerManager.LogDebug("Removing entity from query results", query.Name, "entity", entity);
-				query.Results.RemoveEntity(entity);
+				query.Entities.Remove(entity);
 			}
 
 			// otherwise, attempt to add if it doesn't exist
 			else if (!existsInResults && match)
 			{
 				// LoggerManager.LogDebug("Adding entity to query results", query.Name, "entity", entity);
-				query.Results.AddEntity(entity);
+				query.Entities.Add(entity);
 			}
 		}
 	}
