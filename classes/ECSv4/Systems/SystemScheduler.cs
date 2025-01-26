@@ -104,8 +104,8 @@ public partial class SystemScheduler
 			// update systems for phase
 			// LoggerManager.LogDebug("Running update phase", "", "phase", _core.GetEntityName(phaseEntity));
 
-			QueryEntities results = _queryManager.QueryEntities(_phaseQueries[phase]);
-			foreach (var entity in results.Entities)
+			QueryEntities entities = _queryManager.QueryEntities(_phaseQueries[phase]);
+			foreach (var entity in entities.Entities)
 			{
 				EcsSystem systemConfig = systemConfigComponents.Get(entity);
 				Query query;

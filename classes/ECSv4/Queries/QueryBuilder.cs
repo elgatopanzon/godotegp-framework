@@ -109,7 +109,7 @@ public partial class QueryBuilder
 			// scoped query
 			if (filter.ScopedQuery == null && filter.Matcher != null)
 			{
-				archetypeFilter.Archetypes.Add(filter.Entity);
+				archetypeFilter.Archetype.Add(filter.Entity);
 			}
 		}
 
@@ -189,7 +189,7 @@ public partial class QueryBuilder
 	// InAnd() methods
 	public QueryBuilder InAnd<T>() where T : IComponent
 	{
-		List<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		Archetype archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
 		return InAnd(archetype);
 	}
 
@@ -197,7 +197,7 @@ public partial class QueryBuilder
 	// InOr() methods
 	public QueryBuilder InOr<T>() where T : IComponent
 	{
-		List<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		Archetype archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
 		return InOr(archetype);
 	}
 
@@ -205,7 +205,7 @@ public partial class QueryBuilder
 	// InNot() methods
 	public QueryBuilder InNot<T>() where T : IComponent
 	{
-		List<Entity> archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
+		Archetype archetype = _ecs.GetEntityArchetype(_ecs.Id<T>());
 		return InNot(archetype);
 	}
 
@@ -279,24 +279,24 @@ public partial class QueryBuilder
 	}
 
 	// add the archetypes as an and operation
-	public QueryBuilder InAnd(List<Entity> inArchetypes)
+	public QueryBuilder InAnd(Archetype inArchetypes)
 	{
 		_in(inArchetypes, Has);
 		return this;
 	}
-	public QueryBuilder InOr(List<Entity> inArchetypes)
+	public QueryBuilder InOr(Archetype inArchetypes)
 	{
 		_in(inArchetypes, Has, true);
 		return this;
 	}
-	public QueryBuilder InNot(List<Entity> inArchetypes)
+	public QueryBuilder InNot(Archetype inArchetypes)
 	{
 		_in(inArchetypes, Not);
 		return this;
 	}
-	public QueryBuilder _in(List<Entity> inArchetypes, Func<Entity, QueryBuilder> action, bool isOr = false)
+	public QueryBuilder _in(Archetype inArchetypes, Func<Entity, QueryBuilder> action, bool isOr = false)
 	{
-		foreach (var entity in inArchetypes)
+		foreach (var entity in inArchetypes.Entities)
 		{
 			action(entity);
 			if (isOr)

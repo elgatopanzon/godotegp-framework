@@ -19,8 +19,8 @@ using System.Collections.Generic;
 public partial interface IQueryMatcher
 {
 	// the pre-match method which does the required matching
-	public bool PreMatch(Entity entity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity);
+	public bool PreMatch(Entity entity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity);
 
 	// post-match method to optionally do post-match actions
-	public bool PostMatch(Entity entity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity);
+	public bool PostMatch(Entity entity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity);
 }

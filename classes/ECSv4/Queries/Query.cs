@@ -44,16 +44,16 @@ public partial class Query
 	}
 
 	// an archetype for read and write access
-	private List<Entity> _readArchetype;
-	private List<Entity> _writeArchetype;
+	private Archetype _readArchetype;
+	private Archetype _writeArchetype;
 
-	public List<Entity> ReadsEntities
+	public Archetype ReadsEntities
 	{
 		get {
 			return _readArchetype;
 		}
 	}
-	public List<Entity> WritesEntities
+	public Archetype WritesEntities
 	{
 		get {
 			return _writeArchetype;
@@ -105,20 +105,20 @@ public partial class Query
 
 public partial class QueryArchetypeFilter
 {
-	public List<Entity> Archetypes;
+	public Archetype Archetype;
 	public List<Query> ScopedQueries;
 	public IQueryFilter Filter { get; set; }
 
 	public bool HasBuiltFilters
 	{
 		get {
-			return (Archetypes.Count > 0 || ScopedQueries.Count > 0);
+			return (Archetype.Entities.Count > 0 || ScopedQueries.Count > 0);
 		}
 	}
 
 	public QueryArchetypeFilter()
 	{
-		Archetypes = new();
+		Archetype = new();
 		ScopedQueries = new();
 	}
 }

@@ -20,14 +20,14 @@ using System.Linq;
 
 public partial class QueryMatchPassthrough : IQueryMatcher
 {
-	public virtual bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	public virtual bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		return true;
 	}
 
 	// default post-match is to pass through the pre match result
-	public virtual bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
+	public virtual bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		return preMatched;
@@ -38,17 +38,17 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 {
 	// match the filter's achetypes with the provided entity archetype using an
 	// intersect
-	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 
-		int matchCount = filter.Archetypes.Intersect(entitiesArchetypes).Count();
-		bool matched = (matchCount == filter.Archetypes.Count);
+		int matchCount = filter.Archetype.IntersectCount(entitiesArchetype);
+		bool matched = (matchCount == filter.Archetype.Entities.Count);
 
 		// match a wildcard by making sure the entity has >= archetype count,
 		// and the archetype match was just 1 less than the filter archetype
 		// count
-		if (filter.Filter.Entity == 0 && matchCount == (filter.Archetypes.Count - 1) && entitiesArchetypes.Count >= filter.Archetypes.Count)
+		if (filter.Filter.Entity == 0 && matchCount == (filter.Archetype.Entities.Count - 1) && entitiesArchetype.Entities.Count >= filter.Archetype.Entities.Count)
 		{
 			matched = true;
 		}
@@ -62,7 +62,7 @@ public partial class QueryMatchArchetype : QueryMatchPassthrough
 public partial class QueryMatchEntity : QueryMatchArchetype
 {
 	// match the provided entity ID with the filter's entity ID
-	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		return filter.Filter.Entity == matchEntity;
@@ -71,7 +71,7 @@ public partial class QueryMatchEntity : QueryMatchArchetype
 
 public partial class QueryMatchNotEntity : QueryMatchEntity
 {
-	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
+	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		if (preMatched)
@@ -86,7 +86,7 @@ public partial class QueryMatchNotEntity : QueryMatchEntity
 
 public partial class QueryMatchNotArchetype : QueryMatchArchetype
 {
-	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
+	public override bool PostMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, bool preMatched, out bool nonMatchingEntity)
 	{
 
 		nonMatchingEntity = false;
@@ -108,7 +108,7 @@ public partial class QueryMatchNotArchetype : QueryMatchArchetype
 public partial class QueryMatchEntityName : QueryMatchArchetype
 {
 	// match the provided entity name with the filter's entity name
-	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		if (filter.Filter is NameIsQueryFilter nf)
@@ -126,7 +126,7 @@ public partial class QueryMatchEntityName : QueryMatchArchetype
 public partial class QueryMatchEntityNameRegex : QueryMatchEntityName
 {
 	// match the provided entity name with the filter's entity name
-	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, Dictionary<Entity, List<Entity>> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
+	public override bool PreMatch(Entity matchEntity, QueryArchetypeFilter filter, Archetype entitiesArchetype, Dictionary<Entity, Archetype> entityArchetypes, Dictionary<string, Entity> entityNames, out bool nonMatchingEntity)
 	{
 		nonMatchingEntity = false;
 		if (filter.Filter is NameMatchesQueryFilter nf)

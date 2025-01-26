@@ -25,7 +25,7 @@ public partial class QueryManager
 	private EntityManager _entityManager;
 
 	// reference to entity names and entity archetypes
-	Dictionary<Entity, List<Entity>> _entityArchetypes;
+	Dictionary<Entity, Archetype> _entityArchetypes;
 	Dictionary<string, Entity> _entityNames;
 
 	// store query objects with result objects by their entity ID
@@ -205,11 +205,11 @@ public partial class QueryManager
 
 	public bool _matchEntity(Entity entity, Query query)
 	{
-		if (_entityArchetypes.TryGetValue(entity, out List<Entity> entitiesArchetypes))
+		if (_entityArchetypes.TryGetValue(entity, out Archetype entitiesArchetype))
 		{
 			// for the sake of this on-demand query it's better performance
 			// to stop processing empty entities
-			if (entitiesArchetypes.Count == 0)
+			if (entitiesArchetype.Entities.Count == 0)
 			{
 				return false;
 			}
@@ -221,7 +221,7 @@ public partial class QueryManager
 			{
 				// LoggerManager.LogDebug("Matching against filter", query.GetHashCode().ToString(), "filter", filter);
 
-				bool matched = _matchFilter(entity, query, filter, entitiesArchetypes, out bool nonMatchingEntity);
+				bool matched = _matchFilter(entity, query, filter, entitiesArchetype, out bool nonMatchingEntity);
 
 				if (matched)
 				{
@@ -244,7 +244,7 @@ public partial class QueryManager
 		return false;
 	}
 
-	public bool _matchFilter(Entity entity, Query query, QueryArchetypeFilter filter, List<Entity> entitiesArchetypes, out bool nonMatchingEntity)
+	public bool _matchFilter(Entity entity, Query query, QueryArchetypeFilter filter, Archetype entitiesArchetype, out bool nonMatchingEntity)
 	{
 		// match based on the operator type
 		bool matched = false;
@@ -255,7 +255,7 @@ public partial class QueryManager
 		{
 			// LoggerManager.LogDebug($"Matching against archetype filter {entity.ToString()}", query.GetHashCode().ToString(), "filter", filter);
 
-			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetypes, _entityArchetypes, _entityNames, out bool nonMatchingEntityPre);
+			matched = filter.Filter.Matcher.PreMatch(entity, filter, entitiesArchetype, _entityArchetypes, _entityNames, out bool nonMatchingEntityPre);
 		}
 		// recursively check matches with scoped queries
 		else
@@ -263,7 +263,7 @@ public partial class QueryManager
 			matched = _matchScopedQueries(entity, filter.ScopedQueries, query);
 		}
 		
-		matched = filter.Filter.Matcher.PostMatch(entity, filter, entitiesArchetypes, _entityArchetypes, _entityNames, matched, out bool nonMatchingEntityPost);
+		matched = filter.Filter.Matcher.PostMatch(entity, filter, entitiesArchetype, _entityArchetypes, _entityNames, matched, out bool nonMatchingEntityPost);
 
 		nonMatchingEntity = nonMatchingEntityPost;
 

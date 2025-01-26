@@ -239,7 +239,7 @@ public partial class ECS : Service
 		_updateQueryResults(entity);
 	}
 
-	public List<Entity> GetEntityArchetype(Entity entity)
+	public Archetype GetEntityArchetype(Entity entity)
 	{
 		return _entityManager.GetArchetype(entity);
 	}
