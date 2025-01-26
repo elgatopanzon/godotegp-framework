@@ -575,7 +575,7 @@ public partial class ECS : Service
 		where TSystem : IEcsSystem, new()
 		where TPhase : IEcsProcessPhaseComponent
 	{
-		EntityHandle e = Create(typeof(TSystem).Name);
+		EntityHandle e = Create((name.Length == 0) ? typeof(TSystem).Name : name);
 
 		// add the process phase tag component
 		Add(e.Entity, Id<TPhase>());
